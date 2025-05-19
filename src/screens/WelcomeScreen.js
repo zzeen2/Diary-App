@@ -3,8 +3,14 @@ import { StyleSheet, ImageBackground, Image, Dimensions, View, Platform, Text, T
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
+import { KAKAO_REST_API_KEY } from '@env';
+WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
+
+const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
 const WelcomeScreen = () => {
   // 안전 영역의 인셋 값을 가져옵니다
@@ -138,10 +144,10 @@ const WelcomeScreen = () => {
     color: '#999',
   },
   modalLogo: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     resizeMode: 'contain',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   modalTitle: {
     fontSize: 16,
@@ -151,20 +157,6 @@ const WelcomeScreen = () => {
     marginBottom: 20,
     lineHeight: 24,
   },
-  kakaoButton: {
-    backgroundColor: '#FEE500',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  kakaoButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#191919',
-  },
   termsText: {
     fontSize: 12,
     color: '#888',
@@ -173,27 +165,44 @@ const WelcomeScreen = () => {
   },
   });
 
-  const LoginHandler = () => {
-    console.log("버튼 눌렸어")
-    setModalOpen(true);
-    // 카카오 가입 로직 작성
-  }
+const OpenModal = () => {
+  setModalOpen(true)
+}
+  
+const LoginHandler = async () => {
+  console.log("카카오 로그인 시작");
+
+  // const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  
+  // const result = await AuthSession.startAsync({ authUrl: kakaoAuthUrl });
+  // console.log(result)
+  // console.log("지났어")
+
+  // if (result.type === 'success') {
+  //   const code = result.params.code;
+  //   console.log("✅ 카카오 인증 성공, code:", code);
+
+  //   setModalOpen(false);
+  // } else {
+  //   console.log("❌ 로그인 취소 또는 실패");
+  // }
+};
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" translucent={true} backgroundColor="transparent" hidden={false} />
       
-      <ImageBackground source={require('../../assets/background.png')} style={styles.background} >
-        <Image source={require('../../assets/cloud1.png')} style={[styles.cloud, styles.cloud1]} />
-        <Image source={require('../../assets/cloud2.png')} style={[styles.cloud, styles.cloud2]} />
-        <Image source={require('../../assets/cloud3.png')} style={[styles.cloud, styles.cloud3]} />
-        <Image source={require('../../assets/cloud4.png')} style={[styles.cloud, styles.cloud4]} />
+      <ImageBackground source={require('../assets/background.png')} style={styles.background} >
+        <Image source={require('../assets/cloud1.png')} style={[styles.cloud, styles.cloud1]} />
+        <Image source={require('../assets/cloud2.png')} style={[styles.cloud, styles.cloud2]} />
+        <Image source={require('../assets/cloud3.png')} style={[styles.cloud, styles.cloud3]} />
+        <Image source={require('../assets/cloud4.png')} style={[styles.cloud, styles.cloud4]} />
 
         <View style={styles.content}>
-          <Image source={require('../../assets/logo2.png')} style = {styles.logo} />
+          <Image source={require('../assets/logo2.png')} style = {styles.logo} />
           <Text style = {styles.title}>Mood Groom</Text>
           <Text style = {styles.text}>당신의 감정을 구름에 담아보세요.</Text>
-          <TouchableOpacity style = {styles.button} onPress={LoginHandler}>
+          <TouchableOpacity style = {styles.button} onPress={OpenModal}>
             <Text style = {styles.buttonText}>시작하기</Text>
           </TouchableOpacity>
         </View>
@@ -204,37 +213,23 @@ const WelcomeScreen = () => {
       </ImageBackground>
 
       {/* 카카오 로그인 모달 */}
-      <Modal
-        visible={modalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => modalOpen(false)}
-      >
+      <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)} >
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             {/* 닫기 버튼 */}
-            <TouchableOpacity style={styles.closeButton} onPress={() => modalOpen(false)}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalOpen(false)}>
               <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
 
-            {/* 로고 */}
-            <Image
-              source={require('../../assets/logo2.png')}
-              style={styles.modalLogo}
-            />
+            <Image source={require('../assets/logo2.png')} style={styles.modalLogo}/>
 
             {/* 안내 문구 */}
             <Text style={styles.modalTitle}>간편하게 로그인하고{'\n'}다양한 서비스를 이용해보세요.</Text>
 
             {/* 카카오 로그인 버튼 */}
-            <TouchableOpacity style={styles.kakaoButton} onPress={() => console.log("카카오 로그인")}>
-              <Text style={styles.kakaoButtonText}>🗣️ 카카오로 시작하기</Text>
+            <TouchableOpacity style={styles.kakaoButton} onPress={LoginHandler}>
+                <Image source={require('../assets/kakao_login_button.png')} style={styles.kakaoImage}/>
             </TouchableOpacity>
-
-            {/* 하단 약관 */}
-            <Text style={styles.termsText}>
-              로그인 시 개인정보 처리방침 및 서비스 이용약관에{'\n'}동의하는 것으로 간주합니다
-            </Text>
           </View>
         </View>
       </Modal>
