@@ -9,8 +9,8 @@ const { width, height } = Dimensions.get('window');
 const MainScreen = () => {
   // SafeAreaInsets를 통해 기기별 안전 영역 정보를 가져옴
     const insets = useSafeAreaInsets();
-    const navigation = useNavigation();
     const [activeTab, setActiveTab] = useState('diary');
+    const navigation = useNavigation();
     const [selectedEmotion, setSelectedEmotion] = useState(null);
 
     // 감정 선택 핸들러 
