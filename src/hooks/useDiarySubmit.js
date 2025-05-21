@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+
 const useDiarySubmit = () => {
   const [loading, setLoading] = useState(false);
 
@@ -42,3 +44,6 @@ const useDiarySubmit = () => {
 
   return { submit, loading };
 };
+
+
+export default useDiarySubmit;

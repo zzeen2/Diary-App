@@ -3,12 +3,7 @@ import { View, Image, StyleSheet, TouchableOpacity, Text, Alert } from 'react-na
 import * as ImagePicker from 'expo-image-picker';
 
 const ImagePickerBox = ({ images, setImages }) => {
-  const pickImage = async () => {
-    if (images.length >= 5) {
-      Alert.alert('최대 5장까지 선택할 수 있어요!');
-      return;
-    }
-
+  const pickImage = async () => { // 이미지 추가
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
@@ -53,17 +48,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     fontWeight: '500',
-    marginBottom: 10,
+    marginBottom: 20,
     color: '#555',
   },
   imageRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 13,
   },
   thumbnail: {
-    width: 70,
-    height: 70,
+    width: 160,
+    height: 160,
     borderRadius: 8,
   },
   addBox: {

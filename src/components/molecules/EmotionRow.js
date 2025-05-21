@@ -15,11 +15,7 @@ const EmotionRow = ({ label, emotion, onSelect, onEdit }) => {
         <Text style={styles.name}>{emotion.name}</Text>
 
         {onSelect && <EmotionSelectButton onPress={onSelect} />}
-        {onEdit && (
-          <TouchableOpacity onPress={onEdit}>
-            <Text style={styles.edit}>✏️</Text>
-          </TouchableOpacity>
-        )}
+        {onEdit && ( <TouchableOpacity onPress={onEdit}> <Text style={styles.edit}>✏️</Text> </TouchableOpacity> )}
       </View>
     </View>
   );
@@ -33,7 +29,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   label: {
-    width: 100,
+    width: 80,
     fontSize: 14,
     fontWeight: '500',
     color: '#666',

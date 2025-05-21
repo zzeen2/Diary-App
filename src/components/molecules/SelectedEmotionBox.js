@@ -5,7 +5,7 @@ const SelectedEmotionBox = ({ emotion, onRecordPress, onWritePress }) => {
     return (
         <View style={[styles.container, { backgroundColor: emotion.color + '66' }]}>
         <Text style={styles.text}>
-            {emotion.emoji} {emotion.name}한 기분이시군요!
+            오늘은 {emotion.name}{emotion.emoji}하신가요?
         </Text>
 
         <View style={styles.buttons}>

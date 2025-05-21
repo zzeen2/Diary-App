@@ -4,7 +4,7 @@ import EmotionHeader from '../molecules/EmotionHeader';
 import EmotionRow from '../molecules/EmotionRow';
 import EmotionModal from '../molecules/EmotionModal';
 
-const emotionList = [
+const emotionList = [ // 나중에 백엔드로직으로 교체
   { name: '행복', emoji: '😊', type: 'happy', color: '#FFEAA7' },
   { name: '슬픔', emoji: '😢', type: 'sad', color: '#A3D8F4' },
   { name: '분노', emoji: '😠', type: 'angry', color: '#FFB7B7' },
@@ -19,13 +19,13 @@ const DiaryImotionSection = ({ primaryEmotion = emotionList[0] }) => {
   const [isPublic, setIsPublic] = useState(true);
   const [secondaryEmotion, setSecondaryEmotion] = useState(null); // AI or 수정된 감정
   const [rawSecondaryEmotion, setRawSecondaryEmotion] = useState(null); // 분석 원본
-  const [isEdited, setIsEdited] = useState(false);
+  const [isEdited, setIsEdited] = useState(false); 
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [tempEmotion, setTempEmotion] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false); // 감정 수정할때 모달창
+  const [tempEmotion, setTempEmotion] = useState(null); // 수정한 감정
 
-  const handleAnalyze = () => {
-    const aiResult = emotionList[4]; // 예: '불안'
+  const handlerAnalyze = () => {
+    const aiResult = emotionList[4]; // 예: '불안' << 바뀌어야함
     setRawSecondaryEmotion(aiResult);
     setSecondaryEmotion(aiResult);
     setIsEdited(false);
@@ -43,15 +43,12 @@ const DiaryImotionSection = ({ primaryEmotion = emotionList[0] }) => {
     <View style={styles.section}>
       <EmotionHeader isPublic={isPublic} onToggle={() => setIsPublic(prev => !prev)} />
 
-      {/* 선택한 감정 (primary) */}
+      {/*primary감정 라인*/}
       <EmotionRow label="오늘의 감정" emotion={primaryEmotion} />
 
       {/* 분석 or 수정 감정 (secondary) */}
       {secondaryEmotion ? (
-        <EmotionRow
-          label={isEdited ? '수정한 감정' : 'AI 분석 감정'}
-          emotion={secondaryEmotion}
-          onEdit={() => {
+        <EmotionRow label={isEdited ? '수정한 감정' : 'AI 분석 감정'} emotion={secondaryEmotion} onEdit={() => {
             setTempEmotion(secondaryEmotion);
             setModalVisible(true);
           }}
@@ -61,19 +58,12 @@ const DiaryImotionSection = ({ primaryEmotion = emotionList[0] }) => {
       )}
 
       {/* 분석하기 버튼 */}
-      <TouchableOpacity style={styles.analyzeButton} onPress={handleAnalyze}>
+      <TouchableOpacity style={styles.analyzeButton} onPress={handlerAnalyze}>
         <Text style={styles.analyzeText}>감정 분석하기</Text>
       </TouchableOpacity>
 
       {/* 감정 선택 모달 */}
-      <EmotionModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onConfirm={confirmEmotion}
-        tempEmotion={tempEmotion}
-        setTempEmotion={setTempEmotion}
-        emotions={emotionList}
-      />
+      <EmotionModal visible={modalVisible} onClose={() => setModalVisible(false)} onConfirm={confirmEmotion} tempEmotion={tempEmotion} setTempEmotion={setTempEmotion} emotions={emotionList} />
     </View>
   );
 };
@@ -84,6 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     marginBottom: 25,
+    marginTop: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.05,
@@ -91,7 +82,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   analyzeButton: {
-    marginTop: 16,
+    marginTop: 0,
     paddingVertical: 12,
     backgroundColor: '#b881c2',
     borderRadius: 12,
@@ -105,7 +96,8 @@ const styles = StyleSheet.create({
   guideText: {
     fontSize: 14,
     color: '#888',
-    marginTop: 12,
+    marginTop: 2,
+    marginBottom: 18,
   },
 });
 
