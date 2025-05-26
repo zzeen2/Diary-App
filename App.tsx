@@ -10,11 +10,13 @@ import { Provider } from 'react-redux';
 import { store } from '../MoodCloudApp/src/store'
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import * as WebBrowser from 'expo-web-browser';
+
 const Stack = createNativeStackNavigator();
+
 const AppContent = () => {
   const { isLoggedIn } = useContext(AuthContext);
   if (isLoggedIn === null) return null;
-  
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isLoggedIn ? (
@@ -30,11 +32,12 @@ const AppContent = () => {
 };
 
 export default function App() {
-  WebBrowser.maybeCompleteAuthSession();// 로그인 상태에 따라 화면 결정
+  WebBrowser.maybeCompleteAuthSession();
+
   return (
     <Provider store={store}>
       <SafeAreaProvider>
-        <AuthProvider> 
+        <AuthProvider>
           <NavigationContainer>
             <AppContent />
           </NavigationContainer>

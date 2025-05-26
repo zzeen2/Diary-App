@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import * as WebBrowser from 'expo-web-browser';
 import { AuthContext } from '../context/AuthContext';
 import { useKakaoLogin } from '../hooks/useKakaoLogin';
-console.log("useKakaoLogin imported as:", typeof useKakaoLogin, useKakaoLogin);
 
 
 const { width, height } = Dimensions.get('window');
@@ -174,7 +173,6 @@ const WelcomeScreen = () => {
     const LoginHandler = async () => {
         console.log("로그인 핸들러")
         await signInWithKakao();
-        setModalOpen(false);
     }; 
 
     return (
