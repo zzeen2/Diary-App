@@ -4,7 +4,7 @@ import { makeRedirectUri, useAuthRequest } from 'expo-auth-session'; // AuthRequ
 import * as WebBrowser from 'expo-web-browser'; // WebBrowser 다시 임포트해야 합니다! promptAsync가 이를 사용합니다.
 import axios from 'axios';
 
-import { KAKAO_CLIENT_ID_DEV, KAKAO_CLIENT_ID_PROD, BACKEND_API_URL } from '@env';
+import { KAKAO_CLIENT_ID_DEV, KAKAO_CLIENT_ID_PROD, BACKEND_API_URL,KAKAO_REDIRECT_URI } from '@env';
 
 //WebBrowser.maybeCompleteAuthSession(); // App.js에 있으므로 여기서는 주석 처리 유지
 
@@ -12,9 +12,9 @@ const KAKAO_CLIENT_ID = KAKAO_CLIENT_ID_DEV;
 //const REDIRECT_URI ="https://auth.expo.io/@jieunkim1203/MoodCloudApp"
 
 export const useKakaoLogin = () => {
-    // app.json에 정의된 scheme 값을 여기에 명시적으로 넣어줍니다.
+    // app.json에 정의된 scheme 값을 여기에 명시적으로 넣어줍r니다.
     // 당신의 app.json에 scheme이 "moodcloudapp"으로 설정되어 있다고 가정합니다.
-    const redirectUri = makeRedirectUri({ scheme: 'moodcloudapp', useProxy: true });
+    const redirectUri = KAKAO_REDIRECT_URI
     //const redirectUri = "https://auth.expo.io/@jieunkim1203/moodcloudapp"
 
     console.log("REDIRECT_URI (useKakaoLogin hook):", redirectUri);
@@ -45,6 +45,7 @@ export const useKakaoLogin = () => {
     // 응답(response) 변화 감지 및 처리
     
     React.useEffect(() => { // React.useEffect 사용
+        console.log("카카오 로그인 request:", request);
          console.log("카카오 로그인 response:", response);
         if (response?.type === 'success') {
             const { code } = response.params;
@@ -76,7 +77,7 @@ export const useKakaoLogin = () => {
             console.error("카카오 로그인 오류:", response.error);
             Alert.alert("로그인 오류", `로그인 중 오류가 발생했습니다: ${response.error?.message || response.error}`);
         }
-    }, [response, redirectUri]); // 의존성 배열에 response와 redirectUri 추가
+    }, [response, redirectUri, request]); // 의존성 배열에 response와 redirectUri 추가
 
     // 카카오 로그인 시작 함수
     const signInWithKakao = useCallback(async () => {
