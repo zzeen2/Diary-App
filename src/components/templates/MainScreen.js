@@ -1,26 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {StyleSheet,ScrollView, View, ImageBackground,SafeAreaView,Text} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import useFormmatedDate from '../../hooks/useFormattedDate';
-
-import  {HeaderBar}  from '../molecules'
-import { EmotionSelector, DiaryListSection, TabBar } from '../organisms';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchEmotions } from '../../actions/emotionAction';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TabBar } from '../organisms/TabBar';
+import {EmotionSelector} from '../organisms/main';
+import {DiaryListSection} from '../organisms/main';
+import  {HeaderBar}  from '../molecules/headers';
+console.log(' EmotionSelector:', EmotionSelector);
+console.log(' DiaryListSection:', DiaryListSection);
+console.log(' TabBar:', TabBar);
+console.log(' HeaderBar:', HeaderBar);
 //console.log(EmotionSelector)
-console.log('HeaderBar:', HeaderBar);
-
-const emotionIcons = [
-  { id: 'happy', emoji: '😊', color: '#FFEAA7', name: '행복' },
-  { id: 'sad', emoji: '😢', color: '#A3D8F4', name: '슬픔' },
-  { id: 'angry', emoji: '😠', color: '#FFB7B7', name: '분노' },
-  { id: 'calm', emoji: '😌', color: '#B5EAD7', name: '평온' },
-  { id: 'anxious', emoji: '😰', color: '#C7CEEA', name: '불안' },
-  { id: 'tired', emoji: '😴', color: '#E2D8F3', name: '피곤' },
-  { id: 'excited', emoji: '🤩', color: '#FFD8BE', name: '신남' },
-  { id: 'confused', emoji: '🤔', color: '#D8E2DC', name: '혼란' },
-  { id: 'grateful', emoji: '🤗', color: '#F0E6EF', name: '감사' },
-];
+//console.log('HeaderBar:', HeaderBar);
 
 const diaryEntries = [
   {
@@ -133,16 +130,43 @@ const styles = StyleSheet.create({
     },
 });
 
-
 const MainScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const emotions = useSelector((state) => state.emotions);
+  const loading = useSelector((state) => state.loading);
+
+  const [isEmotionSaved, setIsEmotionSaved] = useState(false);
+
+  
+  useEffect(() => { // 컴포넌트 마운트시에 감정데이터 가져오기 
+    dispatch(fetchEmotions()); // 메인화면 첫번째로 켯을때 // 첫번째 :  실행
+  }, [dispatch]);
+  
+  //console.log(emotions)
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setSelectedEmotion(null); // 메인페이지가 리렌더링 될때마다 초기화
+    }, [])
+  );
+  useEffect(() => { // 감정이 저장되어있는지 확인
+    const checkSaved = async () => {
+      const saved = await AsyncStorage.getItem('emotionSavedDate');
+      const today = new Date().toISOString().slice(0, 10);
+      setIsEmotionSaved(saved === today);
+    };
+
+    checkSaved();
+  }, []);
 
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
 
-  const findEmotion = (id) => emotionIcons.find(e => e.id === id);
-  
+  const findEmotion = (id) => emotions.find(e => e.id === id) || {};
+  //console.log(findEmotion('angry'), "여기야") // 두번째 : 빈객체로 콘솔 찍힘(요청 완료 전) // 세번째 : 리듀서 내부의 요청완료 콘솔 찍힘 // 네번째 : emotion이랑 angry랑 비교해서 콘솔 찍힘
+
   // 날짜 포멧팅
   const today = new Date().toISOString();
   const displayDate = useFormmatedDate(today)
@@ -153,9 +177,24 @@ const MainScreen = () => {
     }
   };
 
-  const recordHandler = () => {
+  const recordHandler = async () => {
     console.log(`${selectedEmotion.name} 감정만 저장`);
-    // 감정 저장 로직
+
+    try {
+      //감정 저장 API 호출
+      await saveEmotionToServer(selectedEmotion);
+
+      // 오늘 날짜 저장
+      const today = new Date().toISOString().slice(0, 10);
+      await AsyncStorage.setItem('emotionSavedDate', today);
+
+      // 상태 반영 
+      setIsEmotionSaved(true);
+
+      Alert.alert('감정이 저장되었습니다.');
+    } catch (err) {
+      Alert.alert('감정 저장 실패', err.message);
+    }
   };
 
   return (
@@ -179,7 +218,7 @@ const MainScreen = () => {
 
             {/* 감정 선택 영역 */}
             <EmotionSelector 
-              emotionIcons={emotionIcons}
+              emotionIcons={emotions}
               selectedEmotion={selectedEmotion}
               onSelectEmotion={setSelectedEmotion}
               onWritePress={writeHandler}

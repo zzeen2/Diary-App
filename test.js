@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 const EmotionSection = () => {
-  const [modalVisiㅍ ㅠㅠ  ble, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [selectedEmotion, setSelectedEmotion] = useState({ name: '행복', emoji: '😊', type: 'happy' });
   const [aiEmotion, setAiEmotion] = useState({ name: '분노', emoji: '😠', type: 'angry' });
   const [tempEmotion, setTempEmotion] = useState(null);
