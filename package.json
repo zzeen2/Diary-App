@@ -24,6 +24,7 @@
     "openai": "^4.102.0",
     "react": "19.0.0",
     "react-native": "0.79.2",
+    "react-native-calendars": "^1.1312.1",
     "react-native-config": "^1.5.5",
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
@@ -33,9 +34,9 @@
     "react-native-screens": "~4.10.0",
     "react-native-stack": "^1.0.0-alpha11",
     "react-native-svg": "15.11.2",
+    "react-native-webview": "13.13.5",
     "react-redux": "^9.2.0",
-    "redux-thunk": "^3.1.0",
-    "react-native-webview": "13.13.5"
+    "redux-thunk": "^3.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

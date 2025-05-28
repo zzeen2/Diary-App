@@ -12,10 +12,10 @@ import { TabBar } from '../organisms/TabBar';
 import {EmotionSelector} from '../organisms/main';
 import {DiaryListSection} from '../organisms/main';
 import  {HeaderBar}  from '../molecules/headers';
-console.log(' EmotionSelector:', EmotionSelector);
-console.log(' DiaryListSection:', DiaryListSection);
-console.log(' TabBar:', TabBar);
-console.log(' HeaderBar:', HeaderBar);
+// console.log(' EmotionSelector:', EmotionSelector);
+// console.log(' DiaryListSection:', DiaryListSection);
+// console.log(' TabBar:', TabBar);
+// console.log(' HeaderBar:', HeaderBar);
 //console.log(EmotionSelector)
 //console.log('HeaderBar:', HeaderBar);
 
@@ -24,10 +24,15 @@ const diaryEntries = [
     id: 1,
     title: '봄 날씨와 함께한 산책',
     date: '2025.05.17',
-    content: '날씨가 너무 좋아서 한강 공원을 산책했다. 날씨가 너무 좋아서 한강 공원을 산책했다. 날씨가 너무 좋아서 한강 공원을 산책했다',
+    content: '날씨가 너무 좋아서 한강 공원을 산책했다. 날씨가 너무 좋아서 한강 공원을 산책했다.',
     primaryEmotion: 'happy',
     secondaryEmotion: 'calm',
     isPublic: true,
+    user: {
+      id: 'user1',
+      nickname: '민지',
+      profile_img: require('../../assets/cloud3.png'), // 이미지 경로 조정
+    },
   },
   {
     id: 2,
@@ -36,51 +41,70 @@ const diaryEntries = [
     content: '프로젝트 마감이 다가오는데 걱정이다...',
     primaryEmotion: 'happy',
     isPublic: true,
+    user: {
+      id: 'user2',
+      nickname: '지은',
+      profile_img: require('../../assets/cloud2.png'),
+    },
   },
   {
-      id: 3,
-      title: '업무에 대한 고민',
-      date: '2025.05.16',
-      content: '프로젝트 마감이 다가오는데 걱정이다...',
-      primaryEmotion: 'anxious',
-      secondaryEmotion: 'calm',
-      isPublic: false,
+    id: 3,
+    title: '업무에 대한 고민',
+    date: '2025.05.16',
+    content: '프로젝트 마감이 다가오는데 걱정이다...',
+    primaryEmotion: 'anxious',
+    secondaryEmotion: 'calm',
+    isPublic: false,
+    user: {
+      id: 'user1',
+      nickname: '민지',
+      profile_img: require('../../assets/cloud3.png'),
     },
-    {
-        id: 4,
-        title: '봄 날씨와 함께한 산책',
-        date: '2025.05.17',
-        content: '날씨가 너무 좋아서 한강 공원을 산책했다...',
-        primaryEmotion: 'happy',
-        secondaryEmotion: 'calm',
-        isPublic: false,
+  },
+  {
+    id: 4,
+    title: '봄 날씨와 함께한 산책',
+    date: '2025.05.17',
+    content: '날씨가 너무 좋아서 한강 공원을 산책했다...',
+    primaryEmotion: 'happy',
+    secondaryEmotion: 'calm',
+    isPublic: false,
+    user: {
+      id: 'user2',
+      nickname: '지은',
+      profile_img: require('../../assets/cloud2.png'),
     },
+  },
 ];
+
 
 const friendDiaryEntries = [
   {
     id: 1,
-    userId: 'user1',
-    userName: '민지',
-    userProfile: '../assets/cloud3.png',
     title: '집에서 요리해본 날',
     date: '2025.05.18',
     content: '오늘은 파스타를 만들어봤다...',
     primaryEmotion: 'happy',
-    // secondaryEmotion: 'excited',
     isPublic: true,
+    user: {
+      id: 'user1',
+      nickname: '민지',
+      profile_img: require('../../assets/cloud3.png'),
+    },
   },
   {
     id: 2,
-    userId: 'user2',
-    userName: '수진',
-    userProfile: '../assets/cloud3.png',
     title: '시험 끝난 후의 해방감',
     date: '2025.05.17',
-    content: '드디어 기말고사가 끝났다! 시험 끝난 후의 해방감 시험 끝난 후의 해방감 시험 끝난 후의 해방감 시험 끝난 후의 해방감 시험 끝난 후의 해방감',
+    content: '드디어 기말고사가 끝났다! 시험 끝난 후의 해방감 시험 끝난 후의 해방감 시험 끝난 후의 해방감',
     primaryEmotion: 'excited',
     secondaryEmotion: 'angry',
     isPublic: true,
+    user: {
+      id: 'user2',
+      nickname: '수진',
+      profile_img: require('../../assets/cloud3.png'),
+    },
   },
 ];
 
@@ -88,14 +112,29 @@ const tabs = [
   { id: 'home', icon: '🏠', label: '홈' },
   { id: 'diary', icon: '📔', label: '일기장' },
   { id: 'stats', icon: '📊', label: '통계' },
+  { id: 'profile', icon: '👤', label: '프로필' },
 ];
 
-const styles = StyleSheet.create({
+
+const MainScreen = () => {
+
+  
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const emotions = useSelector((state) => state.emotions);
+  const loading = useSelector((state) => state.loading);
+  const currentUserId = 1; // 추후 로그인 정보에서 가져오기
+
+
+  const [isEmotionSaved, setIsEmotionSaved] = useState(false);
+  const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
     safeContainer: {
         flex: 1,
+        paddingTop: insets.top
     },
     backgroundImage: {
         flex: 1,
@@ -128,17 +167,7 @@ const styles = StyleSheet.create({
         color: '#333',
         marginBottom: 8,
     },
-});
-
-const MainScreen = () => {
-  const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const emotions = useSelector((state) => state.emotions);
-  const loading = useSelector((state) => state.loading);
-
-  const [isEmotionSaved, setIsEmotionSaved] = useState(false);
-
+  });
   
   useEffect(() => { // 컴포넌트 마운트시에 감정데이터 가져오기 
     dispatch(fetchEmotions()); // 메인화면 첫번째로 켯을때 // 첫번째 :  실행
@@ -166,7 +195,12 @@ const MainScreen = () => {
 
   const findEmotion = (id) => emotions.find(e => e.id === id) || {};
   //console.log(findEmotion('angry'), "여기야") // 두번째 : 빈객체로 콘솔 찍힘(요청 완료 전) // 세번째 : 리듀서 내부의 요청완료 콘솔 찍힘 // 네번째 : emotion이랑 angry랑 비교해서 콘솔 찍힘
-
+  const goToDetail = (entry) => {
+      navigation.navigate('DiaryDetail', {
+      diary: entry,
+      isMine: entry.user.id === currentUserId,
+    })
+  };
   // 날짜 포멧팅
   const today = new Date().toISOString();
   const displayDate = useFormmatedDate(today)
@@ -196,7 +230,7 @@ const MainScreen = () => {
       Alert.alert('감정 저장 실패', err.message);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <StatusBar style="dark" backgroundColor="transparent" translucent />
@@ -224,7 +258,6 @@ const MainScreen = () => {
               onWritePress={writeHandler}
               onRecordPress={recordHandler}
             />
-
             {/* 내 일기 */}
             <DiaryListSection
               title="📓 나의 최근 일기"
@@ -232,9 +265,9 @@ const MainScreen = () => {
               findEmotion={findEmotion}
               maxCount={4}
               onPressSeeMore={() => console.log('내 일기 더보기')}
-              onPressCard={(entry) => console.log(entry.title)}
+              onPressCard={goToDetail}
             />
-
+            
             {/* 친구 일기 */}
             <DiaryListSection
               title="👥 친구들의 일기"
@@ -242,16 +275,27 @@ const MainScreen = () => {
               findEmotion={findEmotion}
               isFriend
               onPressSeeMore={() => console.log('친구 일기 더보기')}
-              onPressCard={(entry) => console.log(entry.title)}
+              onPressCard={goToDetail}
             />
           </ScrollView>
 
           {/* 하단 탭 바 */}
           <TabBar
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabPress={setActiveTab}
-          />
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabPress={(tabId) => {
+            setActiveTab(tabId);
+            if (tabId === 'home') {
+              navigation.navigate('Main');
+            } else if (tabId === 'diary') {
+              navigation.navigate('listDiary');
+            } else if (tabId === 'stats') {
+              navigation.navigate('stats');
+            } else if (tabId === 'profile') {
+                navigation.navigate('myProfile');
+            }
+          }}
+        />
         </SafeAreaView>
       </ImageBackground>
     </View>

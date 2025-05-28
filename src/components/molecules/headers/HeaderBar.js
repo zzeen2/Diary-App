@@ -1,26 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BackButton, ConfirmButton } from '../../atoms/buttons';
+import { BackButton, ConfirmButton,SearchButton } from '../../atoms/buttons';
 
 
-const HeaderBar = ({ title = '홈',streakText = '', profileImage,showBackButton = false,showConfirmButton = false, onBackPress,onConfirmPress,
-centerContent, }) => {
+const HeaderBar = ({ title = '홈',streakText = '', profileImage,showBackButton = false,showConfirmButton = false, onBackPress,onConfirmPress, onlyTitle= false,
+centerContent,rightContent, }) => {
     const insets = useSafeAreaInsets();
 
     return (
-        <View style={[styles.container, Platform.OS === 'android' && { paddingTop: insets.top || 0 }]}>
+        <View style={styles.container}>
         {/* 왼쪽 영역 */}
         <View style={styles.side}>
             {showBackButton ? (
             <BackButton onPress={onBackPress} />
+            ) : onlyTitle ? (
+            <Text style={styles.title}>{title}</Text>
             ) : (
             <View style={styles.leftGroup}>
                 <View style={styles.profileWrapper}>
-                <Image
-                    source={profileImage || require('../../../assets/logo2.png')}
-                    style={styles.profileImage}
-                />
+                <Image source={profileImage || require('../../../assets/logo2.png')} style={styles.profileImage} />
                 </View>
                 <Text style={styles.title}>{title}</Text>
             </View>
@@ -33,9 +32,15 @@ centerContent, }) => {
         </View>
 
         {/* 오른쪽 영역 */}
-        <View style={styles.side}>
-            {showConfirmButton ? ( <ConfirmButton onPress={onConfirmPress} /> ) : ( streakText !== '' && <Text style={styles.streak}>{streakText}</Text> )}  
-        </View>
+            <View style={styles.side}>
+            {showConfirmButton ? (
+                <ConfirmButton onPress={onConfirmPress} />
+            ) : rightContent ? (
+                rightContent
+            ) : streakText !== '' ? (
+                <Text style={styles.streak}>{streakText}</Text>
+            ) : null}
+            </View>
         </View>
     );
 };

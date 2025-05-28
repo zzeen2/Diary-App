@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import SectionTitle from '../../atoms/Texts/SectionTitle';
+import SectionTitle from '../../atoms/TextsAndLabel/SectionTitle';
 import DiaryCard from '../../molecules/cards'
 import FriendDiaryCard from '../../molecules/cards';
 

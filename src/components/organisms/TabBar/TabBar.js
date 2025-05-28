@@ -9,14 +9,7 @@ const TabBar = ({ tabs, activeTab, onTabPress }) => {
     return (
         <View style={[styles.container, { paddingBottom: insets.bottom }]}>
         {tabs.map((tab) => (
-            <TabButton
-            key={tab.id}
-            icon={tab.icon}
-            label={tab.label}
-            isActive={activeTab === tab.id}
-            onPress={() => onTabPress(tab.id)}
-            bottomInset={insets.bottom}
-            />
+            <TabButton key={tab.id} icon={tab.icon} label={tab.label} isActive={activeTab === tab.id} onPress={() => onTabPress(tab.id)} bottomInset={insets.bottom} />
         ))}
         </View>
     );
@@ -25,7 +18,7 @@ const TabBar = ({ tabs, activeTab, onTabPress }) => {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        height: 56,
+        height: 80,
         backgroundColor: 'white',
         borderTopWidth: 1,
         borderTopColor: '#eee',

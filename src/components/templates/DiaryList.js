@@ -24,6 +24,7 @@ const tabs = [
     { id: 'home', icon: '🏠', label: '홈' },
     { id: 'diary', icon: '📔', label: '일기장' },
     { id: 'stats', icon: '📊', label: '통계' },
+    { id: 'profile', icon: '👤', label: '프로필' },
 ];
 
 
@@ -60,6 +61,14 @@ const DiaryListScreen = () => {
         date: '2025.05.20',
         content: '봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.',
         primaryEmotion: 'happy',
+        isPublic: true,
+        },
+        {
+        id: 2,
+        title: '산책 일기',
+        date: '2025.05.21',
+        content: '봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.봄 산책 너무 좋았다.',
+        primaryEmotion: 'sad',
         isPublic: true,
         },
     ];
@@ -115,62 +124,86 @@ const DiaryListScreen = () => {
 
             <View style={styles.divider} />
 
-            <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}keyboardShouldPersistTaps="handled">
-            {isSearchMode ? (
-                <>
-                <DiarySearchArea
-                    searchKeyword={searchKeyword}
-                    setSearchKeyword={setSearchKeyword}
-                    emotions={emotions}
-                    selectedEmotion={selectedEmotion}
-                    setSelectedEmotion={setSelectedEmotion}
-                    showPrivateOnly={showPrivateOnly}
-                    setShowPrivateOnly={setShowPrivateOnly}
-                    privacyFilter={privacyFilter}
-                    setPrivacyFilter={setPrivacyFilter}
-                />
-
-                {filterType === 'my' ? (
-                    <DiaryListSection
-                    title="📖 내 일기 검색 결과"
-                    entries={displayedEntries}
-                    findEmotion={findEmotion}
-                    onPressCard={(entry) => console.log(entry.title)}
-                    />
-                ) : (
-                    <FriendDiaryListSection title="👥 친구 일기 검색 결과" entries={displayedEntries} onPressCard={(entry) => console.log(entry.title)} />
-                )}
-                </>
-            ) : (
-                <>
-                {filterType === 'my' && (
+            <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {isSearchMode ? (
                     <>
-                    <CalenderArea
-                        diaryList={displayedEntries}
-                        selectedDate={selectedDate}
-                        onSelectDate={setSelectedDate}
-                        onPressToday={() => setSelectedDate(getTodayDateString())}
-                    />
-                    {selectedDate && (
-                        <DiaryListSection
-                        title={`📖 ${formattedSelectedDate} 일기`}
-                        entries={displayedEntries.filter(d => d.date === selectedDate)}
-                        findEmotion={findEmotion}
-                        onPressCard={(entry) => console.log(entry.title)}
+                        <DiarySearchArea
+                            searchKeyword={searchKeyword}
+                            setSearchKeyword={setSearchKeyword}
+                            emotions={emotions}
+                            selectedEmotion={selectedEmotion}
+                            setSelectedEmotion={setSelectedEmotion}
+                            showPrivateOnly={showPrivateOnly}
+                            setShowPrivateOnly={setShowPrivateOnly}
+                            privacyFilter={privacyFilter}
+                            setPrivacyFilter={setPrivacyFilter}
                         />
-                    )}
+
+                        {filterType === 'my' ? (
+                            <DiaryListSection
+                                title="📖 내 일기 검색 결과"
+                                entries={displayedEntries}
+                                findEmotion={findEmotion}
+                                onPressCard={(entry) => console.log(entry.title)}
+                            />
+                        ) : (
+                            <DiaryListSection
+                                title="👥 친구 일기 검색 결과"
+                                entries={displayedEntries}
+                                findEmotion={findEmotion}
+                                isFriend={true} // 친구 모드 활성화
+                                onPressCard={(entry) => console.log(entry.title)}
+                            />
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {filterType === 'my' && (
+                            <>
+                                <CalenderArea
+                                    diaryList={displayedEntries}
+                                    selectedDate={selectedDate}
+                                    onSelectDate={setSelectedDate}
+                                    onPressToday={() => setSelectedDate(getTodayDateString())}
+                                    emotions={emotions}
+                                />
+                                {selectedDate && (
+                                    <DiaryListSection
+                                        title={`📖 ${formattedSelectedDate} 일기`}
+                                        entries={displayedEntries.filter(d => {
+                                            const convertedDate = d.date.replace(/\./g, '-');
+                                            return convertedDate === selectedDate;
+                                        })}
+                                        findEmotion={findEmotion}
+                                        onPressCard={(entry) =>
+                                        navigation.navigate('DiaryDetail', {
+                                            diary: entry,
+                                            isMine: true,
+                                        })
+                                        }
+                                    />
+                                )}
+                            </>
+                        )}
+
+                        {filterType === 'follower' && (
+                            <View style={{ marginTop: 20 }}>
+                                <DiaryListSection
+                                    title="👥 친구들의 일기"
+                                    entries={displayedEntries}
+                                    findEmotion={findEmotion}
+                                    isFriend={true}
+                                    onPressCard={(entry) =>
+                                        navigation.navigate('DiaryDetail', {
+                                            diary: entry,
+                                            isMine: true,
+                                        })
+                                        }
+                                />
+                            </View>
+                        )}
                     </>
                 )}
-
-                {filterType === 'follower' && (
-                    <FriendDiaryListSection
-                    title="👥 친구들의 일기"
-                    entries={displayedEntries}
-                    onPressCard={(entry) => console.log(entry.title)}
-                    />
-                )}
-                </>
-            )}
             </ScrollView>
 
             <TabBar tabs={tabs} activeTab={activeTab} onTabPress={(tabId) => {
@@ -181,9 +214,11 @@ const DiaryListScreen = () => {
                 navigation.navigate('listDiary');
             } else if (tabId === 'stats') {
                 navigation.navigate('stats');
+            } else if (tabId === 'profile') {
+                navigation.navigate('myProfile');
             }
             }}
-        />
+            />
             </SafeAreaView>
         </ImageBackground>
         </View>
@@ -220,9 +255,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.7)',
         marginVertical: 1,
     },
-    diarySection : {
-
-    }
 });
 
 export default DiaryListScreen;

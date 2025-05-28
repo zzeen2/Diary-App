@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Modal,StyleSheet,Dimensions, TouchableWithoutFeedback, } from 'react-native';
-import EmojiIcon from '../atoms/icons/EmojiIcon';
-import ModalCloseButton from '../atoms/buttons/ModalCloseButton';
+import {EmojiIcon} from '../../atoms/icons';
+import {ModalCloseButton} from '../../atoms/buttons';
 
 const { width } = Dimensions.get('window');
 const itemWidth = (width - 100) / 4;

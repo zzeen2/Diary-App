@@ -63,26 +63,13 @@ const DiaryWriteScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" backgroundColor="transparent" translucent />
-      <ImageBackground
-        source={require('../../assets/background.png')}
-        style={styles.backgroundImage}
-      >
+      <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage} >
         <SafeAreaView style={styles.safeContainer}>
-          <HeaderBar
-            showBackButton
-            showConfirmButton
-            onBackPress={() => navigation.goBack()}
-            onConfirmPress={handleSubmit}
-            centerContent={<Text style={styles.date}>{formattedDate}</Text>}
-          />
+          <HeaderBar showBackButton showConfirmButton onBackPress={() => navigation.goBack()} onConfirmPress={handleSubmit} centerContent={<Text style={styles.date}>{formattedDate}</Text>} />
 
           <View style={styles.divider} />
 
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{ flex: 1 }}
-            keyboardVerticalOffset={2}
-          >
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }} keyboardVerticalOffset={2} >
             <ScrollView contentContainerStyle={styles.content}>
               <DiaryImotionSection
                 userEmotion={userEmotion}

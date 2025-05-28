@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import {EmotionTag} from '../../atoms/Texts';
+import {EmotionTag} from '../../atoms/TextsAndLabel';
 
 const DiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) => {
     const [lineCount, setLineCount] = useState(0);

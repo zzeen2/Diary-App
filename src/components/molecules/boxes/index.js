@@ -1,3 +1,5 @@
 export { default as DiaryInputBox } from './DiaryInputBox'
 export { default as ImagePickerBox } from './ImagePickerBox'
 export { default as SelectedEmotionBox } from './SelectedEmotionBox'
+export { default as DiaryContentBox } from './DiaryContentBox'
+export { default as CommentItemBox } from './CommentItemBox'

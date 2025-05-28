@@ -6,10 +6,10 @@ import { fetchEmotions } from '../../../actions/emotionAction';
 import {EmotionHeader} from '../../molecules/headers';
 import {EmotionRow} from '../../molecules/Rows';
 import useEmotionAnalyze from '../../../hooks/useEmotionAnalyze';
-console.log('🧪 export 확인: DiaryImotionSection 컴포넌트 정상 로드됨');
-console.log('🧪 EmotionHeader:', EmotionHeader);
-console.log('🧪 EmotionRow:', EmotionRow);
-console.log('🧪 useEmotionAnalyze:', useEmotionAnalyze);
+// console.log('🧪 export 확인: DiaryImotionSection 컴포넌트 정상 로드됨');
+// console.log('🧪 EmotionHeader:', EmotionHeader);
+// console.log('🧪 EmotionRow:', EmotionRow);
+// console.log('🧪 useEmotionAnalyze:', useEmotionAnalyze);
 
 const DiaryImotionSection = ({ userEmotion, setAiEmotion,aiEmotion, isPublic, setIsPublic, emotionList, content }) => {
   const dispatch = useDispatch();

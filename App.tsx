@@ -7,9 +7,14 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import CreateDiary from './src/components/templates/createDiary'
 import { Provider } from 'react-redux';
-import { store } from '../MoodCloudApp/src/store'
+import { store } from './src/store'
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import * as WebBrowser from 'expo-web-browser';
+import DiaryListScreen from './src/components/templates/DiaryList';
+import MyProfile from './src/components/templates/Myprofile'
+import UserProfile from './src/components/templates/UserProfile';
+import DiaryDetail from './src/components/templates/DiaryDetail';
+import StatsTemplate from './src/components/templates/StatsTemplate';
 
 const Stack = createNativeStackNavigator();
 
@@ -80,15 +85,22 @@ const AppContent = () => {
   if (isLoggedIn === null) return null;
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {isLoggedIn ? (
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none', }}>
+      {/* {isLoggedIn ? (
         <>
           <Stack.Screen name="Main" component={MainScreen} />
           <Stack.Screen name="createDiary" component={CreateDiary} />
         </>
       ) : (
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      )}
+      )} */}
+      <Stack.Screen name="Main" component={MainScreen} />
+      <Stack.Screen name="createDiary" component={CreateDiary} />
+      <Stack.Screen name="listDiary" component={DiaryListScreen} />
+      <Stack.Screen name="myProfile" component={MyProfile} />
+      <Stack.Screen name="UserProfile" component={UserProfile}  />
+      <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
+      <Stack.Screen name="stats" component={StatsTemplate} />
     </Stack.Navigator>
   );
 };
