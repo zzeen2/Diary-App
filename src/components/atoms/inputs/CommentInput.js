@@ -19,13 +19,16 @@ const CommentInput = ({ onSubmit }) => {
         value={text}
         onChangeText={setText}
         multiline
+        maxLength={200}
       />
       <TouchableOpacity
         style={[styles.button, !text.trim() && styles.disabledButton]}
         onPress={handleSubmit}
         disabled={!text.trim()}
       >
-        <Text style={styles.buttonText}>등록</Text>
+        <Text style={[styles.buttonText, !text.trim() && styles.disabledText]}>
+          등록
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -34,34 +37,41 @@ const CommentInput = ({ onSubmit }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderColor: '#ddd',
+    borderColor: '#e0e0e0',
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 8,
+    borderRadius: 16,
+    padding: 12,
     alignItems: 'flex-end',
     marginTop: 16,
+    backgroundColor: '#fafafa',
   },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     color: '#333',
     paddingHorizontal: 8,
-    maxHeight: 100,
+    paddingVertical: 4,
+    maxHeight: 80,
+    lineHeight: 20,
   },
   button: {
     backgroundColor: '#b881c2',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
     justifyContent: 'center',
+    marginLeft: 8,
   },
   disabledButton: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#e0e0e0',
   },
   buttonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 13,
+    fontSize: 14,
+  },
+  disabledText: {
+    color: '#999',
   },
 });
 

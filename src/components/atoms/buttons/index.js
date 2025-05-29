@@ -7,5 +7,6 @@ export { default as ToggleSwitch } from './ToggleSwitch'
 export { default as FilterDropdown } from './FilterDropdown'
 export { default as PrivacyFilterButton } from './PrivacyFilterButton'
 export { default as SearchButton } from './SearchButton'
+export { default as RangeSelector } from './RangeSelector'
 
 
