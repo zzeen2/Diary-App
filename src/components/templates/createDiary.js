@@ -9,9 +9,9 @@ import {DiaryInputBox, ImagePickerBox} from '../molecules/boxes';
 import useDiarySubmit from '../../hooks/useDiarySubmit';
 import { useSelector } from 'react-redux';
 
-console.log(' DiaryImotionSection:', DiaryImotionSection);
-console.log(' DiaryInputBox:', DiaryInputBox);
-console.log(' ImagePickerBox:', ImagePickerBox);
+//console.log(' DiaryImotionSection:', DiaryImotionSection);
+//console.log(' DiaryInputBox:', DiaryInputBox);
+//console.log(' ImagePickerBox:', ImagePickerBox);
 
 const DiaryWriteScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();

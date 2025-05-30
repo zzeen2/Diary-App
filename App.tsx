@@ -16,13 +16,29 @@ import UserProfile from './src/components/templates/UserProfile';
 import DiaryDetail from './src/components/templates/DiaryDetail';
 import StatsTemplate from './src/components/templates/StatsTemplate';
 import LoginScreen from './src/components/templates/LoginScreen';
+import { useDispatch } from 'react-redux';
+import  fetchUser  from './src/reducers/userReducer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
 const AppContent = () => {
   const { isLoggedIn } = useContext(AuthContext);
-  const navigation = useNavigation(); // navigation 훅
+  //const dispatch = useDispatch(); // 
+  //const navigation = useNavigation(); // navigation 훅
+
+  // useEffect(() => {
+  //   const initUser = async () => {
+  //     const token = await AsyncStorage.getItem('jwtToken');
+  //     if (token) {
+  //       dispatch(fetchUser(token));
+  //     }
+  //   };
+  //   initUser();
+  // }, []);
+
   if (isLoggedIn === null) return null;
+  
   
   return (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -49,7 +65,7 @@ const AppContent = () => {
 };
 
 export default function App() {
-  //WebBrowser.maybeCompleteAuthSession();
+  WebBrowser.maybeCompleteAuthSession();
 
   return (
     <Provider store={store}>

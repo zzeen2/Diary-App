@@ -173,6 +173,7 @@ const WelcomeScreen = () => {
     
     const LoginHandler = async () => {
         console.log("로그인 핸들러")
+        setModalOpen(false);
         navigation.navigate('OAuth');
     }; 
 

@@ -1,5 +1,5 @@
-import { createStore, applyMiddleware } from "redux";
-import { thunk } from "redux-thunk";
-import emotionReducer from "../reducers/emotionReducers";
+import { createStore, applyMiddleware } from 'redux';
+import {thunk} from 'redux-thunk'; 
+import rootReducer from './rootReducer';
 
-export const store = createStore(emotionReducer, applyMiddleware(thunk));
+export const store = createStore(rootReducer, applyMiddleware(thunk));

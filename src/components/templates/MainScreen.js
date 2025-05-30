@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {StyleSheet,ScrollView, View, ImageBackground,SafeAreaView,Text} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import useFormmatedDate from '../../hooks/useFormattedDate';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
-import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TabBar } from '../organisms/TabBar';
 import {EmotionSelector} from '../organisms/main';
 import {DiaryListSection} from '../organisms/main';
 import  {HeaderBar}  from '../molecules/headers';
+import { AuthContext } from '../../context/AuthContext';
+import { fetchStreak } from '../../reducers/streakReducer';
+import { setUser } from '../../reducers/userReducer';
+import { fetchMyDiaries } from '../../actions/diaryAction';
 // console.log(' EmotionSelector:', EmotionSelector);
 // console.log(' DiaryListSection:', DiaryListSection);
 // console.log(' TabBar:', TabBar);
@@ -19,63 +22,63 @@ import  {HeaderBar}  from '../molecules/headers';
 //console.log(EmotionSelector)
 //console.log('HeaderBar:', HeaderBar);
 
-const diaryEntries = [
-  {
-    id: 1,
-    title: '봄 날씨와 함께한 산책',
-    date: '2025.05.17',
-    content: '날씨가 너무 좋아서 한강 공원을 산책했다. 날씨가 너무 좋아서 한강 공원을 산책했다.',
-    primaryEmotion: 'happy',
-    secondaryEmotion: 'calm',
-    isPublic: true,
-    user: {
-      id: 'user1',
-      nickname: '민지',
-      profile_img: require('../../assets/cloud3.png'), // 이미지 경로 조정
-    },
-  },
-  {
-    id: 2,
-    title: '업무에 대한 고민',
-    date: '2025.05.16',
-    content: '프로젝트 마감이 다가오는데 걱정이다...',
-    primaryEmotion: 'happy',
-    isPublic: true,
-    user: {
-      id: 'user2',
-      nickname: '지은',
-      profile_img: require('../../assets/cloud2.png'),
-    },
-  },
-  {
-    id: 3,
-    title: '업무에 대한 고민',
-    date: '2025.05.16',
-    content: '프로젝트 마감이 다가오는데 걱정이다...',
-    primaryEmotion: 'anxious',
-    secondaryEmotion: 'calm',
-    isPublic: false,
-    user: {
-      id: 'user1',
-      nickname: '민지',
-      profile_img: require('../../assets/cloud3.png'),
-    },
-  },
-  {
-    id: 4,
-    title: '봄 날씨와 함께한 산책',
-    date: '2025.05.17',
-    content: '날씨가 너무 좋아서 한강 공원을 산책했다...',
-    primaryEmotion: 'happy',
-    secondaryEmotion: 'calm',
-    isPublic: false,
-    user: {
-      id: 'user2',
-      nickname: '지은',
-      profile_img: require('../../assets/cloud2.png'),
-    },
-  },
-];
+// const diaryEntries = [
+//   {
+//     id: 1,
+//     title: '봄 날씨와 함께한 산책',
+//     date: '2025.05.17',
+//     content: '날씨가 너무 좋아서 한강 공원을 산책했다. 날씨가 너무 좋아서 한강 공원을 산책했다.',
+//     primaryEmotion: 'happy',
+//     secondaryEmotion: 'calm',
+//     isPublic: true,
+//     user: {
+//       id: 'user1',
+//       nickname: '민지',
+//       profile_img: require('../../assets/cloud3.png'), // 이미지 경로 조정
+//     },
+//   },
+//   {
+//     id: 2,
+//     title: '업무에 대한 고민',
+//     date: '2025.05.16',
+//     content: '프로젝트 마감이 다가오는데 걱정이다...',
+//     primaryEmotion: 'happy',
+//     isPublic: true,
+//     user: {
+//       id: 'user2',
+//       nickname: '지은',
+//       profile_img: require('../../assets/cloud2.png'),
+//     },
+//   },
+//   {
+//     id: 3,
+//     title: '업무에 대한 고민',
+//     date: '2025.05.16',
+//     content: '프로젝트 마감이 다가오는데 걱정이다...',
+//     primaryEmotion: 'anxious',
+//     secondaryEmotion: 'calm',
+//     isPublic: false,
+//     user: {
+//       id: 'user1',
+//       nickname: '민지',
+//       profile_img: require('../../assets/cloud3.png'),
+//     },
+//   },
+//   {
+//     id: 4,
+//     title: '봄 날씨와 함께한 산책',
+//     date: '2025.05.17',
+//     content: '날씨가 너무 좋아서 한강 공원을 산책했다...',
+//     primaryEmotion: 'happy',
+//     secondaryEmotion: 'calm',
+//     isPublic: false,
+//     user: {
+//       id: 'user2',
+//       nickname: '지은',
+//       profile_img: require('../../assets/cloud2.png'),
+//     },
+//   },
+// ];
 
 
 const friendDiaryEntries = [
@@ -117,17 +120,18 @@ const tabs = [
 
 
 const MainScreen = () => {
-
-  
+  const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const emotions = useSelector((state) => state.emotions);
+  const emotions = useSelector((state) => state.emotions.emotions);
   const loading = useSelector((state) => state.loading);
   const currentUserId = 1; // 추후 로그인 정보에서 가져오기
-
-
+  const streak = useSelector(state => state.streak.value);
+  const user = useSelector(state => state.user);
+  //console.log("asdfasdfasdfasdfasdfasdfasdfasdfasdfsdf", emotions)
+  //console.log("dfsdfsdfsdfsdf", user)
   const [isEmotionSaved, setIsEmotionSaved] = useState(false);
+  const myDiaries = useSelector(state => state.myDiaries.myDiaries);
   const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -186,9 +190,23 @@ const MainScreen = () => {
       const today = new Date().toISOString().slice(0, 10);
       setIsEmotionSaved(saved === today);
     };
-
+    
     checkSaved();
   }, []);
+  useEffect(() => {
+    if (user.uid) {
+      dispatch(fetchStreak(user.uid));
+    }
+  }, [user]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setSelectedEmotion(null); // 메인페이지가 리렌더링 될때마다 초기화
+      if (user && user.uid) {
+        dispatch(fetchMyDiaries());
+      }
+    }, [dispatch, user.uid])
+  );
 
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
@@ -198,7 +216,7 @@ const MainScreen = () => {
   const goToDetail = (entry) => {
       navigation.navigate('DiaryDetail', {
       diary: entry,
-      isMine: entry.user.id === currentUserId,
+      isMine: entry.user.id === user.uid, 
     })
   };
   // 날짜 포멧팅
@@ -237,7 +255,7 @@ const MainScreen = () => {
 
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
         <SafeAreaView style={styles.safeContainer}>
-          <HeaderBar title="홈" streakText="🔥 3일 연속 기록 중" />
+          <HeaderBar title="홈" streakText={`🔥 ${streak}일 연속 기록 중`} />
 
           <View style={styles.divider} />
 
@@ -246,7 +264,7 @@ const MainScreen = () => {
             {/* 날짜 인사 */}
             <View style={styles.greetingBox}>
               <Text style={styles.dateText}>{displayDate}</Text>
-              <Text style={styles.greetingText}>김지은님! 👋</Text>
+              <Text style={styles.greetingText}>{`${user.nickname}님! 👋`}</Text>
               <Text style={styles.greetingText}>오늘의 감정은 어떤가요?</Text>
             </View>
 
@@ -261,7 +279,7 @@ const MainScreen = () => {
             {/* 내 일기 */}
             <DiaryListSection
               title="📓 나의 최근 일기"
-              entries={diaryEntries}
+              entries={myDiaries}
               findEmotion={findEmotion}
               maxCount={4}
               onPressSeeMore={() => console.log('내 일기 더보기')}

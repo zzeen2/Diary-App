@@ -17,9 +17,9 @@ export const useKakaoLogin = () => {
     const redirectUri = KAKAO_REDIRECT_URI
     //const redirectUri = "https://auth.expo.io/@jieunkim1203/moodcloudapp"
 
-    console.log("REDIRECT_URI (useKakaoLogin hook):", redirectUri);
-    console.log("KAKAO_CLIENT_ID (useKakaoLogin hook):", KAKAO_CLIENT_ID);
-    console.log("BACKEND_API_URL (useKakaoLogin hook):", BACKEND_API_URL);
+    // console.log("REDIRECT_URI (useKakaoLogin hook):", redirectUri);
+    // console.log("KAKAO_CLIENT_ID (useKakaoLogin hook):", KAKAO_CLIENT_ID);
+    // console.log("BACKEND_API_URL (useKakaoLogin hook):", BACKEND_API_URL);
 
     // useAuthRequest 훅 사용: 인증 요청, 응답, 프롬프트 함수를 얻습니다.
     const [request, response, promptAsync] = useAuthRequest(
@@ -45,8 +45,8 @@ export const useKakaoLogin = () => {
     // 응답(response) 변화 감지 및 처리
     
     React.useEffect(() => { // React.useEffect 사용
-        console.log("카카오 로그인 request:", request);
-         console.log("카카오 로그인 response:", response);
+        //console.log("카카오 로그인 request:", request);
+         //console.log("카카오 로그인 response:", response);
         if (response?.type === 'success') {
             const { code } = response.params;
             console.log("카카오 로그인 성공! 인가 코드:", code);

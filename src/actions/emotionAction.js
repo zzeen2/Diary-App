@@ -17,7 +17,7 @@ export const fetchEmotions = () => {
         //console.log('감정 데이터 요청 시작');
         
         // API URL 가져오기
-        const apiUrl = 'http://192.168.219.104:4000'||Constants.expoConfig?.extra?.apiUrl ; // 192.168.0.6 // 192.168.219.104
+        const apiUrl = 'http://192.168.219.104:4000'|| Constants.expoConfig?.extra?.apiUrl ; // 192.168.0.6 // 192.168.219.104
         console.log("apirukl ######", apiUrl)
         // API 호출
         const response = await fetch(`${apiUrl}/main/emotionAll`);    

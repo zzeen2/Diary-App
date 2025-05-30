@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import {EmojiIcon} from '../../atoms/icons';
 import {SelectedEmotionBox} from '../../molecules/boxes';
 
-const EmotionSelector = ({ emotionIcons, selectedEmotion, onSelectEmotion, onWritePress, onRecordPress }) => {
+const EmotionSelector = ({ emotionIcons =[], selectedEmotion, onSelectEmotion, onWritePress, onRecordPress }) => {
     return (
         <View style={styles.container}>
         <Text style={styles.sectionText}>
