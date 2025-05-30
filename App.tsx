@@ -15,6 +15,7 @@ import MyProfile from './src/components/templates/Myprofile'
 import UserProfile from './src/components/templates/UserProfile';
 import DiaryDetail from './src/components/templates/DiaryDetail';
 import StatsTemplate from './src/components/templates/StatsTemplate';
+import LoginScreen from './src/components/templates/LoginScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,28 +25,31 @@ const AppContent = () => {
   if (isLoggedIn === null) return null;
   
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none', }}>
-      {isLoggedIn ? (
-        <>
-          <Stack.Screen name="Main" component={MainScreen} />
-          <Stack.Screen name="createDiary" component={CreateDiary} />
-        </>
-      ) : (
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      )}
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    {isLoggedIn ? (
+      <>
+        <Stack.Screen name="Main" component={MainScreen} />
+        <Stack.Screen name="createDiary" component={CreateDiary} />
+        <Stack.Screen name="listDiary" component={DiaryListScreen} />
+        <Stack.Screen name="myProfile" component={MyProfile} />
+        <Stack.Screen name="UserProfile" component={UserProfile} />
+        <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
+        <Stack.Screen name="stats" component={StatsTemplate} />
+      </>
+    ) : (
+      <>
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen name="OAuth" component={LoginScreen} />
       <Stack.Screen name="Main" component={MainScreen} />
-      <Stack.Screen name="createDiary" component={CreateDiary} />
-      <Stack.Screen name="listDiary" component={DiaryListScreen} />
-      <Stack.Screen name="myProfile" component={MyProfile} />
-      <Stack.Screen name="UserProfile" component={UserProfile}  />
-      <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
-      <Stack.Screen name="stats" component={StatsTemplate} />
-    </Stack.Navigator>
-  );
+      </>
+    )}
+  </Stack.Navigator>
+);
+
 };
 
 export default function App() {
-  // WebBrowser.maybeCompleteAuthSession();
+  //WebBrowser.maybeCompleteAuthSession();
 
   return (
     <Provider store={store}>

@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import * as WebBrowser from 'expo-web-browser';
 import { AuthContext } from '../context/AuthContext';
 import { useKakaoLogin } from '../hooks/useKakaoLogin';
+import { useNavigation } from '@react-navigation/native';
 
 
 const { width, height } = Dimensions.get('window');
@@ -17,7 +18,7 @@ const WelcomeScreen = () => {
     // 안전 영역의 인셋 값을 가져옵니다
     const insets = useSafeAreaInsets();
     const [modalOpen, setModalOpen] = useState(false); // 모달 상태
-    
+    const navigation = useNavigation();
     const styles = StyleSheet.create({
         container: {
         flex: 1,
@@ -167,12 +168,12 @@ const WelcomeScreen = () => {
     });
 
     const OpenModal = () => {
-    setModalOpen(true)
+        setModalOpen(true)
     }
     
     const LoginHandler = async () => {
         console.log("로그인 핸들러")
-        await signInWithKakao();
+        navigation.navigate('OAuth');
     }; 
 
     return (
