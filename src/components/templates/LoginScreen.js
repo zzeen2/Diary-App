@@ -103,10 +103,9 @@ import { WebView } from 'react-native-webview';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {EXPO_PUBLIC_API_URL, REST_API_KEY, REDIRECT_URI} from '@env' // @env 변수명 직접 임포트
-import { AuthContext } from '../../context/AuthContext';
-import { useDispatch } from 'react-redux'; // Redux의 dispatch 임포트
-import { setUser } from '../../reducers/userReducer'; // Redux의 setUser 액션 임포트
+// @env 변수는 직접 임포트해야 합니다.
+import { EXPO_PUBLIC_API_URL, REST_API_KEY, REDIRECT_URI } from '@env'; 
+import { AuthContext } from '../../context/AuthContext'; 
 
 export default function LoginScreen() {
   const navigation = useNavigation();
