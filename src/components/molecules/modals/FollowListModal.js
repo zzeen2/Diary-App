@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   View,
@@ -7,21 +7,46 @@ import {
   FlatList,
   StyleSheet,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { getFollowers, getFollowings } from '../../../api/follow';
+import { useNavigation } from '@react-navigation/native';
 
 const FollowListModal = ({
   visible,
   onClose,
-  followers = [],
-  followings = [],
+  uid,
+  type,
   isMine = false,
   onRemoveFollower,
   onRemoveFollowing
 }) => {
   const [activeTab, setActiveTab] = useState('followers'); // 'followers' or 'followings'
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
-  const data = activeTab === 'followers' ? followers : followings;
+  useEffect(() => {
+    if (visible && uid) {
+      setLoading(true);
+      const fetchList = async () => {
+        try {
+          let data = type === 'followers' ? await getFollowers(uid) : await getFollowings(uid);
+          console.log('[FollowListModal] API 응답:', data);
+          if (data && !Array.isArray(data) && data.users) data = data.users;
+          setList(Array.isArray(data) ? data : []);
+          console.log('[FollowListModal] setList:', Array.isArray(data) ? data : []);
+        } catch (e) {
+          setList([]);
+          console.error('[FollowListModal] API 에러:', e);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchList();
+    }
+  }, [visible, uid, type]);
 
   const handleRemove = (id) => {
     if (activeTab === 'followers') {
@@ -31,87 +56,66 @@ const FollowListModal = ({
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.userRow}>
-      <View style={styles.avatarContainer}>
-        <Image source={item.profile_img} style={styles.avatar} />
-      </View>
-      <Text style={styles.nickname}>{item.nickname}</Text>
-      {isMine && (
-        <TouchableOpacity style={styles.removeBtn} onPress={() => handleRemove(item.id)} activeOpacity={0.8}>
-          <Text style={styles.removeText}>삭제</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+  const handleUserPress = (user) => {
+    onClose();
+    navigation.navigate('UserProfile', {
+      uid: user.uid,
+      nickname: user.nickname || user.nick_name,
+      isFollowing: false,
+    });
+  };
+
+  const renderItem = ({ item }) => {
+    console.log('item 전체:', item);
+    const profileImg =
+      item.profile_img ||
+      item.profileImage ||
+      item.profile_image ||
+      item.avatar ||
+      item.img_url ||
+      '';
+    console.log('프로필 이미지 값:', profileImg);
+    return (
+      <TouchableOpacity onPress={() => handleUserPress(item)} style={styles.userRow}>
+        <Image
+          source={
+            !!profileImg && typeof profileImg === 'string' && profileImg.trim().startsWith('http')
+              ? { uri: profileImg }
+              : require('../../../assets/logo2.png')
+          }
+          style={styles.avatar}
+        />
+        <View style={styles.infoBox}>
+          <Text style={styles.nickname}>{item.nickname || item.nick_name}</Text>
+          {/* 필요시 추가 정보(예: 자기소개) 표시 가능 */}
+        </View>
+        {/* 팔로우/언팔로우 버튼 등 추가 가능 */}
+      </TouchableOpacity>
+    );
+  };
+
+  console.log('[FollowListModal] 렌더링 list:', list);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          {/* 헤더 */}
-          <View style={styles.header}>
-            <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>친구 목록</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeIcon}>
-                <Feather name="x" size={20} color="#666" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* 탭 */}
-          <View style={styles.tabContainer}>
-            <View style={styles.tabRow}>
-              <TouchableOpacity
-                onPress={() => setActiveTab('followers')}
-                style={[
-                  styles.tab,
-                  activeTab === 'followers' && styles.activeTab,
-                ]}
-                activeOpacity={0.8}
-              >
-                <Text style={[
-                  styles.tabText,
-                  activeTab === 'followers' && styles.activeTabText
-                ]}>
-                  팔로워 ({followers.length})
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setActiveTab('followings')}
-                style={[
-                  styles.tab,
-                  activeTab === 'followings' && styles.activeTab,
-                ]}
-                activeOpacity={0.8}
-              >
-                <Text style={[
-                  styles.tabText,
-                  activeTab === 'followings' && styles.activeTabText
-                ]}>
-                  팔로잉 ({followings.length})
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* 리스트 */}
-          <FlatList
-            data={data}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            style={styles.list}
-            showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListEmptyComponent={() => (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyIcon}>👥</Text>
-                <Text style={styles.emptyText}>
-                  {activeTab === 'followers' ? '팔로워가 없어요' : '팔로잉이 없어요'}
-                </Text>
-              </View>
-            )}
-          />
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center' }}>
+        <View style={{ margin: 24, backgroundColor: '#fff', borderRadius: 16, padding: 20, maxHeight: '70%' }}>
+          <TouchableOpacity onPress={onClose} style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
+            <Feather name="x" size={28} color="#b881c2" />
+          </TouchableOpacity>
+          <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
+            {type === 'followers' ? '팔로워 목록' : '팔로잉 목록'}
+          </Text>
+          {loading ? (
+            <ActivityIndicator size="large" color="#b881c2" />
+          ) : (
+            <FlatList
+              data={list}
+              keyExtractor={(item) => item.uid?.toString() || item.id?.toString()}
+              renderItem={renderItem}
+              ListEmptyComponent={<Text style={{ color: '#888', textAlign: 'center', marginVertical: 24 }}>목록이 없습니다.</Text>}
+            />
+          )}
         </View>
       </View>
     </Modal>
@@ -201,28 +205,29 @@ const styles = StyleSheet.create({
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#f8f9fa',
     borderRadius: 16,
     marginVertical: 4,
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginRight: 16,
+    gap: 12,
   },
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
     borderWidth: 2,
-    borderColor: '#ffffff',
+    borderColor: '#fff',
+    backgroundColor: '#eee',
+  },
+  infoBox: {
+    flex: 1,
+    justifyContent: 'center',
   },
   nickname: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    flex: 1,
   },
   removeBtn: {
     flexDirection: 'row',

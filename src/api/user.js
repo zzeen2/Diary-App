@@ -38,19 +38,27 @@ export const updateUserBio = async (uid, bio) => {
 };
 
 export const getPublicDiaries = async (uid) => {
-  const token = await AsyncStorage.getItem('jwtToken');
-  const res = await axios.get(
-    `${EXPO_PUBLIC_API_URL}/main/app/public/${uid}`,
-    {
-      headers: { Authorization: `Bearer ${token}` }
-    }
-  );
-  return res.data;
+  const url = `${EXPO_PUBLIC_API_URL}/mypage/public/${uid}`;
+  console.log('[getPublicDiaries] 요청 URL:', url);
+  console.log('[getPublicDiaries] uid:', uid);
+  try {
+    const res = await axios.get(url);
+    console.log('[getPublicDiaries] 응답:', res.data);
+    return res.data;
+  } catch (err) {
+    console.error('[getPublicDiaries] 에러:', err);
+    throw err;
+  }
 };
 
 export const getUserById = async (uid) => {
   const res = await axios.get(
     `${EXPO_PUBLIC_API_URL}/login/${uid}`
   );
+  return res.data;
+};
+
+export const getUserStats = async (uid) => {
+  const res = await axios.get(`${EXPO_PUBLIC_API_URL}/detail/stats/${uid}`);
   return res.data;
 };

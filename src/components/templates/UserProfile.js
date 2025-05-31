@@ -8,8 +8,10 @@ import { useNavigation } from '@react-navigation/native';
 import { PublicDiaryCard, DiaryCard } from '../molecules/cards';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
-import { getPublicDiaries, getUserById } from '../../api/user';
+import { getPublicDiaries, getUserById, getUserStats } from '../../api/user';
 import { EXPO_PUBLIC_API_URL } from '@env';
+import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const tabs = [
   { id: 'home', icon: '🏠', label: '홈' },
@@ -25,7 +27,7 @@ const UserProfile = ({ route }) => {
   const emotions = useSelector((state) => state.emotions);
 
   const [activeTab, setActiveTab] = useState('profile');
-  const [isFollowing, setIsFollowing] = useState(route?.params?.isFollowing ?? false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const nickname = route?.params?.nickname ?? '유저';
@@ -37,58 +39,85 @@ const UserProfile = ({ route }) => {
   useEffect(() => {
     dispatch(fetchEmotions());
     if (uid) {
-      console.log('[UserProfile] getUserById 호출 uid:', uid);
-      console.log('[UserProfile] getUserById 요청 URL:', `${EXPO_PUBLIC_API_URL}/login/${uid}`);
+      console.log('[UserProfile] 진입 uid:', uid);
       getUserById(uid)
         .then((data) => {
           console.log('[UserProfile] getUserById 응답:', data);
-          setProfile({
+          setProfile((prev) => ({
+            ...prev,
             nickname: data.nick_name,
             profile_img: data.profile_image,
             intro: data.bio,
-            followerCount: data.followerCount ?? 0,
-            followingCount: data.followingCount ?? 0,
-            publicDiaryCount: data.publicDiaryCount ?? 0,
             uid: data.uid,
-          });
+          }));
         })
-        .catch((err) => {
-          console.error('[UserProfile] getUserById 에러:', err);
-          setProfile(null);
-        });
+        .catch((err) => { console.error('[UserProfile] getUserById 에러:', err); setProfile(null); });
       getPublicDiaries(uid)
-        .then(setPublicDiaries)
-        .catch((err) => {
-          if (err?.response?.status === 404) {
-            console.warn('[UserProfile] getPublicDiaries 404: 공개 일기 없음');
-          } else {
-            console.error('[UserProfile] getPublicDiaries 에러:', err);
-          }
-          setPublicDiaries([]);
-        });
+        .then((data) => {
+          console.log('[UserProfile] getPublicDiaries 응답:', data);
+          setPublicDiaries(data);
+        })
+        .catch((err) => { console.error('[UserProfile] getPublicDiaries 에러:', err); setPublicDiaries([]); });
+      AsyncStorage.getItem('userUid').then(myUid => {
+        if (myUid) {
+          checkFollowStatus(myUid, uid).then((res) => {
+            console.log('[UserProfile] checkFollowStatus 응답:', res);
+            setIsFollowing(res);
+          }).catch((err) => { console.error('[UserProfile] checkFollowStatus 에러:', err); setIsFollowing(false); });
+        }
+      });
+      getUserStats(uid).then((res) => {
+        console.log('[UserProfile] getUserStats 응답:', res);
+        if (res.success && res.data) {
+          setProfile((prev) => ({
+            ...prev,
+            followerCount: res.data.followerCount,
+            followingCount: res.data.followingCount,
+            publicDiaryCount: res.data.diaryCount,
+          }));
+        }
+      }).catch((err) => { console.error('[UserProfile] getUserStats 에러:', err); });
     }
   }, [dispatch, uid]);
 
   const findEmotion = (id) => emotions.find((e) => e.id === id) || {};
 
-  const handleFollowToggle = () => {
+  const handleFollowToggle = async () => {
     setLoading(true);
-    setTimeout(() => {
-        setIsFollowing((prev) => {
-        const newFollowState = !prev;
-
-        setProfile((prevProfile) => ({
-            ...prevProfile,
-            followerCount: prevProfile.followerCount + (newFollowState ? 1 : -1),
+    const myUid = await AsyncStorage.getItem('userUid');
+    if (!myUid) { console.warn('[UserProfile] 내 uid 없음'); setLoading(false); return; }
+    try {
+      if (isFollowing) {
+        console.log('[UserProfile] 언팔로우 요청:', myUid, uid);
+        const res = await unfollowUser(myUid, uid);
+        console.log('[UserProfile] 언팔로우 응답:', res);
+        setIsFollowing(false);
+      } else {
+        console.log('[UserProfile] 팔로우 요청:', myUid, uid);
+        const res = await followUser(myUid, uid);
+        console.log('[UserProfile] 팔로우 응답:', res);
+        setIsFollowing(true);
+      }
+      const statsRes = await getUserStats(uid);
+      console.log('[UserProfile] getUserStats(팔로우 후) 응답:', statsRes);
+      if (statsRes.success && statsRes.data) {
+        setProfile((prev) => ({
+          ...prev,
+          followerCount: statsRes.data.followerCount,
+          followingCount: statsRes.data.followingCount,
+          publicDiaryCount: statsRes.data.diaryCount,
         }));
+      }
+    } catch (e) {
+      console.error('[UserProfile] 팔로우/언팔로우 에러:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        return newFollowState;
-        });
-
-        setLoading(false);
-    }, 600);
-    };
-
+  console.log('[UserProfile] 렌더링 publicDiaries:', publicDiaries);
+  console.log('[UserProfile] 렌더링 isFollowing:', isFollowing);
+  console.log('[UserProfile] 렌더링 uid:', uid);
 
   return (
     <View style={styles.container}>
@@ -127,19 +156,37 @@ const UserProfile = ({ route }) => {
 
             <Text style={styles.listTitle}>📖 공개된 일기</Text>
             <View style={styles.divider2} />
-
             {isFollowing ? (
               <FlatList
                 data={publicDiaries}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <DiaryCard
-                    entry={item}
-                    userEmotion={item.userEmotion}
-                    aiEmotion={item.aiEmotion}
-                    onPress={() => {/* 상세보기 등 */}}
-                  />
-                )}
+                renderItem={({ item }) => {
+                  let userEmotionData = null;
+                  let aiEmotionData = null;
+
+                  if (item.userEmotion) {
+                    userEmotionData = item.userEmotion;
+                  } else if (item.emotion) {
+                    userEmotionData = item.emotion;
+                  } else if (item.primaryEmotion) {
+                    userEmotionData = item.primaryEmotion;
+                  }
+
+                  if (item.aiEmotion) {
+                    aiEmotionData = item.aiEmotion;
+                  } else if (item.secondaryEmotion) {
+                    aiEmotionData = item.secondaryEmotion;
+                  }
+
+                  return (
+                    <DiaryCard
+                      entry={item}
+                      userEmotion={userEmotionData}
+                      aiEmotion={aiEmotionData}
+                      onPress={() => {/* 상세보기 등 */}}
+                    />
+                  );
+                }}
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 scrollEnabled={false}
               />

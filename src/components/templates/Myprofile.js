@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../context/AuthContext';
 import { clearUser } from '../../reducers/userReducer';
 import { Feather } from '@expo/vector-icons';
-import { updateUserBio } from '../../api/user';
+import { updateUserBio, getUserStats } from '../../api/user';
 import { DiaryCard } from '../molecules/cards';
 import { fetchMyDiaries } from '../../actions/diaryAction';
 
@@ -37,6 +37,7 @@ const MyProfile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showFollowerModal, setShowFollowerModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [modalType, setModalType] = useState('followers');
   const dispatch = useDispatch();
   const emotions = useSelector((state) => state.emotions.emotions);
   const { setIsLoggedIn, setUser: setAuthUser } = useContext(AuthContext);
@@ -69,28 +70,34 @@ const MyProfile = () => {
         const storedNickname = await AsyncStorage.getItem('userNickname');
         const storedProfileImage = await AsyncStorage.getItem('userProfileImage');
         const storedBio = await AsyncStorage.getItem('userBio');
-        // TODO: userUid도 필요하다면 가져오기 (예: 사용자 일기 목록 조회 시)
-        // const storedUserUid = await AsyncStorage.getItem('userUid');
+        const storedUserUid = await AsyncStorage.getItem('userUid');
 
         setProfile(prevProfile => ({
           ...prevProfile,
           nickname: storedNickname || '사용자',
           profile_img: storedProfileImage ? { uri: storedProfileImage } : require('../../assets/IMG_3349.jpg'),
           intro: storedBio || '',
-          // uid: storedUserUid || null, // 필요하다면 uid도 상태에 저장
+          uid: storedUserUid || null,
         }));
-        
-        // TODO: followerCount, followingCount, publicDiaryCount는 별도 API 호출로 업데이트 필요
-        // 이 정보들은 AsyncStorage에 저장하지 않았으므로, API 호출 필요.
-        // 예: fetchUserStats(storedUserUid).then(stats => setProfile(prev => ({...prev, ...stats})));
 
+        // 팔로워/팔로잉/공개일기 숫자 최신화
+        if (storedUserUid) {
+          const statsRes = await getUserStats(storedUserUid);
+          if (statsRes.success && statsRes.data) {
+            setProfile(prev => ({
+              ...prev,
+              followerCount: statsRes.data.followerCount,
+              followingCount: statsRes.data.followingCount,
+              publicDiaryCount: statsRes.data.diaryCount,
+            }));
+          }
+        }
       } catch (error) {
-        console.error("AsyncStorage에서 프로필 데이터 로딩 실패:", error);
+        console.error('프로필 데이터/통계 로딩 실패:', error);
       }
     };
-
     loadProfileData();
-  }, []); // 컴포넌트 마운트 시 1회 실행
+  }, []);
   
   const myDiaries = useSelector((state) => state.myDiaries.myDiaries || []);
   const publicDiaries = myDiaries.filter((d) => d.isPublic);
@@ -225,8 +232,8 @@ const MyProfile = () => {
               profile={profile}
               isMine={true}
               onEditIntro={() => setShowEditModal(true)}
-              onPressFollowers={() => setShowFollowerModal(true)}
-              onPressFollowings={() => setShowFollowingModal(true)}
+              onPressFollowers={() => { setModalType('followers'); setShowFollowerModal(true); }}
+              onPressFollowings={() => { setModalType('followings'); setShowFollowingModal(true); }}
             />
 
             <Text style={styles.listTitle}>📖 공개된 일기</Text>
@@ -265,15 +272,9 @@ const MyProfile = () => {
             />
             <FollowListModal
               visible={showFollowerModal || showFollowingModal}
-              onClose={() => {
-                setShowFollowerModal(false);
-                setShowFollowingModal(false);
-              }}
-              followers={followers}
-              followings={followings}
-              isMine={true}
-              onRemoveFollower={handleRemoveFollower}
-              onRemoveFollowing={handleRemoveFollowing}
+              onClose={() => { setShowFollowerModal(false); setShowFollowingModal(false); }}
+              uid={profile?.uid}
+              type={modalType}
             />
           <Button
           title="친구 프로필 테스트"

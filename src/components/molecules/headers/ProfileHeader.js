@@ -24,7 +24,13 @@ const ProfileHeader = ({
       {/* 왼쪽: 프로필 사진 */}
       <View style={styles.avatarContainer}>
         <Image 
-          source={profile_img ? { uri: profile_img } : require('../.././../assets/logo2.png')}
+          source={
+            profile_img
+              ? (typeof profile_img === 'string'
+                  ? { uri: profile_img }
+                  : profile_img)
+              : require('../../../assets/logo2.png')
+          }
           style={styles.avatar} 
         />
         <View style={styles.avatarBorder} />
