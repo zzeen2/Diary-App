@@ -24,7 +24,7 @@ const ProfileHeader = ({
       {/* 왼쪽: 프로필 사진 */}
       <View style={styles.avatarContainer}>
         <Image 
-          source={typeof profile_img === 'number' ? profile_img : { uri: profile_img }} 
+          source={profile_img} 
           style={styles.avatar} 
         />
         <View style={styles.avatarBorder} />

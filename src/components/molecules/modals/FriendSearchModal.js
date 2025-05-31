@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
@@ -168,20 +169,13 @@ const FriendSearchModal = ({ visible, onClose }) => {
 
   // 사용자 카드 렌더링
   const renderUserCard = ({ item }) => {
-    const isFollowing = followingUsers.includes(item.uid);
+    // const isFollowing = followingUsers.includes(item.uid); // 버튼이 제거되므로 이 변수는 여기서 필요 없어짐
     
     return (
       <View style={styles.userItem}>
         <Image source={{ uri: item.profile_image }} style={styles.userAvatar} />
         <Text style={styles.userNickname}>{item.nick_name}</Text>
-        <TouchableOpacity
-          style={[styles.followBtn, isFollowing ? styles.followingBtn : styles.notFollowingBtn]}
-          onPress={() => handleFollowToggle(item)}
-        >
-          <Text style={[styles.followBtnText, isFollowing ? styles.followingText : styles.notFollowingText]}>
-            {isFollowing ? '팔로잉' : '팔로우'}
-          </Text>
-        </TouchableOpacity>
+        {/* 팔로우/팔로잉 버튼 TouchableOpacity 제거됨 */}
       </View>
     );
   };
@@ -252,37 +246,33 @@ const FriendSearchModal = ({ visible, onClose }) => {
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    position: 'absolute',
+    position: 'absolute', // 화면 전체를 덮도록 position: 'absolute' 사용
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    zIndex: 1000, // 다른 요소들 위에 표시되도록 zIndex 설정
   },
   modalContainer: {
-    width: '85%',
-    maxWidth: 400,
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    maxHeight: '70%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 10,
+    width: '90%',
+    maxHeight: '80%', // 모달의 최대 높이 제한 (화면의 80%)
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    display: 'flex',
+    flexDirection: 'column',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    borderBottomColor: '#eee',
+    paddingBottom: 10,
   },
   modalTitle: {
     fontSize: 18,
@@ -290,36 +280,33 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   modalCloseBtn: {
-    padding: 8,
-    borderRadius: 20,
+    padding: 5,
   },
   searchSection: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 8,
+    marginBottom: 15,
   },
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
     paddingHorizontal: 12,
-    height: 40,
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8, // 플랫폼별 패딩 조절
   },
   searchInputField: {
     flex: 1,
-    fontSize: 14,
-    color: '#333',
     marginLeft: 8,
+    fontSize: 15,
+    color: '#333',
   },
   clearButton: {
-    padding: 4,
+    padding: 5,
   },
   resultsList: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-    maxHeight: 300,
+    // flex: 1, // 일단 주석 처리하고 height 또는 maxHeight로 제어
+    // minHeight: 100, 
+    height: 300, // 4-5개 항목이 보일 수 있는 대략적인 높이 (조정 필요)
+    // 또는 maxHeight: 300, 
   },
   loadingContainer: {
     alignItems: 'center',
@@ -368,31 +355,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     flex: 1,
-  },
-  followBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    minWidth: 70,
-    alignItems: 'center',
-  },
-  notFollowingBtn: {
-    backgroundColor: '#b881c2',
-  },
-  followingBtn: {
-    backgroundColor: 'rgba(184, 129, 194, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(184, 129, 194, 0.2)',
-  },
-  followBtnText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  notFollowingText: {
-    color: '#ffffff',
-  },
-  followingText: {
-    color: '#b881c2',
   },
 });
 

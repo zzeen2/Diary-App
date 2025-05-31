@@ -283,7 +283,7 @@ const DiaryListScreen = () => {
                     <View style={styles.followerContainer}>
                         {/* 오늘의 팔로워 일기 */}
                         <DiaryListSection
-                            title="👥 오늘의 팔로워 일기"
+                            title="👥 오늘의 팔로잉 일기"
                             entries={todayFollowerDiaries}
                             findEmotion={findEmotion}
                             isFriend={true}

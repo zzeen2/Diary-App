@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, ImageBackground, SafeAreaView, FlatList, Text, Button } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, ScrollView, StyleSheet, ImageBackground, SafeAreaView, FlatList, Text, Button, TouchableOpacity, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { HeaderBar, ProfileHeader } from '../molecules/headers';
@@ -12,6 +12,11 @@ import { PublicDiaryCard } from '../molecules/cards';
 import {PublicDiaryListSection} from '../atoms/thumbnail';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../context/AuthContext';
+import { clearUser } from '../../reducers/userReducer';
+import { Feather } from '@expo/vector-icons';
+import { updateUserBio } from '../../api/user';
 
 // 탭 구성
 const tabs = [
@@ -31,25 +36,60 @@ const MyProfile = () => {
   const [showFollowerModal, setShowFollowerModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const dispatch = useDispatch();
-  const emotions = useSelector((state) => state.emotions);
+  const emotions = useSelector((state) => state.emotions.emotions);
+  const { setIsLoggedIn, setUser: setAuthUser } = useContext(AuthContext);
+  
+  // Redux 스토어에서 로그인한 사용자 정보 가져오기 (이제 직접 사용하지 않음, 또는 보조적으로 사용)
+  // const loggedInUser = useSelector((state) => state.user); 
 
   // 감정 데이터 가져오기
   useEffect(() => {
     dispatch(fetchEmotions());
   }, [dispatch]);
 
-const findEmotion = (id) => emotions.find(e => e.id === id) || {};
-  // 샘플 프로필 정보
-  const [profile, setProfile] = useState({
-    profile_img: require('../../assets/IMG_3349.jpg'),
-    nickname: '지은',
-    intro: '감정을 기록하는 중 🐾',
-    followerCount: 128,
-    followingCount: 99,
-    publicDiaryCount: 23,
-  });
+  const findEmotion = (id) => emotions.find(e => e.id === id) || {};
   
-  // 샘플 공개 일기 목록
+  // 프로필 정보 상태
+  const [profile, setProfile] = useState({
+    profile_img: require('../../assets/IMG_3349.jpg'), // 기본 이미지
+    nickname: '사용자',
+    intro: '',
+    followerCount: 0, 
+    followingCount: 0, 
+    publicDiaryCount: 0, 
+  });
+
+  // AsyncStorage에서 사용자 정보를 불러와 profile 상태 업데이트
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        const storedNickname = await AsyncStorage.getItem('userNickname');
+        const storedProfileImage = await AsyncStorage.getItem('userProfileImage');
+        const storedBio = await AsyncStorage.getItem('userBio');
+        // TODO: userUid도 필요하다면 가져오기 (예: 사용자 일기 목록 조회 시)
+        // const storedUserUid = await AsyncStorage.getItem('userUid');
+
+        setProfile(prevProfile => ({
+          ...prevProfile,
+          nickname: storedNickname || '사용자',
+          profile_img: storedProfileImage ? { uri: storedProfileImage } : require('../../assets/IMG_3349.jpg'),
+          intro: storedBio || '',
+          // uid: storedUserUid || null, // 필요하다면 uid도 상태에 저장
+        }));
+        
+        // TODO: followerCount, followingCount, publicDiaryCount는 별도 API 호출로 업데이트 필요
+        // 이 정보들은 AsyncStorage에 저장하지 않았으므로, API 호출 필요.
+        // 예: fetchUserStats(storedUserUid).then(stats => setProfile(prev => ({...prev, ...stats})));
+
+      } catch (error) {
+        console.error("AsyncStorage에서 프로필 데이터 로딩 실패:", error);
+      }
+    };
+
+    loadProfileData();
+  }, []); // 컴포넌트 마운트 시 1회 실행
+  
+  // 샘플 공개 일기 목록 (이것도 실제 데이터로 변경 필요)
   const publicDiaries = [
     {
       id: 1,
@@ -132,6 +172,43 @@ const findEmotion = (id) => emotions.find(e => e.id === id) || {};
   setFollowers(prev => prev.filter(user => user.id !== id));
   };
 
+  // 로그아웃 처리 함수
+  const handleLogout = () => {
+    Alert.alert(
+      "로그아웃",
+      "정말로 로그아웃 하시겠습니까?",
+      [
+        {
+          text: "취소",
+          style: "cancel"
+        },
+        {
+          text: "로그아웃",
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('jwtToken');
+              await AsyncStorage.removeItem('userUid');
+              await AsyncStorage.removeItem('userNickname');
+              await AsyncStorage.removeItem('userProfileImage');
+              await AsyncStorage.removeItem('userBio');
+
+              dispatch(clearUser());
+
+              if (setAuthUser) setAuthUser(null);
+              setIsLoggedIn(false);
+              
+              console.log("로그아웃 완료");
+
+            } catch (error) {
+              console.error("로그아웃 처리 중 오류:", error);
+              Alert.alert("오류", "로그아웃 중 문제가 발생했습니다.");
+            }
+          },
+          style: "destructive"
+        }
+      ]
+    );
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -179,7 +256,14 @@ const findEmotion = (id) => emotions.find(e => e.id === id) || {};
       <StatusBar style="dark" translucent backgroundColor="transparent" />
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
         <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
-            <HeaderBar title={`${profile.nickname}님의 프로필`} onlyTitle />
+            <HeaderBar 
+              title={`${profile.nickname}님의 프로필`} 
+              rightContent={ 
+                <TouchableOpacity onPress={handleLogout} style={{ padding: 8 }}>
+                  <Feather name="log-out" size={24} color="#333" />
+                </TouchableOpacity>
+              }
+            />
             <View style={styles.divider} />
           <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}
                     >
@@ -209,7 +293,17 @@ const findEmotion = (id) => emotions.find(e => e.id === id) || {};
               visible={showEditModal}
               currentIntro={profile.intro}
               onClose={() => setShowEditModal(false)}
-              onSave={(newIntro) => setProfile((prev) => ({ ...prev, intro: newIntro }))}
+              onSave={async (newIntro) => {
+                try {
+                  const uid = await AsyncStorage.getItem('userUid');
+                  await updateUserBio(uid, newIntro);
+                  setProfile((prev) => ({ ...prev, intro: newIntro }));
+                  await AsyncStorage.setItem('userBio', newIntro);
+                  Alert.alert('성공', '자기소개가 저장되었습니다.');
+                } catch (e) {
+                  Alert.alert('오류', '자기소개 저장에 실패했습니다.');
+                }
+              }}
             />
             <FollowListModal
               visible={showFollowerModal || showFollowingModal}
@@ -239,7 +333,7 @@ const findEmotion = (id) => emotions.find(e => e.id === id) || {};
               if (tabId === 'home') navigation.navigate('Main');
               else if (tabId === 'diary') navigation.navigate('listDiary');
               else if (tabId === 'stats') navigation.navigate('stats');
-              else if (tabId === 'profile') navigation.navigate('myProfile');
+              // else if (tabId === 'profile') navigation.navigate('myProfile');
             }}
           />
         </SafeAreaView>

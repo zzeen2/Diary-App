@@ -10,7 +10,7 @@ const FilterDropdown = ({ selected, onSelect }) => {
     onSelect(value);
   };
 
-  const currentLabel = selected === 'my' ? '📓 내 일기' : '👥 팔로워 일기';
+  const currentLabel = selected === 'my' ? '📓 내 일기' : '👥 팔로잉 일기';
 
   return (
     <View style={styles.container}>
@@ -25,7 +25,7 @@ const FilterDropdown = ({ selected, onSelect }) => {
             <Text style={styles.itemText}>📓 내 일기</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleSelect('follower')} style={styles.item}>
-            <Text style={styles.itemText}>👥 팔로워 일기</Text>
+            <Text style={styles.itemText}>👥 팔로잉 일기</Text>
           </TouchableOpacity>
         </View>
       )}

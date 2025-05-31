@@ -1,4 +1,6 @@
 import { EXPO_PUBLIC_API_URL } from '@env';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const getUserInfo = async (token) => {
     try {
@@ -21,4 +23,16 @@ export const getUserInfo = async (token) => {
     } catch (error) {
         throw error;
     }
+};
+
+export const updateUserBio = async (uid, bio) => {
+  const token = await AsyncStorage.getItem('jwtToken');
+  const res = await axios.get(
+    `${process.env.EXPO_PUBLIC_API_URL}/mypage/app/userBio`,
+    {
+      params: { uid, bio },
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+  return res.data;
 };

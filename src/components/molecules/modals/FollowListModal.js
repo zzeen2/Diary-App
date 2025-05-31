@@ -34,7 +34,7 @@ const FollowListModal = ({
   const renderItem = ({ item }) => (
     <View style={styles.userRow}>
       <View style={styles.avatarContainer}>
-        <Image source={typeof item.profile_img === 'number' ? item.profile_img : { uri: item.profile_img }} style={styles.avatar} />
+        <Image source={item.profile_img} style={styles.avatar} />
       </View>
       <Text style={styles.nickname}>{item.nickname}</Text>
       {isMine && (
