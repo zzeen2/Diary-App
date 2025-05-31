@@ -3,10 +3,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const StatsEmotionLabel = ({ color, emoji, name, value }) => {
+const StatsEmotionLabel = ({ color = '#ccc', emoji = '', name = '', value = 0 }) => {
   return (
     <View style={styles.row}>
-      <View style={[styles.colorDot, { backgroundColor: color || '#ccc' }]} />
+      <View style={[styles.colorDot, { backgroundColor: color }]} />
       <Text style={styles.emoji}>{emoji}</Text>
       <Text style={styles.name}>{name}</Text>
       {value !== undefined && (

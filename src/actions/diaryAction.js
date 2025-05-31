@@ -1,10 +1,15 @@
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getTodayFollowingDiaries } from '../api/diary';
 
 export const FETCH_MY_DIARIES_REQUEST = 'FETCH_MY_DIARIES_REQUEST';
 export const FETCH_MY_DIARIES_SUCCESS = 'FETCH_MY_DIARIES_SUCCESS';
 export const FETCH_MY_DIARIES_FAILURE = 'FETCH_MY_DIARIES_FAILURE';
+
+export const FETCH_TODAY_FOLLOWING_DIARIES_REQUEST = 'FETCH_TODAY_FOLLOWING_DIARIES_REQUEST';
+export const FETCH_TODAY_FOLLOWING_DIARIES_SUCCESS = 'FETCH_TODAY_FOLLOWING_DIARIES_SUCCESS';
+export const FETCH_TODAY_FOLLOWING_DIARIES_FAILURE = 'FETCH_TODAY_FOLLOWING_DIARIES_FAILURE';
 
 export const fetchMyDiaries = () => async (dispatch) => {
     dispatch({ type: FETCH_MY_DIARIES_REQUEST });
@@ -30,4 +35,14 @@ export const fetchMyDiaries = () => async (dispatch) => {
             dispatch({type: FETCH_MY_DIARIES_FAILURE, payload: error.message,
         });
     }
+};
+
+export const fetchTodayFollowingDiaries = () => async (dispatch) => {
+  dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_REQUEST });
+  try {
+    const data = await getTodayFollowingDiaries();
+    dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_FAILURE, payload: error.message });
+  }
 };

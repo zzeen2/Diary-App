@@ -4,17 +4,18 @@ import { View, Text, StyleSheet } from 'react-native';
 import {StatsEmotionLabel} from '../../atoms/TextsAndLabel';
 
 const EmotionSummaryBox = ({ emotionStats = [] }) => {
+  const safeStats = Array.isArray(emotionStats) ? emotionStats : [];
   return (
     <View style={styles.container}>
       <Text style={styles.title}>감정 요약</Text>
       <View style={styles.keyList}>
-        {emotionStats.map((emotion) => (
+        {safeStats.map((emotion) => (
           <StatsEmotionLabel
             key={emotion.id}
             emoji={emotion.emoji}
             name={emotion.name}
             color={emotion.color}
-            count={emotion.count}
+            value={emotion.count}
           />
         ))}
       </View>

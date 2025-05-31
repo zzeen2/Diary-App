@@ -99,7 +99,7 @@ const MyProfile = () => {
     loadProfileData();
   }, []);
   
-  const myDiaries = useSelector((state) => state.myDiaries.myDiaries || []);
+  const myDiaries = useSelector((state) => state.diary.myDiaries || []);
   const publicDiaries = myDiaries.filter((d) => d.isPublic);
   
   const [followers, setFollowers] = useState([

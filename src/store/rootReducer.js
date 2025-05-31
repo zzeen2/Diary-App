@@ -9,7 +9,7 @@ const rootReducer = combineReducers({
     emotions: emotionReducer,
     streak: streakReducer,
     user: userReducer,
-    myDiaries: diaryReducer,
+    diary: diaryReducer,
     friendDiaries : friendDiaryReducer
 });
 

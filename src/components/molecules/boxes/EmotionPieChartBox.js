@@ -1,18 +1,22 @@
 // components/molecules/charts/EmotionPieChart.js
 import React from 'react';
-import { Dimensions, View } from 'react-native';
+import { Dimensions, View, Text } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
 
 const EmotionPieChart = ({ data = [] }) => {
-  const chartData = data.map((item) => ({
+  const chartData = Array.isArray(data) ? data.map((item) => ({
     name: item.name,
     population: item.count,
     color: item.color,
     legendFontColor: '#333',
     legendFontSize: 13,
-  }));
+  })) : [];
+
+  if (!chartData.length) {
+    return <View style={{height: 200, justifyContent: 'center', alignItems: 'center'}}><Text style={{color:'#aaa'}}>데이터 없음</Text></View>;
+  }
 
   return (
     <View>

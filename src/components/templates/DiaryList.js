@@ -8,7 +8,7 @@ import {HeaderBar} from '../molecules/headers';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
-import { fetchMyDiaries } from '../../actions/diaryAction';
+import { fetchMyDiaries, fetchTodayFollowingDiaries } from '../../actions/diaryAction';
 import {SearchInput} from '../atoms/inputs';
 import { EmotionFilterGroup, DiarySearchArea, CalenderArea } from '../molecules/filters';
 import { Feather } from '@expo/vector-icons';
@@ -46,9 +46,10 @@ const DiaryListScreen = () => {
 
     // Redux 상태
     const emotions = useSelector((state) => state.emotions.emotions) || [];
-    const diaryState = useSelector((state) => state.myDiaries);
+    const diaryState = useSelector((state) => state.diary);
     const rawMyDiaries = diaryState?.myDiaries || [];
     const diaryLoading = diaryState?.loading || false;
+    const todayFollowingDiaries = useSelector((state) => state.diary.todayFollowingDiaries) || [];
 
     console.log('=== DiaryListScreen 상태 ===');
     console.log('현재 필터:', filterType);
@@ -73,6 +74,7 @@ const DiaryListScreen = () => {
         console.log('=== 데이터 로딩 시작 ===');
         dispatch(fetchEmotions());
         dispatch(fetchMyDiaries());
+        dispatch(fetchTodayFollowingDiaries());
         // TODO: 팔로워 일기 데이터도 가져오기
         // dispatch(fetchFollowerDiaries());
     }, [dispatch]);
@@ -281,10 +283,9 @@ const DiaryListScreen = () => {
                 {/* ✅ 팔로워 일기 탭 */}
                 {filterType === 'follower' && (
                     <View style={styles.followerContainer}>
-                        {/* 오늘의 팔로워 일기 */}
                         <DiaryListSection
                             title="👥 오늘의 팔로잉 일기"
-                            entries={todayFollowerDiaries}
+                            entries={todayFollowingDiaries}
                             findEmotion={findEmotion}
                             isFriend={true}
                             onPressCard={(entry) =>
@@ -294,9 +295,7 @@ const DiaryListScreen = () => {
                                 })
                             }
                         />
-                        
-                        {/* 일기가 없을 때 안내 메시지 */}
-                        {todayFollowerDiaries.length === 0 && (
+                        {todayFollowingDiaries.length === 0 && (
                             <View style={styles.emptyContainer}>
                                 <Text style={styles.emptyText}>😔 오늘 작성된 팔로워 일기가 없어요</Text>
                                 <Text style={styles.emptySubText}>친구들을 찾아서 팔로우해보세요!</Text>
