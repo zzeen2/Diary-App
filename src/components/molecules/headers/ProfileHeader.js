@@ -14,17 +14,17 @@ const ProfileHeader = ({
     profile_img,
     nickname,
     intro,
-    followerCount,
-    followingCount,
-    publicDiaryCount,
-  } = profile;
+    followerCount = 0,
+    followingCount = 0,
+    publicDiaryCount = 0,
+  } = profile || {};
 
   return (
     <View style={styles.container}>
       {/* 왼쪽: 프로필 사진 */}
       <View style={styles.avatarContainer}>
         <Image 
-          source={profile_img} 
+          source={profile_img ? { uri: profile_img } : require('../.././../assets/logo2.png')}
           style={styles.avatar} 
         />
         <View style={styles.avatarBorder} />
@@ -49,17 +49,17 @@ const ProfileHeader = ({
 
         <View style={styles.statsRow}>
           <TouchableOpacity onPress={onPressFollowers} style={styles.statCard} activeOpacity={0.8}>
-            <Text style={styles.statNumber}>{followerCount.toLocaleString()}</Text>
+            <Text style={styles.statNumber}>{(followerCount ?? 0).toLocaleString()}</Text>
             <Text style={styles.statLabel}>팔로워</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={onPressFollowings} style={styles.statCard} activeOpacity={0.8}>
-            <Text style={styles.statNumber}>{followingCount.toLocaleString()}</Text>
+            <Text style={styles.statNumber}>{(followingCount ?? 0).toLocaleString()}</Text>
             <Text style={styles.statLabel}>팔로잉</Text>
           </TouchableOpacity>
 
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{publicDiaryCount.toLocaleString()}</Text>
+            <Text style={styles.statNumber}>{(publicDiaryCount ?? 0).toLocaleString()}</Text>
             <Text style={styles.statLabel}>공개일기</Text>
           </View>
         </View>

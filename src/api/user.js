@@ -36,3 +36,21 @@ export const updateUserBio = async (uid, bio) => {
   );
   return res.data;
 };
+
+export const getPublicDiaries = async (uid) => {
+  const token = await AsyncStorage.getItem('jwtToken');
+  const res = await axios.get(
+    `${EXPO_PUBLIC_API_URL}/main/app/public/${uid}`,
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+  return res.data;
+};
+
+export const getUserById = async (uid) => {
+  const res = await axios.get(
+    `${EXPO_PUBLIC_API_URL}/login/${uid}`
+  );
+  return res.data;
+};

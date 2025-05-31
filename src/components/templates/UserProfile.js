@@ -5,9 +5,11 @@ import { StatusBar } from 'expo-status-bar';
 import { HeaderBar, ProfileHeader } from '../molecules/headers';
 import { TabBar } from '../organisms/TabBar';
 import { useNavigation } from '@react-navigation/native';
-import { PublicDiaryCard } from '../molecules/cards';
+import { PublicDiaryCard, DiaryCard } from '../molecules/cards';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
+import { getPublicDiaries, getUserById } from '../../api/user';
+import { EXPO_PUBLIC_API_URL } from '@env';
 
 const tabs = [
   { id: 'home', icon: '🏠', label: '홈' },
@@ -28,31 +30,44 @@ const UserProfile = ({ route }) => {
 
   const nickname = route?.params?.nickname ?? '유저';
 
-  const [profile, setProfile] = useState({
-    profile_img: require('../../assets/IMG_3349.jpg'),
-    nickname: '민지',
-    intro: '하루하루 열심히 살기!',
-    followerCount: 234,
-    followingCount: 145,
-    publicDiaryCount: isFollowing ? 5 : 0,
-    });
-
-  const publicDiaries = isFollowing
-    ? [
-        {
-          id: 1,
-          title: '벚꽃 아래 산책',
-          date: '2025.05.12',
-          content: '날씨가 좋아서 기분이 좋았다',
-          primaryEmotion: 'happy',
-          isPublic: true,
-        },
-      ]
-    : [];
+  const uid = route?.params?.uid;
+  const [profile, setProfile] = useState(null);
+  const [publicDiaries, setPublicDiaries] = useState([]);
 
   useEffect(() => {
     dispatch(fetchEmotions());
-  }, [dispatch]);
+    if (uid) {
+      console.log('[UserProfile] getUserById 호출 uid:', uid);
+      console.log('[UserProfile] getUserById 요청 URL:', `${EXPO_PUBLIC_API_URL}/login/${uid}`);
+      getUserById(uid)
+        .then((data) => {
+          console.log('[UserProfile] getUserById 응답:', data);
+          setProfile({
+            nickname: data.nick_name,
+            profile_img: data.profile_image,
+            intro: data.bio,
+            followerCount: data.followerCount ?? 0,
+            followingCount: data.followingCount ?? 0,
+            publicDiaryCount: data.publicDiaryCount ?? 0,
+            uid: data.uid,
+          });
+        })
+        .catch((err) => {
+          console.error('[UserProfile] getUserById 에러:', err);
+          setProfile(null);
+        });
+      getPublicDiaries(uid)
+        .then(setPublicDiaries)
+        .catch((err) => {
+          if (err?.response?.status === 404) {
+            console.warn('[UserProfile] getPublicDiaries 404: 공개 일기 없음');
+          } else {
+            console.error('[UserProfile] getPublicDiaries 에러:', err);
+          }
+          setPublicDiaries([]);
+        });
+    }
+  }, [dispatch, uid]);
 
   const findEmotion = (id) => emotions.find((e) => e.id === id) || {};
 
@@ -84,25 +99,31 @@ const UserProfile = ({ route }) => {
           <View style={styles.divider} />
 
           <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-            <ProfileHeader
-              profile={profile}
-              isMine={false}
-              rightContent={
-                <TouchableOpacity
-                  style={styles.followBtn}
-                  onPress={handleFollowToggle}
-                  disabled={loading}
-                >
-                  <Text style={styles.followBtnText}>
-                    {loading
-                      ? '처리 중...'
-                      : isFollowing
-                      ? '팔로우 취소'
-                      : '팔로우하기'}
-                  </Text>
-                </TouchableOpacity>
-              }
-            />
+            {profile ? (
+              <ProfileHeader
+                profile={profile}
+                isMine={false}
+                rightContent={
+                  <TouchableOpacity
+                    style={styles.followBtn}
+                    onPress={handleFollowToggle}
+                    disabled={loading}
+                  >
+                    <Text style={styles.followBtnText}>
+                      {loading
+                        ? '처리 중...'
+                        : isFollowing
+                        ? '팔로우 취소'
+                        : '팔로우하기'}
+                    </Text>
+                  </TouchableOpacity>
+                }
+              />
+            ) : (
+              <Text style={{ textAlign: 'center', marginVertical: 40, color: 'red' }}>
+                프로필 정보를 불러올 수 없습니다.
+              </Text>
+            )}
 
             <Text style={styles.listTitle}>📖 공개된 일기</Text>
             <View style={styles.divider2} />
@@ -112,7 +133,12 @@ const UserProfile = ({ route }) => {
                 data={publicDiaries}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                  <PublicDiaryCard entry={item} findEmotion={findEmotion} onPress={(entry) => console.log(entry.title)} />
+                  <DiaryCard
+                    entry={item}
+                    userEmotion={item.userEmotion}
+                    aiEmotion={item.aiEmotion}
+                    onPress={() => {/* 상세보기 등 */}}
+                  />
                 )}
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 scrollEnabled={false}

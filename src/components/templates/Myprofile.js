@@ -17,6 +17,8 @@ import { AuthContext } from '../../context/AuthContext';
 import { clearUser } from '../../reducers/userReducer';
 import { Feather } from '@expo/vector-icons';
 import { updateUserBio } from '../../api/user';
+import { DiaryCard } from '../molecules/cards';
+import { fetchMyDiaries } from '../../actions/diaryAction';
 
 // 탭 구성
 const tabs = [
@@ -45,6 +47,7 @@ const MyProfile = () => {
   // 감정 데이터 가져오기
   useEffect(() => {
     dispatch(fetchEmotions());
+    dispatch(fetchMyDiaries()); // 내 일기 불러오기
   }, [dispatch]);
 
   const findEmotion = (id) => emotions.find(e => e.id === id) || {};
@@ -89,58 +92,8 @@ const MyProfile = () => {
     loadProfileData();
   }, []); // 컴포넌트 마운트 시 1회 실행
   
-  // 샘플 공개 일기 목록 (이것도 실제 데이터로 변경 필요)
-  const publicDiaries = [
-    {
-      id: 1,
-      title: '벚꽃 아래 산책',
-      date: '2025.05.12',
-      content: '날씨가 좋아서 기분이 좋았다',
-      primaryEmotion: 'happy',
-      secondaryEmotion: 'sad',
-      isPublic: true,
-    },
-    {
-      id: 2,
-      title: '벚꽃 아래 산책',
-      date: '2025.05.12',
-      content: '날씨가 좋아서 기분이 좋았다',
-      primaryEmotion: 'happy',
-      isPublic: true,
-    },
-    {
-      id: 3,
-      title: '벚꽃 아래 산책',
-      date: '2025.05.12',
-      content: '날씨가 좋아서 기분이 좋았다',
-      primaryEmotion: 'happy',
-      isPublic: true,
-    },
-    {
-      id: 4,
-      title: '벚꽃 아래 산책',
-      date: '2025.05.12',
-      content: '날씨가 좋아서 기분이 좋았다',
-      primaryEmotion: 'happy',
-      isPublic: true,
-    },
-    {
-      id: 5,
-      title: '벚꽃 아래 산책',
-      date: '2025.05.12',
-      content: '날씨가 좋아서 기분이 좋았다',
-      primaryEmotion: 'happy',
-      isPublic: true,
-    },
-    {
-      id: 6,
-      title: '벚꽃 아래 산책',
-      date: '2025.05.12',
-      content: '날씨가 좋아서 기분이 좋았다',
-      primaryEmotion: 'happy',
-      isPublic: true,
-    },
-  ];
+  const myDiaries = useSelector((state) => state.myDiaries.myDiaries || []);
+  const publicDiaries = myDiaries.filter((d) => d.isPublic);
   
   const [followers, setFollowers] = useState([
     {
@@ -282,7 +235,12 @@ const MyProfile = () => {
               data={publicDiaries}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
-                <PublicDiaryCard entry={item} findEmotion={findEmotion} onPress={(entry) => console.log(entry.title)} />
+                <DiaryCard
+                  entry={item}
+                  userEmotion={item.userEmotion}
+                  aiEmotion={item.aiEmotion}
+                  onPress={() => {/* 상세보기 등 */}}
+                />
               )}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
               scrollEnabled={false}

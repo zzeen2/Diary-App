@@ -1,5 +1,6 @@
 import { getUserInfo } from "../api/user";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SEARCH_USERS_SUCCESS } from '../actions/userAction';
 
 const SET_USER = 'SET_USER';
 const CLEAR_USER = 'CLEAR_USER';
@@ -9,6 +10,7 @@ const initialState = {
     nickname: '',
     profile: '',
     bio: '',
+    searchResults: [],
 };
 
 const userReducer = (state = initialState, action) => {
@@ -17,6 +19,8 @@ const userReducer = (state = initialState, action) => {
         return { ...state, ...action.payload };
         case CLEAR_USER:
         return initialState;
+        case SEARCH_USERS_SUCCESS:
+        return { ...state, searchResults: action.payload };
         default:
         return state;
     }

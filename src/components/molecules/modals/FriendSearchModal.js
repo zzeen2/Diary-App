@@ -14,20 +14,23 @@ import {
 import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const EXPO_PUBLIC_API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { useDispatch, useSelector } from 'react-redux';
+import { searchUsersByNickname } from '../../../actions/userAction';
+import { useNavigation } from '@react-navigation/native';
+import { EXPO_PUBLIC_API_URL } from '@env';
 
 const FriendSearchModal = ({ visible, onClose }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [followingUsers, setFollowingUsers] = useState([]); // 현재 팔로우 중인 사용자들
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const searchResults = useSelector(state => state.user.searchResults);
 
   // 검색 결과 초기화
   useEffect(() => {
     if (visible) {
       setSearchKeyword('');
-      setSearchResults([]);
       loadFollowingList();
     }
   }, [visible]);
@@ -161,24 +164,35 @@ const FriendSearchModal = ({ visible, onClose }) => {
   // 검색 입력 처리 (디바운싱)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      searchUsers(searchKeyword);
+      if (searchKeyword.trim()) {
+        dispatch(searchUsersByNickname(searchKeyword));
+      }
     }, 500);
-
     return () => clearTimeout(timeoutId);
   }, [searchKeyword]);
 
+  // 검색 결과 디버깅
+  useEffect(() => {
+    console.log('[FriendSearchModal] searchResults:', searchResults);
+  }, [searchResults]);
+
   // 사용자 카드 렌더링
-  const renderUserCard = ({ item }) => {
-    // const isFollowing = followingUsers.includes(item.uid); // 버튼이 제거되므로 이 변수는 여기서 필요 없어짐
-    
-    return (
-      <View style={styles.userItem}>
-        <Image source={{ uri: item.profile_image }} style={styles.userAvatar} />
-        <Text style={styles.userNickname}>{item.nick_name}</Text>
-        {/* 팔로우/팔로잉 버튼 TouchableOpacity 제거됨 */}
-      </View>
-    );
-  };
+  const renderUserCard = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => {
+        onClose();
+        navigation.navigate('UserProfile', {
+          uid: item.uid,
+          nickname: item.nick_name,
+          isFollowing: false,
+        });
+      }}
+      style={styles.userItem}
+    >
+      <Image source={{ uri: item.profile_image }} style={styles.userAvatar} />
+      <Text style={styles.userNickname}>{item.nick_name}</Text>
+    </TouchableOpacity>
+  );
 
   if (!visible) return null;
 
