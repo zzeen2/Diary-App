@@ -5,29 +5,18 @@ import { fetchEmotions } from '../../../actions/emotionAction';
 
 import {EmotionHeader} from '../../molecules/headers';
 import {EmotionRow} from '../../molecules/Rows';
-import useEmotionAnalyze from '../../../hooks/useEmotionAnalyze';
-// console.log('🧪 export 확인: DiaryImotionSection 컴포넌트 정상 로드됨');
-// console.log('🧪 EmotionHeader:', EmotionHeader);
-// console.log('🧪 EmotionRow:', EmotionRow);
-// console.log('🧪 useEmotionAnalyze:', useEmotionAnalyze);
 
-const DiaryImotionSection = ({ userEmotion, setAiEmotion,aiEmotion, isPublic, setIsPublic, emotionList, content }) => {
+const DiaryImotionSection = ({ userEmotion, setAiEmotion,aiEmotion, isPublic, setIsPublic, emotionList, content, onAnalyzeEmotion }) => {
   const dispatch = useDispatch();
-
-  const { emotions, loading } = useSelector(state => ({emotions : state.emotions, loading: state.loading})); // 스토어에서 감정 리스트 가져오기
-  // ai가 분석한 감정
-  const { analyzeEmotion } = useEmotionAnalyze();
 
   useEffect(() => {
     dispatch(fetchEmotions());
   }, [dispatch]);
 
-  // const handleAnalyze = () => {
-  //   if (emotions.length > 0) {
-  //     const randomEmotion = emotions.find((e) => e.type === 'anxious') || emotions[0]; // 예시용
-  //     setAiEmotion(randomEmotion);
-  //   }
-  // };
+  const { emotions: allEmotions, loading: emotionsLoading } = useSelector(state => ({
+    emotions: state.emotions.emotions, // 감정 목록
+    loading: state.loading,   
+  }));
 
   return (
     <View style={styles.section}>
@@ -37,19 +26,14 @@ const DiaryImotionSection = ({ userEmotion, setAiEmotion,aiEmotion, isPublic, se
       <EmotionRow label="오늘의 감정" emotion={userEmotion} />
 
       {/* AI 감정 표시 */}
-      {loading ? (
-        <View style={styles.loadingBox}>
-          <ActivityIndicator size="small" color="#b881c2" />
-          <Text style={styles.loadingText}>감정 분석 중입니다...</Text>
-        </View>
-      ) : aiEmotion ? (
+      {aiEmotion ? (
         <EmotionRow label="AI 분석 감정" emotion={aiEmotion} />
       ) : (
         <Text style={styles.guideText}>일기를 작성한 후 분석 버튼을 눌러주세요!</Text>
       )}
 
       {/* 분석 버튼 */}
-      <TouchableOpacity style={styles.analyzeButton} onPress={() => analyzeEmotion(content, emotionList, setAiEmotion)} disabled={loading}>
+      <TouchableOpacity style={styles.analyzeButton} onPress={() => onAnalyzeEmotion(content)}>
         <Text style={styles.analyzeText}>감정 분석하기</Text>
       </TouchableOpacity>
     </View>

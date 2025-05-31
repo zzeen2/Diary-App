@@ -1,28 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import {EmotionTag} from '../../atoms/TextsAndLabel';
+import { EmotionTag } from '../../atoms/TextsAndLabel';
 
-const FriendDiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) => {
+// ⭐ Prop 이름 변경: primaryEmotion, secondaryEmotion -> userEmotion, aiEmotion ⭐
+const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
     const [lineCount, setLineCount] = useState(0);
     const [measuringText, setMeasuringText] = useState(true);
     
     useEffect(() => {
-        // 컴포넌트가 마운트되거나 entry가 변경될 때마다 측정 상태 초기화
+        // 컴포넌트가 마운트되거나 entry.content가 변경될 때마다 측정 상태 초기화
         setMeasuringText(true);
     }, [entry.content]);
 
+    // 백엔드에서 user, nick_name, profile_image 등을 'writer' 필드에 담아줬을 때 사용
+    const writerName = entry.writer?.nick_name;
+    const profileImageSource = entry.writer?.profile_image 
+                               ? { uri: entry.writer.profile_image } 
+                               : require('../../../assets/logo2.png'); // 기본 프로필 이미지 경로
+
     return (
         <TouchableOpacity onPress={onPress} style={styles.wrapper}>
-            <View style={[ styles.card,lineCount === 1 && !measuringText && { height: 140 } ]}>
+            <View style={[ styles.card, lineCount === 1 && !measuringText && { height: 140 } ]}>
                 {/* 감정 색상 바 */}
                 <View style={styles.emotionBarContainer}>
-                    {secondaryEmotion ? (
+                    {/* ⭐ userEmotion과 aiEmotion 존재 여부에 따라 색상 바 렌더링 ⭐ */}
+                    {aiEmotion && userEmotion ? (
                         <>
-                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: primaryEmotion.color }]} />
-                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: secondaryEmotion.color }]} />
+                            {/* userEmotion이 있다면 첫 번째 절반 바 */}
+                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: userEmotion.color }]} />
+                            {/* aiEmotion이 있다면 두 번째 절반 바 */}
+                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: aiEmotion.color }]} />
                         </>
                     ) : (
-                        <View style={[styles.emotionBar, styles.singleBar, { backgroundColor: primaryEmotion.color }]} />
+                        // userEmotion만 있거나 aiEmotion만 있는 경우 전체 바
+                        (userEmotion || aiEmotion) && ( // 둘 중 하나라도 있을 때만 렌더링
+                            <View style={[styles.emotionBar, styles.singleBar, { backgroundColor: (userEmotion || aiEmotion).color }]} />
+                        )
                     )}
                 </View>
 
@@ -31,12 +44,15 @@ const FriendDiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) =
                     {/* 친구 정보 */}
                     <View style={styles.profileRow}>
                         <View style={styles.profileImageWrapper}>
-                            <Image source={require('../../../assets/cloud3.png')} style={styles.profileImage}
-                            />
+                            <Image source={profileImageSource} style={styles.profileImage} />
                         </View>
                         <View style={styles.profileInfo}>
-                            <Text style={styles.userName}>{entry.userName}</Text>
-                            <Text style={styles.date}>{entry.date}</Text>
+                            {/* ⭐ entry.writer?.nick_name 사용 ⭐ */}
+                            <Text style={styles.userName}>{writerName || '알 수 없음'}</Text>
+                            {/* ⭐ entry.createdAt 사용 ⭐ */}
+                            <Text style={styles.date}>
+                                {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString('ko-KR') : ''}
+                            </Text>
                         </View>
                     </View>
 
@@ -55,19 +71,26 @@ const FriendDiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) =
                         </Text>
                     )}
                     
-                    <Text style={styles.preview} numberOfLines={2}>{entry.content}</Text>
+                    {/* ⭐ entry.content가 있을 때만 렌더링 ⭐ */}
+                    {entry.content && (
+                        <Text style={styles.preview} numberOfLines={2}>{entry.content}</Text>
+                    )}
 
                     <View style={styles.tags}>
-                        <EmotionTag
-                            emoji={primaryEmotion.emoji}
-                            name={primaryEmotion.name}
-                            backgroundColor={primaryEmotion.color + '40'}
-                        />
-                        {secondaryEmotion && (
+                        {/* ⭐ 사용자 감정 태그 렌더링 ⭐ */}
+                        {userEmotion && (
                             <EmotionTag
-                                emoji={secondaryEmotion.emoji}
-                                name={secondaryEmotion.name}
-                                backgroundColor={secondaryEmotion.color + '40'}
+                                emoji={userEmotion.emoji}
+                                name={userEmotion.name}
+                                backgroundColor={userEmotion.color + '40'}
+                            />
+                        )}
+                        {/* ⭐ AI 감정 태그 렌더링 ⭐ */}
+                        {aiEmotion && (
+                            <EmotionTag
+                                emoji={aiEmotion.emoji}
+                                name={aiEmotion.name}
+                                backgroundColor={aiEmotion.color + '40'}
                             />
                         )}
                     </View>

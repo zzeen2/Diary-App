@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {EmotionTag} from '../../atoms/TextsAndLabel';
 
-const DiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) => {
+const DiaryCard = ({ entry, onPress, userEmotion, aiEmotion  }) => {
     const [lineCount, setLineCount] = useState(0);
-    
+    // console.log('primaryEmotion:', primaryEmotion)
     // 텍스트가 변경될 때마다 줄 수를 다시 측정
     const [measuringText, setMeasuringText] = useState(true);
-    
+
+    // 이미지 url 처리
+    const imageUrl = entry.images && entry.images.length > 0 ? entry.images[0] : null;
+
     useEffect(() => {
         // 컴포넌트가 마운트되거나 entry가 변경될 때마다 측정 상태 초기화
         setMeasuringText(true);
@@ -18,13 +21,13 @@ const DiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) => {
             <View style={[ styles.card, lineCount === 1 && !measuringText && { height: 100 } ]}>
                 {/* 감정 색상 바 */}
                 <View style={styles.emotionBarContainer}>
-                    {secondaryEmotion ? (
+                    {aiEmotion ? (
                         <>
-                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: primaryEmotion.color }]} />
-                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: secondaryEmotion.color }]} />
+                            {userEmotion && <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: userEmotion.color }]} />}
+                            <View style={[styles.emotionBar, styles.halfBar, { backgroundColor: aiEmotion.color }]} />
                         </>
                     ) : (
-                        <View style={[styles.emotionBar, styles.singleBar, { backgroundColor: primaryEmotion.color }]} />
+                        userEmotion && <View style={[styles.emotionBar, styles.singleBar, { backgroundColor: userEmotion.color }]} />
                     )}
                 </View>
 
@@ -32,7 +35,11 @@ const DiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) => {
                 <View style={styles.content}>
                     <View style={styles.header}>
                         <Text style={styles.title} numberOfLines={2}>{entry.title}</Text>
-                        <Text style={styles.date}>{entry.isPublic ? '🌎' : '🔒'} {entry.date}</Text>
+                        <Text style={styles.date}>
+                            {entry.isPublic ? '🌎' : '🔒'}
+                            {' '}
+                            {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString('ko-KR') : ''}
+                        </Text>
                     </View>
 
                     {/* 측정용 숨겨진 텍스트 */}
@@ -48,16 +55,19 @@ const DiaryCard = ({ entry, onPress, primaryEmotion, secondaryEmotion }) => {
                     </Text>
 
                     <View style={styles.tags}>
-                        <EmotionTag
-                            emoji={primaryEmotion.emoji}
-                            name={primaryEmotion.name}
-                            backgroundColor={primaryEmotion.color + '40'}
-                        />
-                        {secondaryEmotion && (
+                        {userEmotion && (
                             <EmotionTag
-                                emoji={secondaryEmotion.emoji}
-                                name={secondaryEmotion.name}
-                                backgroundColor={secondaryEmotion.color + '40'}
+                                emoji={userEmotion.emoji}
+                                name={userEmotion.name}
+                                backgroundColor={userEmotion.color + '40'}
+                            />
+                        )}
+                        {/* ⭐ AI 감정 태그 렌더링 ⭐ */}
+                        {aiEmotion && (
+                            <EmotionTag
+                                emoji={aiEmotion.emoji}
+                                name={aiEmotion.name}
+                                backgroundColor={aiEmotion.color + '40'}
                             />
                         )}
                     </View>

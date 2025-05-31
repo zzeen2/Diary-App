@@ -19,7 +19,7 @@ export const fetchMyDiaries = () => async (dispatch) => {
             Authorization: `Bearer ${token}`,
         },
         });
-        console.log('fetchMyDiaries API 응답:', response.data); 
+        //console.log('fetchMyDiaries API 응답:', response.data); 
 
         dispatch({
             type: FETCH_MY_DIARIES_SUCCESS,

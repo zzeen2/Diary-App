@@ -27,15 +27,15 @@ const AppContent = () => {
   //const dispatch = useDispatch(); // 
   //const navigation = useNavigation(); // navigation 훅
 
-  // useEffect(() => {
-  //   const initUser = async () => {
-  //     const token = await AsyncStorage.getItem('jwtToken');
-  //     if (token) {
-  //       dispatch(fetchUser(token));
-  //     }
-  //   };
-  //   initUser();
-  // }, []);
+  useEffect(() => {
+    const initUser = async () => {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (token) {
+        dispatch(fetchUser(token));
+      }
+    };
+    initUser();
+  }, []);
 
   if (isLoggedIn === null) return null;
   
