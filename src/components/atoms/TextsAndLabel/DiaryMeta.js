@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const DiaryMeta = ({ date, isPublic }) => {
     return (
         <View style={styles.metaContainer}>
-        <Text style={styles.metaText}>📅 {date} · {isPublic ? '🌐' : '🔒'}</Text>
+        <Text style={styles.metaText}>📅 {date} · {isPublic ? '🌎' : '🔒'}</Text>
         </View>
     );
 };

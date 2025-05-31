@@ -115,7 +115,7 @@ const useDiarySubmit = () => {
 
       console.log('✅ 프론트엔드에서 백엔드로 보내는 diaryData:', diaryData);
 
-      const response = await axios.post(`${EXPO_PUBLIC_API_URL}/write`, diaryData, {
+      const response = await axios.post(`${EXPO_PUBLIC_API_URL}/write/app`, diaryData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

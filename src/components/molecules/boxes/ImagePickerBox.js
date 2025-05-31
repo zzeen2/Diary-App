@@ -1,117 +1,66 @@
-// import React from 'react';
-// import { View, Image, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
-// import * as ImagePicker from 'expo-image-picker';
-
-// const ImagePickerBox = ({ images, setImages }) => {
-//   const pickImage = async () => { // 이미지 추가
-//     const result = await ImagePicker.launchImageLibraryAsync({
-//       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-//       quality: 0.8,
-//     });
-
-//     if (!result.canceled) {
-//       const uri = result.assets[0].uri;
-//       setImages([...images, uri]);
-//     }
-//   };
-
-//   const removeImage = (index) => {
-//     setImages(images.filter((_, i) => i !== index));
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.label}>사진 추가 (최대 5장)</Text>
-//       <View style={styles.imageRow}>
-//         {images.map((uri, index) => (
-//           <TouchableOpacity key={index} onPress={() => removeImage(index)}>
-//             <Image source={{ uri }} style={styles.thumbnail} />
-//           </TouchableOpacity>
-//         ))}
-
-//         {images.length < 5 && (
-//           <TouchableOpacity onPress={pickImage}>
-//             <View style={styles.addBox}>
-//               <Text style={styles.addText}>＋</Text>
-//             </View>
-//           </TouchableOpacity>
-//         )}
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     marginTop: 16,
-//   },
-//   label: {
-//     fontSize: 15,
-//     fontWeight: '500',
-//     marginBottom: 20,
-//     color: '#555',
-//   },
-//   imageRow: {
-//     flexDirection: 'row',
-//     flexWrap: 'wrap',
-//     gap: 13,
-//   },
-//   thumbnail: {
-//     width: 160,
-//     height: 160,
-//     borderRadius: 8,
-//   },
-//   addBox: {
-//     width: 70,
-//     height: 70,
-//     borderRadius: 8,
-//     backgroundColor: '#eee',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   addText: {
-//     fontSize: 28,
-//     color: '#aaa',
-//   },
-// });
-
-// export default ImagePickerBox;
-
 // src/components/molecules/boxes/ImagePickerBox.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
-// import * as ImagePicker from 'expo-image-picker'; // 여기서 직접 이미지 피커를 호출하지 않으므로 필요 없음
 
 // images: 로컬 URI 배열, onPickImage: 이미지 선택 시 호출될 함수, onRemoveImage: 이미지 제거 시 호출될 함수
 const ImagePickerBox = ({ images, onPickImage, onRemoveImage }) => {
+  // 컴포넌트가 렌더링될 때마다 이미지 상태 확인
+  useEffect(() => {
+    console.log('=== ImagePickerBox 렌더링 ===');
+    console.log('받은 images props:', images);
+    console.log('images 길이:', images?.length || 0);
+    console.log('images 타입:', typeof images);
+    console.log('images는 배열인가?', Array.isArray(images));
+    if (images && images.length > 0) {
+      console.log('첫 번째 이미지 URI:', images[0]);
+    }
+  }, [images]);
+
   // 이미지를 추가하는 버튼 클릭 시, DiaryWriteScreen에서 넘어온 onPickImage 함수를 호출합니다.
   const handlePickImage = () => {
-    if (images.length >= 5) {
+    console.log('=== 이미지 추가 버튼 클릭 ===');
+    console.log('현재 이미지 개수:', images?.length || 0);
+    
+    if (images && images.length >= 5) {
+      console.log('⚠️ 이미지 개수 제한 도달');
       Alert.alert('사진 첨부 제한', '최대 5장까지 사진을 첨부할 수 있습니다.');
       return;
     }
+    
+    console.log('✅ onPickImage 함수 호출');
     onPickImage(); // DiaryWriteScreen의 pickImage (useDiarySubmit의 uploadImage 포함) 호출
   };
 
   // 이미지를 제거하는 버튼 클릭 시, DiaryWriteScreen에서 넘어온 onRemoveImage 함수를 호출합니다.
   const handleRemoveImage = (index) => {
+    console.log('=== 이미지 제거 버튼 클릭 ===');
+    console.log('제거할 이미지 인덱스:', index);
+    console.log('제거 전 이미지 개수:', images?.length || 0);
+    console.log('제거할 이미지 URI:', images?.[index]);
+    
     onRemoveImage(index);
+    
+    // 제거 후 상태는 부모 컴포넌트에서 업데이트되므로 여기서는 로그만
+    console.log('✅ onRemoveImage 함수 호출 완료');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>사진 추가 (최대 5장)</Text>
       <View style={styles.imageRow}>
-        {images.map((uri, index) => (
-          <View key={index} style={styles.thumbnailContainer}>
-            <Image source={{ uri }} style={styles.thumbnail} />
-            <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveImage(index)}>
-              <Text style={styles.removeButtonText}>X</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+        {images && images.map((uri, index) => {
+          console.log(`이미지 ${index} 렌더링:`, uri);
+          return (
+            <View key={index} style={styles.thumbnailContainer}>
+              <Image source={{ uri }} style={styles.thumbnail} />
+              <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveImage(index)}>
+                <Text style={styles.removeButtonText}>X</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
 
-        {images.length < 5 && (
+        {(!images || images.length < 5) && (
           <TouchableOpacity onPress={handlePickImage}>
             <View style={styles.addBox}>
               <Text style={styles.addText}>＋</Text>

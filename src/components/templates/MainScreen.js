@@ -323,7 +323,7 @@
 // export default MainScreen;
 
 import React, { useState, useEffect, useContext } from 'react';
-import {StyleSheet,ScrollView, View, ImageBackground,SafeAreaView,Text} from 'react-native';
+import {StyleSheet,ScrollView, View, ImageBackground,SafeAreaView,Text, Alert} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -338,36 +338,7 @@ import  {HeaderBar}  from '../molecules/headers';
 import { AuthContext } from '../../context/AuthContext';
 import { fetchStreak } from '../../reducers/streakReducer';
 import { fetchMyDiaries } from '../../actions/diaryAction';
-
-const friendDiaryEntries = [
-  {
-    id: 1,
-    title: '집에서 요리해본 날',
-    date: '2025.05.18',
-    content: '오늘은 파스타를 만들어봤다...',
-    primaryEmotion: 'happy',
-    isPublic: true,
-    user: {
-      id: 'user1',
-      nickname: '민지',
-      profile_img: require('../../assets/cloud3.png'),
-    },
-  },
-  {
-    id: 2,
-    title: '시험 끝난 후의 해방감',
-    date: '2025.05.17',
-    content: '드디어 기말고사가 끝났다! 시험 끝난 후의 해방감 시험 끝난 후의 해방감 시험 끝난 후의 해방감',
-    primaryEmotion: 'excited',
-    secondaryEmotion: 'angry',
-    isPublic: true,
-    user: {
-      id: 'user2',
-      nickname: '수진',
-      profile_img: require('../../assets/cloud3.png'),
-    },
-  },
-];
+import { fetchFriendDiaries } from '../../actions/friendDiaryAction'; // ⭐ 친구 일기 액션 추가
 
 const tabs = [
   { id: 'home', icon: '🏠', label: '홈' },
@@ -390,6 +361,12 @@ const MainScreen = () => {
 
   const [isEmotionSaved, setIsEmotionSaved] = useState(false);
   const myDiaries = useSelector(state => state.myDiaries.myDiaries);
+  
+  // ⭐ 친구 일기 관련 상태들 추가 ⭐
+  const friendDiaries = useSelector(state => state.friendDiaries.friendDiaries);
+  const friendDiariesLoading = useSelector(state => state.friendDiaries.loading);
+  const friendDiariesError = useSelector(state => state.friendDiaries.error);
+  
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
 
@@ -437,57 +414,52 @@ const MainScreen = () => {
   // ⭐ 메인 useFocusEffect - 사용자 정보 로드 및 초기화 ⭐
   useFocusEffect(
     React.useCallback(() => {
+      console.log("=== MainScreen useFocusEffect 시작 ===");
+      
       const loadUserData = async () => {
-  try {
-    console.log("=== MainScreen loadUserData 시작 ===");
-    
-    // ⭐ AsyncStorage의 모든 키 확인 ⭐
-    const allKeys = await AsyncStorage.getAllKeys();
-    console.log("AsyncStorage에 저장된 모든 키들:", allKeys);
-    
-    // ⭐ 각 키별로 값 확인 ⭐
-    const allValues = await AsyncStorage.multiGet(allKeys);
-    console.log("AsyncStorage에 저장된 모든 값들:", allValues);
+        try {
+          // AsyncStorage에서 닉네임과 UID를 직접 불러오기
+          const storedNickname = await AsyncStorage.getItem('userNickname');
+          const storedUid = await AsyncStorage.getItem('userUid');
 
-    // AsyncStorage에서 닉네임과 UID를 직접 불러오기
-    const storedNickname = await AsyncStorage.getItem('userNickname');
-    const storedUid = await AsyncStorage.getItem('userUid');
+          console.log("저장된 닉네임:", storedNickname);
+          console.log("저장된 UID:", storedUid);
 
-    console.log("=== 개별 값 확인 ===");
-    console.log("storedNickname:", storedNickname);
-    console.log("storedNickname type:", typeof storedNickname);
-    console.log("storedNickname length:", storedNickname ? storedNickname.length : 'null');
-    console.log("storedUid:", storedUid);
+          if (storedNickname && storedNickname.trim() !== '') {
+            setDisplayNickname(storedNickname);
+            console.log('MainScreen: AsyncStorage에서 닉네임 불러옴:', storedNickname);
+          } else {
+            setDisplayNickname('친구'); // 기본값
+            console.log('MainScreen: AsyncStorage에 닉네임 없음, 기본값 설정.');
+          }
 
-    if (storedNickname && storedNickname.trim() !== '') {
-      setDisplayNickname(storedNickname);
-      console.log('MainScreen: AsyncStorage에서 닉네임 불러옴:', storedNickname);
-    } else {
-      setDisplayNickname('사용자'); // 기본값
-      console.log('MainScreen: AsyncStorage에 닉네임 없음 또는 빈 문자열, 기본값 설정.');
-    }
-
-    if (storedUid) {
-      const parsedUid = Number(storedUid);
-      setCurrentUserId(parsedUid);
-      console.log('MainScreen: AsyncStorage에서 UID 불러옴:', parsedUid);
-      dispatch(fetchStreak(parsedUid));
-      dispatch(fetchMyDiaries());
-    } else {
-      setCurrentUserId(null);
-      console.log('MainScreen: AsyncStorage에 UID 없음.');
-    }
-  } catch (error) {
-    console.error('MainScreen: 사용자 정보 불러오기 오류:', error);
-    setDisplayNickname('사용자');
-    setCurrentUserId(null);
-  }
-};
+          if (storedUid) {
+            const parsedUid = Number(storedUid);
+            setCurrentUserId(parsedUid);
+            console.log('MainScreen: AsyncStorage에서 UID 불러옴:', parsedUid);
+            // UID를 불러온 후 streak과 diaries 액션을 디스패치
+            dispatch(fetchStreak(parsedUid));
+            dispatch(fetchMyDiaries());
+          } else {
+            setCurrentUserId(null);
+            console.log('MainScreen: AsyncStorage에 UID 없음.');
+          }
+        } catch (error) {
+          console.error('MainScreen: 사용자 정보 불러오기 오류:', error);
+          setDisplayNickname('친구');
+          setCurrentUserId(null);
+        }
+      };
 
       loadUserData(); // 사용자 데이터 로드
       
       // 감정 데이터 불러오기
+      console.log("감정 데이터 fetch 시작...");
       dispatch(fetchEmotions());
+
+      // ⭐ 친구 일기 데이터 불러오기 추가 ⭐
+      console.log("친구 일기 데이터 fetch 시작...");
+      dispatch(fetchFriendDiaries());
 
       // 선택된 감정 초기화
       setSelectedEmotion(null);
@@ -503,32 +475,59 @@ const MainScreen = () => {
     }, [dispatch])
   );
 
+  // ⭐ 친구 일기 데이터 디버깅 useEffect ⭐
+  useEffect(() => {
+    console.log("=== 친구 일기 상태 변화 감지 ===");
+    console.log("friendDiaries:", friendDiaries);
+    console.log("friendDiaries 타입:", typeof friendDiaries);
+    console.log("friendDiaries 배열인가?", Array.isArray(friendDiaries));
+    console.log("friendDiaries 길이:", friendDiaries?.length);
+    console.log("friendDiariesLoading:", friendDiariesLoading);
+    console.log("friendDiariesError:", friendDiariesError);
+    
+    if (friendDiaries && friendDiaries.length > 0) {
+      console.log("첫 번째 친구 일기 데이터:", JSON.stringify(friendDiaries[0], null, 2));
+    }
+  }, [friendDiaries, friendDiariesLoading, friendDiariesError]);
+
   const findEmotion = (id) => emotions.find(e => e.id === id) || {};
 
   const goToDetail = (entry) => {
-  console.log("=== goToDetail 함수 호출 ===");
-  console.log("클릭된 entry:", JSON.stringify(entry, null, 2));
-  console.log("currentUserId:", currentUserId);
-  
-  // 데이터 구조 확인
-  console.log("entry.user:", entry.user);
-  console.log("entry.userId:", entry.userId);
-  console.log("entry.user?.id:", entry.user?.id);
-  
-  // isMine 계산 로직 확인
-  const isMine = entry.user?.id === currentUserId || entry.userId === currentUserId;
-  console.log("isMine 계산 결과:", isMine);
+    console.log("=== goToDetail 함수 호출 ===");
+    console.log("클릭된 entry:", JSON.stringify(entry, null, 2));
+    console.log("currentUserId:", currentUserId);
+    
+    // ⭐ 실제 데이터 구조에 맞게 수정 ⭐
+    console.log("entry.writer:", entry.writer);
+    console.log("entry.writer?.uid:", entry.writer?.uid);
+    
+    // ⭐ writer.uid로 isMine 계산 ⭐
+    const isMine = entry.writer?.uid === currentUserId;
+    console.log("isMine 계산 결과:", isMine);
 
-  try {
-    navigation.navigate('DiaryDetail', {
-      diary: entry,
-      isMine: isMine,
-    });
-    console.log("✅ 네비게이션 성공");
-  } catch (error) {
-    console.error("❌ 네비게이션 오류:", error);
-  }
-};
+    // ⭐ DiaryDetail에서 기대하는 형태로 데이터 구조 변환 ⭐
+    const transformedEntry = {
+      ...entry,
+      user: {
+        id: entry.writer?.uid,
+        nickname: entry.writer?.nick_name,
+        profile_img: entry.writer?.profile_image,
+      }
+    };
+
+    console.log("변환된 데이터:", transformedEntry);
+
+    try {
+      navigation.navigate('DiaryDetail', {
+        diary: transformedEntry,
+        isMine: isMine,
+      });
+      console.log("✅ 네비게이션 성공");
+    } catch (error) {
+      console.error("❌ 네비게이션 오류:", error);
+    }
+  };
+
   // 날짜 포멧팅
   const today = new Date().toISOString();
   const displayDate = useFormmatedDate(today);
@@ -597,15 +596,32 @@ const MainScreen = () => {
               onPressCard={goToDetail}
             />
             
-            {/* 친구 일기 */}
+            {/* ⭐ 친구 일기 - 디버깅 정보 포함 ⭐ */}
             <DiaryListSection
-              title="👥 친구들의 일기"
-              entries={friendDiaryEntries}
+              title={`👥 친구들의 일기 ${friendDiariesLoading ? '(로딩중...)' : friendDiariesError ? '(오류 발생)' : `(${friendDiaries?.length || 0}개)`}`}
+              entries={friendDiaries || []} // null 방어
               findEmotion={findEmotion}
               isFriend
               onPressSeeMore={() => console.log('친구 일기 더보기')}
               onPressCard={goToDetail}
             />
+            
+            {/* ⭐ 디버깅용 친구 일기 상태 표시 ⭐ */}
+            {friendDiariesError && (
+              <View style={{ padding: 16, backgroundColor: '#ffebee', margin: 16, borderRadius: 8 }}>
+                <Text style={{ color: '#c62828', fontSize: 14 }}>
+                  친구 일기 오류: {friendDiariesError}
+                </Text>
+              </View>
+            )}
+            
+            {!friendDiariesLoading && (!friendDiaries || friendDiaries.length === 0) && (
+              <View style={{ padding: 16, backgroundColor: '#f5f5f5', margin: 16, borderRadius: 8 }}>
+                <Text style={{ color: '#666', fontSize: 14, textAlign: 'center' }}>
+                  친구들의 일기가 없습니다. 친구를 팔로우해보세요! 👥
+                </Text>
+              </View>
+            )}
           </ScrollView>
 
           {/* 하단 탭 바 */}

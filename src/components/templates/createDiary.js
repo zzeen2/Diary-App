@@ -225,6 +225,15 @@ const DiaryWriteScreen = ({ route, navigation }) => {
   // useDiarySubmit 훅에서 uploadImage도 사용된다면 여기에 포함
   const { submit, loading, analyzeEmotion, uploadImage } = useDiarySubmit(); 
 
+  // 이미지 상태 변경 감지
+  useEffect(() => {
+    console.log('=== DiaryWriteScreen 이미지 상태 변경 ===');
+    console.log('selectedImageUris:', selectedImageUris);
+    console.log('selectedImageUris 길이:', selectedImageUris.length);
+    console.log('uploadedImageUrls:', uploadedImageUrls);
+    console.log('uploadedImageUrls 길이:', uploadedImageUrls.length);
+  }, [selectedImageUris, uploadedImageUrls]);
+
   const handleAnalyzeEmotion = async () => {
     // analyzeEmotion 훅은 이제 'sad'와 같은 Emotion.id(영어)를 반환합니다.
     const aiEmotionId = await analyzeEmotion(content); 
@@ -248,38 +257,91 @@ const DiaryWriteScreen = ({ route, navigation }) => {
     }
   };
 
-  // 이미지 업로드 로직 (기존과 동일)
+  // 이미지 선택 로직 (수정됨)
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    console.log('=== DiaryWriteScreen pickImage 호출 ===');
+    console.log('pickImage 호출 전 selectedImageUris:', selectedImageUris);
+    console.log('pickImage 호출 전 uploadedImageUrls:', uploadedImageUrls);
+    
+    // 이미지 개수 제한 확인
+    if (selectedImageUris.length >= 5) {
+      Alert.alert('사진 첨부 제한', '최대 5장까지 사진을 첨부할 수 있습니다.');
+      return;
+    }
+    
+    // 이미지 선택 로직
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false, 
-      aspect: [4, 3],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setSelectedImageUris(prev => [...prev, uri]); 
+      const newUri = result.assets[0].uri;
+      console.log('선택한 새 이미지 URI:', newUri);
       
-      // 이미지 업로드 실행 및 URL 저장
-      // useDiarySubmit 훅에 uploadImage가 있다면 해당 훅의 loading 상태도 공유
-      const imageUrl = await uploadImage(uri); 
-      if (imageUrl) {
-        setUploadedImageUrls(prev => [...prev, imageUrl]); 
+      // 로컬 URI 배열에 추가
+      const updatedSelectedUris = [...selectedImageUris, newUri];
+      console.log('업데이트될 selectedImageUris:', updatedSelectedUris);
+      
+      setSelectedImageUris(updatedSelectedUris);
+      
+      // 이미지를 서버에 업로드 (uploadImage 함수가 있다면)
+      if (uploadImage) {
+        console.log('서버에 이미지 업로드 시작:', newUri);
+        try {
+          const uploadedUrl = await uploadImage(newUri);
+          console.log('서버 업로드 완료:', uploadedUrl);
+          
+          const updatedUploadedUrls = [...uploadedImageUrls, uploadedUrl];
+          console.log('업데이트될 uploadedImageUrls:', updatedUploadedUrls);
+          setUploadedImageUrls(updatedUploadedUrls);
+        } catch (error) {
+          console.error('이미지 업로드 실패:', error);
+          Alert.alert('업로드 실패', '이미지 업로드에 실패했습니다.');
+          // 업로드 실패 시 로컬 URI도 제거
+          setSelectedImageUris(selectedImageUris);
+        }
+      } else {
+        // uploadImage 함수가 없으면 로컬 URI를 그대로 사용
+        console.log('uploadImage 함수가 없어서 로컬 URI 사용');
+        const updatedUploadedUrls = [...uploadedImageUrls, newUri];
+        setUploadedImageUrls(updatedUploadedUrls);
       }
+      
+      // 상태 업데이트 후 확인
+      setTimeout(() => {
+        console.log('상태 업데이트 후 selectedImageUris:', selectedImageUris);
+        console.log('상태 업데이트 후 uploadedImageUrls:', uploadedImageUrls);
+      }, 100);
     }
   };
 
-  // 이미지 제거 로직 (기존과 동일)
+  // 이미지 제거 로직 (수정됨)
   const removeImage = (indexToRemove) => {
+    console.log('=== DiaryWriteScreen removeImage 호출 ===');
+    console.log('제거할 인덱스:', indexToRemove);
+    console.log('제거 전 selectedImageUris:', selectedImageUris);
+    console.log('제거 전 uploadedImageUrls:', uploadedImageUrls);
+    
     const updatedSelectedUris = selectedImageUris.filter((_, index) => index !== indexToRemove);
-    setSelectedImageUris(updatedSelectedUris);
     const updatedUploadedUrls = uploadedImageUrls.filter((_, index) => index !== indexToRemove);
+    
+    console.log('제거 후 selectedImageUris:', updatedSelectedUris);
+    console.log('제거 후 uploadedImageUrls:', updatedUploadedUrls);
+    
+    setSelectedImageUris(updatedSelectedUris);
     setUploadedImageUrls(updatedUploadedUrls);
   };
 
-
   const handleSubmit = () => {
+    console.log('=== DiaryWriteScreen handleSubmit 호출 ===');
+    console.log('submit 시점의 selectedImageUris:', selectedImageUris);
+    console.log('submit 시점의 uploadedImageUrls:', uploadedImageUrls);
+    console.log('submit 시점의 title:', title);
+    console.log('submit 시점의 content:', content);
+    console.log('submit 시점의 userEmotion:', userEmotion);
+    console.log('submit 시점의 aiEmotion:', aiEmotion);
+    
     if (loading) return; 
     if (!title.trim()) {
       Alert.alert('제목을 입력해주세요.');
@@ -298,7 +360,6 @@ const DiaryWriteScreen = ({ route, navigation }) => {
       return;
     }
 
-
     Alert.alert(
       '일기 저장 확인',
       `\n오늘의 감정: ${userEmotion?.emoji || ''} ${userEmotion?.name || ''}\nAI 감정: ${aiEmotion?.emoji || ''} ${aiEmotion?.name || ''}\n\n이대로 저장하시겠습니까?`,
@@ -307,17 +368,21 @@ const DiaryWriteScreen = ({ route, navigation }) => {
         {
           text: '저장하기',
           onPress: async () => { // async 추가
-            const success = await submit({
+            console.log('=== submit 함수 호출 직전 ===');
+            console.log('전달할 이미지 데이터:', uploadedImageUrls);
+            
+            const submitData = {
               title,
               content,
-              images: uploadedImageUrls,
-              // userEmotion은 Emotion.id(영어)를 전달해야 합니다.
-              // route.params.emotion이 Emotion 객체라면 .id에 접근합니다.
+              images: uploadedImageUrls, // 서버 업로드된 URL 또는 로컬 URI
               userEmotion: userEmotion?.id, 
-              // aiEmotion은 이제 Emotion 객체이므로 .id에 접근하여 전달합니다.
               aiEmotion: aiEmotion?.id, 
               isPublic
-            });
+            };
+            
+            console.log('submit 함수로 전달할 전체 데이터:', submitData);
+            
+            const success = await submit(submitData);
             if (success) {
                 // 일기 저장 성공 후 처리 (예: 이전 화면으로 돌아가기)
                 navigation.goBack(); 

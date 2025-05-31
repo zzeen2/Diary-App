@@ -1,4 +1,5 @@
 export { default as EmotionModal } from './EmotionModal'
 export { default as EditIntroModal } from './EditIntroModal'
 export { default as FollowListModal } from './FollowListModal'
+export { default as FriendSearchModal } from './FriendSearchModal'
 export { default as DeleteModal } from './DeleteModal'
