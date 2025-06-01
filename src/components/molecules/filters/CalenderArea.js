@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
-const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDate, onPressToday }) => {
+const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDate, onPressToday, calendarEmotions = [], onMonthChange }) => {
   const getTodayDateString = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -30,7 +30,18 @@ const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDat
   };
   
   const findEmotionForDate = (dateStr) => {
-    // 달력 형식(하이픈)을 일기 형식(점)으로 변환해서 찾기
+    // 먼저 달력 감정 데이터에서 찾기
+    const calendarEmotion = calendarEmotions.find((item) => item.date === dateStr);
+    if (calendarEmotion && calendarEmotion.userEmotion) {
+      return {
+        emoji: calendarEmotion.userEmotion.emoji || null,
+        color: calendarEmotion.userEmotion.color || null,
+        hasDiary: calendarEmotion.hasDiary,
+        diaryId: calendarEmotion.diaryId
+      };
+    }
+    
+    // 일기 데이터에서 찾기 (기존 로직)
     const dotFormatDate = convertDateToDot(dateStr);
     const diary = diaryList.find((entry) => entry.date === dotFormatDate);
     
@@ -38,10 +49,28 @@ const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDat
       const emotion = findEmotion(diary.primaryEmotion);
       return {
         emoji: emotion?.emoji || null,
-        color: emotion?.color || null
+        color: emotion?.color || null,
+        hasDiary: true,
+        diaryId: diary.id
       };
     }
     return null;
+  };
+
+  const handleDayPress = (day) => {
+    const emotionData = findEmotionForDate(day.dateString);
+    
+    if (emotionData && emotionData.hasDiary === false) {
+      // 감정만 있고 일기가 없는 경우
+      Alert.alert(
+        '감정만 기록한 날이에요',
+        '이 날은 감정만 기록되고 일기는 작성되지 않았습니다.',
+        [{ text: '확인', style: 'default' }]
+      );
+    } else {
+      // 일기가 있거나 아무것도 없는 경우
+      onSelectDate(day.dateString);
+    }
   };
 
   return (
@@ -55,11 +84,12 @@ const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDat
 
       <View style={styles.calendarContainer}>
         <Calendar
-          onDayPress={(day) => onSelectDate(day.dateString)}
+          onDayPress={handleDayPress}
           current={selectedDate || today}
           hideExtraDays={true}
           enableSwipeMonths={true}
           firstDay={0}
+          onMonthChange={onMonthChange}
           dayComponent={({ date, state }) => {
             const emotionData = findEmotionForDate(date.dateString);
             const isToday = date.dateString === today;
@@ -68,7 +98,7 @@ const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDat
 
             return (
               <TouchableOpacity
-                onPress={() => onSelectDate(date.dateString)}
+                onPress={() => handleDayPress({ dateString: date.dateString })}
                 style={[
                   styles.dayContainer,
                   isToday && styles.todayContainer,
@@ -77,6 +107,7 @@ const CalenderArea = ({ diaryList = [], emotions = [], selectedDate, onSelectDat
                     backgroundColor: emotionData.color,
                     borderRadius: 18,
                   },
+                  hasEmotion && !emotionData.hasDiary && styles.emotionOnlyContainer,
                 ]}
               >
                 {hasEmotion ? (
@@ -180,6 +211,12 @@ const styles = StyleSheet.create({
   },
   disabledText: {
     color: '#ccc',
+  },
+  emotionOnlyContainer: {
+    opacity: 0.6,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.2)',
   },
 });
 

@@ -4,8 +4,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackButton, ConfirmButton,SearchButton } from '../../atoms/buttons';
 
 
-const HeaderBar = ({ title = '홈',streakText = '', profileImage,showBackButton = false,showConfirmButton = false, onBackPress,onConfirmPress, onlyTitle= false,
-centerContent,rightContent, }) => {
+const HeaderBar = ({ 
+    title = '홈',
+    streakText = '', 
+    profileImage,
+    showBackButton = false,
+    showConfirmButton = false, 
+    onBackPress,
+    onConfirmPress, 
+    onlyTitle= false,
+    centerContent,
+    rightContent,
+}) => {
     const insets = useSafeAreaInsets();
 
     return (
@@ -19,7 +29,10 @@ centerContent,rightContent, }) => {
             ) : (
             <View style={styles.leftGroup}>
                 <View style={styles.profileWrapper}>
-                <Image source={profileImage || require('../../../assets/logo2.png')} style={styles.profileImage} />
+                <Image 
+                    source={profileImage || require('../../../assets/logo2.png')} 
+                    style={styles.profileImage} 
+                />
                 </View>
                 <Text style={styles.title}>{title}</Text>
             </View>

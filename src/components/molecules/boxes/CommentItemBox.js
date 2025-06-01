@@ -4,31 +4,53 @@ import {ProfileThumbnail} from '../../atoms/thumbnail';
 import { Feather } from '@expo/vector-icons';
 
 const CommentItemBox = ({ comment, isMyComment = false, onDelete }) => {
-    const { user, content, created_at } = comment; // createdAt → created_at
+    // 백엔드 데이터 구조에 맞게 수정
+    const writer = comment.writer || comment.user; // 하위 호환성을 위해 둘 다 체크
+    const content = comment.content;
+    const createdAt = comment.createdAt || comment.created_at;
+    
+    // 프로필 이미지와 닉네임 처리
+    const profileImage = writer?.profile_image || writer?.profile_img;
+    const nickname = writer?.nick_name || writer?.nickname;
+    
+    // 날짜 포맷팅
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\. /g, '.').replace(/\.$/, '');
+        } catch (error) {
+            return dateString; // 파싱 실패시 원본 반환
+        }
+    };
 
     return (
         <View style={styles.container}>
             {/* 프로필 썸네일 */}
-            <ProfileThumbnail image={user.profile_img} small />
+            <ProfileThumbnail image={profileImage} small />
 
             {/* 내용 + 날짜 */}
             <View style={styles.contentBox}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.nickname}>{user.nickname}</Text>
-                    <Text style={styles.date}>{created_at}</Text>
+                    <Text style={styles.nickname}>{nickname || '익명'}</Text>
+                    <Text style={styles.date}>{formatDate(createdAt)}</Text>
                 </View>
                 <Text style={styles.content}>{content}</Text>
             </View>
 
-            {/* 내 댓글일 경우만 삭제 버튼 */}
-            {isMyComment && (
+            {/* 내 댓글일 경우만 삭제 버튼 (삭제 기능은 구현하지 않음) */}
+            {/* {isMyComment && (
                 <TouchableOpacity 
                     style={styles.deleteButton}
                     onPress={() => onDelete?.(comment.id)}
                 >
                     <Feather name="trash-2" size={16} color="#999" />
                 </TouchableOpacity>
-            )}
+            )} */}
         </View>
     );
 };

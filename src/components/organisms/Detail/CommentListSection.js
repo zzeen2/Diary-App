@@ -12,7 +12,7 @@ import {
 import {CommentItemBox} from '../../molecules/boxes';
 import {CommentInput} from '../../atoms/inputs';
 
-const CommentListSection = ({ comments = [], onSubmitComment, onDeleteComment, currentUserId }) => {
+const CommentListSection = ({ comments = [], onSubmitComment, onDeleteComment, currentUserId, isPublic = true }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -28,20 +28,35 @@ const CommentListSection = ({ comments = [], onSubmitComment, onDeleteComment, c
             showsVerticalScrollIndicator={false}
           >
             {comments.length === 0 && (
-              <Text style={styles.emptyText}>댓글이 아직 없어요.</Text>
+              <Text style={styles.emptyText}>
+                {isPublic ? '댓글이 아직 없어요.' : '비공개 일기입니다.'}
+              </Text>
             )}
 
-            {comments.map((item) => (
-              <CommentItemBox
-                key={item.id}
-                comment={item}
-                isMine={item.user.id === currentUserId}
-                onDelete={() => onDeleteComment?.(item.id)}
-              />
-            ))}
+            {comments.map((item) => {
+              const writerId = item.writer?.uid || item.user?.id;
+              const isMine = writerId === currentUserId;
+              
+              return (
+                <CommentItemBox
+                  key={item.id}
+                  comment={item}
+                  isMyComment={isMine}
+                  onDelete={() => onDeleteComment?.(item.id)}
+                />
+              );
+            })}
           </ScrollView>
 
-          <CommentInput onSubmit={onSubmitComment} />
+          {isPublic ? (
+            <CommentInput onSubmit={onSubmitComment} />
+          ) : (
+            <View style={styles.privateNotice}>
+              <Text style={styles.privateNoticeText}>
+                🔒 비공개 일기에는 댓글을 작성할 수 없습니다.
+              </Text>
+            </View>
+          )}
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -73,6 +88,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginTop: 20,
+  },
+  privateNotice: {
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 12,
+  },
+  privateNoticeText: {
+    color: '#333',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 

@@ -6,13 +6,18 @@ import {EmotionSelectButton} from '../../atoms/buttons';
 const EmotionRow = ({ label, emotion, onSelect, onEdit }) => {
   if (!emotion) return null;
 
+  // emotion 객체는 있지만 프로퍼티가 없을 경우 처리
+  const emoji = emotion.emoji || '❓';
+  const name = emotion.name || '감정 없음';
+  const color = emotion.color || '#ccc';
+
   return (
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
 
       <View style={styles.content}>
-        <EmojiIcon emoji={emotion.emoji} color={emotion.color} />
-        <Text style={styles.name}>{emotion.name}</Text>
+        <EmojiIcon emoji={emoji} color={color} />
+        <Text style={styles.name}>{name}</Text>
 
         {onSelect && <EmotionSelectButton onPress={onSelect} />}
         {onEdit && ( <TouchableOpacity onPress={onEdit}> <Text style={styles.edit}>✏️</Text> </TouchableOpacity> )}

@@ -15,6 +15,8 @@ import { Feather } from '@expo/vector-icons';
 import useFormmatedDate from '../../hooks/useFormattedDate';
 import { TabBar } from '../organisms/TabBar';
 import { FriendSearchModal } from '../molecules/modals';
+import { getCalendarEmotions } from '../../api/diary';
+
 const tabs = [
     { id: 'home', icon: '🏠', label: '홈' },
     { id: 'diary', icon: '📔', label: '일기장' },
@@ -43,6 +45,11 @@ const DiaryListScreen = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('diary');
+    const [calendarEmotions, setCalendarEmotions] = useState([]); // 달력용 감정 데이터
+    const [currentMonth, setCurrentMonth] = useState(() => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    });
 
     // Redux 상태
     const emotions = useSelector((state) => state.emotions.emotions) || [];
@@ -78,6 +85,22 @@ const DiaryListScreen = () => {
         // TODO: 팔로워 일기 데이터도 가져오기
         // dispatch(fetchFollowerDiaries());
     }, [dispatch]);
+
+    // 달력 감정 데이터 가져오기
+    useEffect(() => {
+        const fetchCalendarData = async () => {
+            try {
+                console.log('달력 감정 데이터 가져오기:', currentMonth);
+                const data = await getCalendarEmotions(currentMonth);
+                console.log('달력 감정 데이터:', data);
+                setCalendarEmotions(data);
+            } catch (error) {
+                console.error('달력 감정 데이터 가져오기 실패:', error);
+            }
+        };
+        
+        fetchCalendarData();
+    }, [currentMonth]);
 
     // 실제 API 데이터를 캘린더 형식으로 변환
     const transformDiaryData = (diaries) => {
@@ -252,10 +275,15 @@ const DiaryListScreen = () => {
                                 {/* 캘린더 */}
                                 <CalenderArea
                                     diaryList={myDiaryEntries}
+                                    calendarEmotions={calendarEmotions}
                                     selectedDate={selectedDate}
                                     onSelectDate={setSelectedDate}
                                     onPressToday={() => setSelectedDate(getTodayDateString())}
                                     emotions={emotions}
+                                    onMonthChange={(date) => {
+                                        const month = `${date.year}-${String(date.month).padStart(2, '0')}`;
+                                        setCurrentMonth(month);
+                                    }}
                                 />
                                 
                                 {/* 선택된 날짜의 일기 */}
@@ -294,16 +322,11 @@ const DiaryListScreen = () => {
                                     isMine: false,
                                 })
                             }
+                            emptyMessage="😔 오늘 작성된 팔로잉 일기가 없어요"
+                            emptySubMessage="친구들을 찾아서 팔로우해보세요!"
+                            onEmptyButtonPress={handleOpenFriendModal}
+                            emptyButtonText="친구 찾기"
                         />
-                        {todayFollowingDiaries.length === 0 && (
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>😔 오늘 작성된 팔로워 일기가 없어요</Text>
-                                <Text style={styles.emptySubText}>친구들을 찾아서 팔로우해보세요!</Text>
-                                <TouchableOpacity style={styles.findFriendsBtn} onPress={handleOpenFriendModal}>
-                                    <Text style={styles.findFriendsText}>👥 친구 찾기</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
                     </View>
                 )}
             </ScrollView>
@@ -369,35 +392,6 @@ const styles = StyleSheet.create({
     },
     followerContainer: {
         marginTop: 8,
-    },
-    emptyContainer: {
-        alignItems: 'center',
-        paddingVertical: 40,
-        backgroundColor: 'white',
-        borderRadius: 16,
-        marginTop: 16,
-    },
-    emptyText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#666',
-        marginBottom: 8,
-    },
-    emptySubText: {
-        fontSize: 14,
-        color: '#999',
-        marginBottom: 20,
-    },
-    findFriendsBtn: {
-        backgroundColor: '#b881c2',
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 20,
-    },
-    findFriendsText: {
-        color: 'white',
-        fontWeight: '600',
-        fontSize: 14,
     },
 });
 

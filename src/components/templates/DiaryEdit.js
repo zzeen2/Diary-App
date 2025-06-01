@@ -41,7 +41,20 @@ const DiaryEditScreen = ({ route, navigation }) => {
   console.log("감정 리스트:", emotionList);
 
   // 🔒 수정 불가능한 항목 (읽기 전용)
-  const originalUserEmotion = diary?.userEmotion; // 사용자 선택 감정 - 수정 불가
+  // diary 객체 구조 확인
+  console.log("=== DiaryEdit userEmotion 확인 ===");
+  console.log("diary 전체:", diary);
+  console.log("diary.userEmotion:", diary?.userEmotion);
+  console.log("diary.emotionLog:", diary?.emotionLog);
+  console.log("diary.emotionLog?.userEmotionData:", diary?.emotionLog?.userEmotionData);
+  
+  // 다양한 경로에서 userEmotion 찾기
+  const originalUserEmotion = diary?.userEmotion || 
+                            diary?.emotionLog?.userEmotionData || 
+                            diary?.emotionLog?.userEmotion ||
+                            null;
+  
+  console.log("최종 originalUserEmotion:", originalUserEmotion);
 
   // ✅ 수정 가능한 항목들
   const [title, setTitle] = useState(diary?.title || '');
@@ -264,7 +277,7 @@ const DiaryEditScreen = ({ route, navigation }) => {
 
     Alert.alert(
       '수정 확인',
-      `일기를 수정하시겠습니까?\n\n수정불가: ${originalUserEmotion?.emoji} ${originalUserEmotion?.name}\n새 AI감정: ${aiEmotion?.emoji} ${aiEmotion?.name}`,
+      `일기를 수정하시겠습니까?\n\n수정불가: ${originalUserEmotion ? `${originalUserEmotion.emoji} ${originalUserEmotion.name}` : '감정 없음'}\n새 AI감정: ${aiEmotion?.emoji} ${aiEmotion?.name}`,
       [
         { text: '취소', style: 'cancel' },
         {

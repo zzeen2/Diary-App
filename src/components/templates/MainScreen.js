@@ -15,6 +15,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { fetchStreak } from '../../reducers/streakReducer';
 import { fetchMyDiaries } from '../../actions/diaryAction';
 import { fetchFriendDiaries } from '../../actions/friendDiaryAction'; // ⭐ 친구 일기 액션 추가
+import { FriendSearchModal } from '../molecules/modals';
 
 const tabs = [
   { id: 'home', icon: '🏠', label: '홈' },
@@ -34,6 +35,7 @@ const MainScreen = () => {
   // ⭐ Redux user 대신 AsyncStorage에서 직접 관리하는 상태들 ⭐
   const [displayNickname, setDisplayNickname] = useState('');
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [userProfileImage, setUserProfileImage] = useState(null); // 프로필 이미지 추가
 
   const [isEmotionSaved, setIsEmotionSaved] = useState(false);
   const myDiaries = useSelector(state => state.diary.myDiaries);
@@ -45,6 +47,7 @@ const MainScreen = () => {
   
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
+  const [showFriendModal, setShowFriendModal] = useState(false); // 친구찾기 모달 상태
 
   const styles = StyleSheet.create({
     container: {
@@ -97,9 +100,11 @@ const MainScreen = () => {
           // AsyncStorage에서 닉네임과 UID를 직접 불러오기
           const storedNickname = await AsyncStorage.getItem('userNickname');
           const storedUid = await AsyncStorage.getItem('userUid');
+          const storedProfileImage = await AsyncStorage.getItem('userProfileImage'); // 프로필 이미지 추가
 
           console.log("저장된 닉네임:", storedNickname);
           console.log("저장된 UID:", storedUid);
+          console.log("저장된 프로필 이미지:", storedProfileImage);
 
           if (storedNickname && storedNickname.trim() !== '') {
             setDisplayNickname(storedNickname);
@@ -120,10 +125,17 @@ const MainScreen = () => {
             setCurrentUserId(null);
             console.log('MainScreen: AsyncStorage에 UID 없음.');
           }
+
+          // 프로필 이미지 설정
+          if (storedProfileImage) {
+            setUserProfileImage({ uri: storedProfileImage });
+            console.log('MainScreen: 프로필 이미지 설정');
+          }
         } catch (error) {
           console.error('MainScreen: 사용자 정보 불러오기 오류:', error);
           setDisplayNickname('친구');
           setCurrentUserId(null);
+          setUserProfileImage(null);
         }
       };
 
@@ -214,6 +226,11 @@ const MainScreen = () => {
     }
   };
 
+  const handleOpenFriendModal = () => {
+    console.log('친구찾기 모달 열기');
+    setShowFriendModal(true);
+  };
+
   const recordHandler = async () => {
     console.log(`${selectedEmotion.name} 감정만 저장`);
 
@@ -240,7 +257,11 @@ const MainScreen = () => {
 
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
         <SafeAreaView style={styles.safeContainer}>
-          <HeaderBar title="홈" streakText={`🔥 ${streak}일 연속 기록 중`} />
+          <HeaderBar 
+            title="홈" 
+            streakText={streak > 0 ? `🔥 ${streak}일 연속 기록 중` : '🌱 다시 기록을 시작해보세요!'} 
+            profileImage={userProfileImage} 
+          />
 
           <View style={styles.divider} />
 
@@ -274,30 +295,17 @@ const MainScreen = () => {
             
             {/* ⭐ 친구 일기 - 디버깅 정보 포함 ⭐ */}
             <DiaryListSection
-              title={`👥 친구들의 일기 ${friendDiariesLoading ? '(로딩중...)' : friendDiariesError ? '(오류 발생)' : `(${friendDiaries?.length || 0}개)`}`}
+              title="👥 친구들의 일기"
               entries={friendDiaries || []} // null 방어
               findEmotion={findEmotion}
               isFriend
               onPressSeeMore={() => console.log('친구 일기 더보기')}
               onPressCard={goToDetail}
+              emptyMessage="😔 오늘 작성된 팔로잉 일기가 없어요"
+              emptySubMessage="친구들을 찾아서 팔로우해보세요!"
+              onEmptyButtonPress={handleOpenFriendModal}
+              emptyButtonText="친구 찾기"
             />
-            
-            {/* ⭐ 디버깅용 친구 일기 상태 표시 ⭐ */}
-            {friendDiariesError && (
-              <View style={{ padding: 16, backgroundColor: '#ffebee', margin: 16, borderRadius: 8 }}>
-                <Text style={{ color: '#c62828', fontSize: 14 }}>
-                  친구 일기 오류: {friendDiariesError}
-                </Text>
-              </View>
-            )}
-            
-            {!friendDiariesLoading && (!friendDiaries || friendDiaries.length === 0) && (
-              <View style={{ padding: 16, backgroundColor: '#f5f5f5', margin: 16, borderRadius: 8 }}>
-                <Text style={{ color: '#666', fontSize: 14, textAlign: 'center' }}>
-                  친구들의 일기가 없습니다. 친구를 팔로우해보세요! 👥
-                </Text>
-              </View>
-            )}
           </ScrollView>
 
           {/* 하단 탭 바 */}
@@ -319,6 +327,12 @@ const MainScreen = () => {
           />
         </SafeAreaView>
       </ImageBackground>
+      
+      {/* ✅ 친구찾기 모달 */}
+      <FriendSearchModal 
+        visible={showFriendModal}
+        onClose={() => setShowFriendModal(false)}
+      />
     </View>
   );
 };
