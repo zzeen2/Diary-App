@@ -104,6 +104,24 @@ const UserProfile = ({ route }) => {
     }
   };
 
+  const handleDiaryPress = (item) => {
+    const transformedEntry = {
+      ...item,
+      user: {
+        uid: profile?.uid,
+        id: profile?.uid,
+        nickname: profile?.nickname,
+        nick_name: profile?.nickname,
+        profile_img: profile?.profile_img,
+        profile_image: profile?.profile_img,
+      }
+    };
+    navigation.navigate('DiaryDetail', {
+      diary: transformedEntry,
+      isMine: false,
+    });
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" translucent backgroundColor="transparent" />
@@ -169,7 +187,7 @@ const UserProfile = ({ route }) => {
                       entry={item}
                       userEmotion={userEmotionData}
                       aiEmotion={aiEmotionData}
-                      onPress={() => {}}
+                      onPress={() => handleDiaryPress(item)}
                     />
                   );
                 }}

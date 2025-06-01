@@ -4,7 +4,11 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'rea
 const DiaryContentBox = ({ content, images = [], onImagePress }) => {
   const removeMarkdownImages = (text) => {
     if (!text) return '';
-    return text.replace(/!\[.*?\]\((.*?)\)/g, '');
+    // 마크다운 이미지 태그 제거: ![alt](url)
+    let cleanText = text.replace(/!\[.*?\]\((.*?)\)/g, '');
+    // HTML img 태그 제거: <img src="..." alt="..."> 형식
+    cleanText = cleanText.replace(/<img[^>]*>/gi, '');
+    return cleanText;
   };
 
   const convertLocalhostUrl = (url) => {

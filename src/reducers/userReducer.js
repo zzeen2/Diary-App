@@ -1,6 +1,6 @@
 import { getUserInfo } from "../api/user";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SEARCH_USERS_SUCCESS } from '../actions/userAction';
+import { SEARCH_USERS_REQUEST, SEARCH_USERS_SUCCESS, SEARCH_USERS_FAILURE } from '../actions/userAction';
 
 const SET_USER = 'SET_USER';
 const CLEAR_USER = 'CLEAR_USER';
@@ -11,18 +11,24 @@ const initialState = {
     profile: '',
     bio: '',
     searchResults: [],
+    loading: false,
+    error: null,
 };
 
 const userReducer = (state = initialState, action) => {
     switch (action.type) {
         case SET_USER:
-        return { ...state, ...action.payload };
+            return { ...state, ...action.payload };
         case CLEAR_USER:
-        return initialState;
+            return initialState;
+        case SEARCH_USERS_REQUEST:
+            return { ...state, loading: true, error: null };
         case SEARCH_USERS_SUCCESS:
-        return { ...state, searchResults: action.payload };
+            return { ...state, searchResults: action.payload, loading: false, error: null };
+        case SEARCH_USERS_FAILURE:
+            return { ...state, searchResults: [], loading: false, error: action.payload };
         default:
-        return state;
+            return state;
     }
 };
 

@@ -21,11 +21,13 @@ import { EXPO_PUBLIC_API_URL } from '@env';
 
 const FriendSearchModal = ({ visible, onClose }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [followingUsers, setFollowingUsers] = useState([]);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const searchResults = useSelector(state => state.user.searchResults);
+  
+  // Redux에서 검색 결과와 로딩 상태를 가져옵니다
+  const searchResults = useSelector(state => state.user?.searchResults || []);
+  const loading = useSelector(state => state.user?.loading || false);
 
   useEffect(() => {
     if (visible) {
@@ -42,30 +44,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
       setFollowingUsers([]);
     } catch (error) {
       console.error('팔로우 목록 로딩 실패:', error);
-    }
-  };
-
-  const searchUsers = async (keyword) => {
-    if (!keyword.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const token = await AsyncStorage.getItem('jwtToken');
-      if (!token) {
-        Alert.alert('오류', '로그인이 필요합니다.');
-        return;
-      }
-      setSearchResults([]);
-
-    } catch (error) {
-      console.error('사용자 검색 실패:', error);
-      Alert.alert('검색 실패', '사용자 검색 중 오류가 발생했습니다.');
-      setSearchResults([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -86,17 +64,37 @@ const FriendSearchModal = ({ visible, onClose }) => {
     }
   };
 
+  // 검색어가 변경될 때마다 Redux 액션을 dispatch합니다
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchKeyword.trim()) {
         dispatch(searchUsersByNickname(searchKeyword));
+        
+        // 백엔드가 작동하지 않을 경우를 대비한 임시 더미 데이터
+        // 실제 검색 결과가 없고 백엔드 문제일 경우에만 사용
+        setTimeout(() => {
+          // 검색 후 2초 뒤에도 결과가 없다면 더미 데이터 표시 (개발/테스트용)
+          if (searchResults.length === 0 && !loading) {
+            console.log('백엔드 API 문제로 더미 데이터 표시');
+            // dispatch({ 
+            //   type: 'SEARCH_USERS_SUCCESS', 
+            //   payload: [
+            //     { uid: 1, nick_name: '테스트유저1', profile_image: null },
+            //     { uid: 2, nick_name: '테스트유저2', profile_image: null }
+            //   ] 
+            // });
+          }
+        }, 2000);
       }
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [searchKeyword]);
+  }, [searchKeyword, dispatch, searchResults.length, loading]);
 
+  // 디버깅을 위한 로그
   useEffect(() => {
-  }, [searchResults]);
+    console.log('FriendSearchModal - searchResults:', searchResults);
+    console.log('FriendSearchModal - loading:', loading);
+  }, [searchResults, loading]);
 
   const renderUserCard = ({ item }) => (
     <TouchableOpacity
@@ -110,7 +108,17 @@ const FriendSearchModal = ({ visible, onClose }) => {
       }}
       style={styles.userItem}
     >
-      <Image source={{ uri: item.profile_image }} style={styles.userAvatar} />
+      <Image 
+        source={
+          item.profile_image && item.profile_image.trim() !== '' 
+            ? { uri: item.profile_image } 
+            : require('../../../assets/logo2.png')
+        } 
+        style={styles.userAvatar} 
+        onError={() => {
+          // 이미지 로드 실패 시 기본 이미지 사용
+        }}
+      />
       <Text style={styles.userNickname}>{item.nick_name}</Text>
     </TouchableOpacity>
   );

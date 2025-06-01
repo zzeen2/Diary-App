@@ -141,6 +141,24 @@ const MyProfile = () => {
   setFollowers(prev => prev.filter(user => user.id !== id));
   };
 
+  const handleDiaryPress = (item) => {
+    const transformedEntry = {
+      ...item,
+      user: {
+        uid: profile?.uid,
+        id: profile?.uid,
+        nickname: profile?.nickname,
+        nick_name: profile?.nickname,
+        profile_img: profile?.profile_img,
+        profile_image: profile?.profile_img,
+      }
+    };
+    navigation.navigate('DiaryDetail', {
+      diary: transformedEntry,
+      isMine: true,
+    });
+  };
+
   // 로그아웃 처리 함수
   const handleLogout = () => {
     Alert.alert(
@@ -186,10 +204,14 @@ const MyProfile = () => {
     },
     scrollContent: {
         flex: 1,
+        marginTop: 16,
     },
     scrollContainer: {
         paddingHorizontal: 10,
         paddingBottom: 80,
+    },
+    header2: {
+      marginTop: 16,
     },
     listTitle: {
       fontSize: 16,
@@ -236,6 +258,7 @@ const MyProfile = () => {
               onEditIntro={() => setShowEditModal(true)}
               onPressFollowers={() => { setModalType('followers'); setShowFollowerModal(true); }}
               onPressFollowings={() => { setModalType('followings'); setShowFollowingModal(true); }}
+              style = {styles.header2}
             />
 
             <Text style={styles.listTitle}>📖 공개된 일기</Text>
@@ -249,7 +272,7 @@ const MyProfile = () => {
                   entry={item}
                   userEmotion={item.userEmotion}
                   aiEmotion={item.aiEmotion}
-                  onPress={() => {}}
+                  onPress={() => handleDiaryPress(item)}
                 />
               )}
               ItemSeparatorComponent={() => <View style={styles.separator} />}

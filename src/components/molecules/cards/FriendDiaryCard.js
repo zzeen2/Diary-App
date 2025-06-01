@@ -8,7 +8,11 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
     
     const removeMarkdownImages = (text) => {
         if (!text) return '';
-        return text.replace(/!\[.*?\]\((.*?)\)/g, '');
+        // 마크다운 이미지 태그 제거: ![alt](url)
+        let cleanText = text.replace(/!\[.*?\]\((.*?)\)/g, '');
+        // HTML img 태그 제거: <img src="..." alt="..."> 형식
+        cleanText = cleanText.replace(/<img[^>]*>/gi, '');
+        return cleanText;
     };
 
     const cleanContent = removeMarkdownImages(entry.content);

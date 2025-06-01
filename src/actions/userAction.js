@@ -10,16 +10,27 @@ export const searchUsersByNickname = (nickname) => async (dispatch) => {
   dispatch({ type: SEARCH_USERS_REQUEST });
   try {
     const token = await AsyncStorage.getItem('jwtToken');
-    if (!token) throw new Error('JWT 토큰이 없습니다.');
+    
+    // 헤더 설정 - 토큰이 있을 때만 Authorization 헤더 추가
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
     const response = await axios.get(
       `${EXPO_PUBLIC_API_URL}/login/search/users`,
       {
         params: { q: nickname },
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
       }
     );
-    dispatch({ type: SEARCH_USERS_SUCCESS, payload: response.data.users });
+    
+    // API 응답에서 users 배열을 가져오거나, 응답 자체가 배열인 경우 처리
+    const users = response.data.users || response.data || [];
+    dispatch({ type: SEARCH_USERS_SUCCESS, payload: users });
   } catch (error) {
-    dispatch({ type: SEARCH_USERS_FAILURE, payload: error.message });
+    console.error('사용자 검색 실패:', error);
+    const errorMessage = error.response?.data?.message || error.message || '검색 중 오류가 발생했습니다.';
+    dispatch({ type: SEARCH_USERS_FAILURE, payload: errorMessage });
   }
 }; 

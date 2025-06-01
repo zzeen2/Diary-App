@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 20,
     marginBottom: 16,
+    marginTop: 16,
   },
   actionRow: {
     flexDirection: 'row',
