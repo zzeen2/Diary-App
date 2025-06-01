@@ -41,31 +41,28 @@ const DiaryListScreen = ({ route }) => {
     const [privacyFilter, setPrivacyFilter] = useState('all');
     const [isSearchMode, setIsSearchMode] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
-    const [showFriendModal, setShowFriendModal] = useState(false); // ✅ 친구찾기 모달 상태
+    const [showFriendModal, setShowFriendModal] = useState(false);
     const formattedSelectedDate = useFormmatedDate(selectedDate);
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('diary');
-    const [calendarEmotions, setCalendarEmotions] = useState([]); // 달력용 감정 데이터
-    const [followingTodayDiaries, setFollowingTodayDiaries] = useState([]); // 팔로잉 오늘 일기
+    const [calendarEmotions, setCalendarEmotions] = useState([]);
+    const [followingTodayDiaries, setFollowingTodayDiaries] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(() => {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     });
 
-    // Redux 상태
     const emotions = useSelector((state) => state.emotions.emotions) || [];
     const diaryState = useSelector((state) => state.diary);
     const rawMyDiaries = diaryState?.myDiaries || [];
     const diaryLoading = diaryState?.loading || false;
     const todayFollowingDiaries = useSelector((state) => state.diary.todayFollowingDiaries) || [];
     
-    // ⭐ 사용자 정보 상태 추가 ⭐
     const [currentUserId, setCurrentUserId] = useState(null);
     const [displayNickname, setDisplayNickname] = useState('');
     const [userProfileImage, setUserProfileImage] = useState(null);
 
-    // ⭐ AsyncStorage에서 사용자 정보 로드 ⭐
     useEffect(() => {
         const loadUserInfo = async () => {
             try {
@@ -77,24 +74,12 @@ const DiaryListScreen = ({ route }) => {
                 if (storedNickname) setDisplayNickname(storedNickname);
                 if (storedProfileImage) setUserProfileImage({ uri: storedProfileImage });
                 
-                console.log('DiaryList 사용자 정보 로드:', {
-                    uid: storedUid,
-                    nickname: storedNickname,
-                    profileImage: storedProfileImage
-                });
             } catch (error) {
-                console.error('사용자 정보 로드 실패:', error);
             }
         };
         
         loadUserInfo();
     }, []);
-
-    console.log('=== DiaryListScreen 상태 ===');
-    console.log('현재 필터:', filterType);
-    console.log('isSearchMode:', isSearchMode);
-    console.log('emotions 길이:', emotions.length);
-    console.log('rawMyDiaries 길이:', rawMyDiaries.length);
 
     const getTodayDateString = () => {
         const today = new Date();
@@ -110,19 +95,15 @@ const DiaryListScreen = ({ route }) => {
     };
 
     useEffect(() => {
-        console.log('=== 데이터 로딩 시작 ===');
         dispatch(fetchEmotions());
         dispatch(fetchMyDiaries());
         dispatch(fetchTodayFollowingDiaries());
         
-        // 팔로잉 오늘 일기 데이터 가져오기
         const fetchFollowingToday = async () => {
             try {
                 const data = await getFollowingsTodayDiaries();
-                console.log('팔로잉 오늘 일기 데이터:', data);
                 setFollowingTodayDiaries(data);
             } catch (error) {
-                console.error('팔로잉 오늘 일기 조회 실패:', error);
                 setFollowingTodayDiaries([]);
             }
         };
@@ -130,23 +111,18 @@ const DiaryListScreen = ({ route }) => {
         fetchFollowingToday();
     }, [dispatch]);
 
-    // 달력 감정 데이터 가져오기
     useEffect(() => {
         const fetchCalendarData = async () => {
             try {
-                console.log('달력 감정 데이터 가져오기:', currentMonth);
                 const data = await getCalendarEmotions(currentMonth);
-                console.log('달력 감정 데이터:', data);
                 setCalendarEmotions(data);
             } catch (error) {
-                console.error('달력 감정 데이터 가져오기 실패:', error);
             }
         };
         
         fetchCalendarData();
     }, [currentMonth]);
 
-    // 실제 API 데이터를 캘린더 형식으로 변환
     const transformDiaryData = (diaries) => {
         return diaries.map(diary => {
             const dateStr = diary.createdAt ? diary.createdAt.split('T')[0].replace(/-/g, '.') : '';
@@ -168,40 +144,26 @@ const DiaryListScreen = ({ route }) => {
         });
     };
 
-    // 변환된 내 일기 데이터
     const myDiaryEntries = transformDiaryData(rawMyDiaries);
-
-    // ✅ 팔로잉 오늘 일기 데이터 변환
     const transformedFollowingDiaries = transformDiaryData(followingTodayDiaries);
-
-    console.log('=== 팔로잉 일기 확인 ===');
-    console.log('팔로잉 오늘 일기 개수:', transformedFollowingDiaries.length);
-    console.log('오늘 날짜:', getTodayDotFormat());
 
     const findEmotion = (id) => {
         if (!Array.isArray(emotions)) return {};
         return emotions.find(e => e?.id === id) || {};
     };
 
-    // ✅ 친구찾기 모달 열기
     const handleOpenFriendModal = () => {
-        console.log('친구찾기 모달 열기');
         setShowFriendModal(true);
-        // TODO: 친구찾기 모달 구현
     };
 
-    // ✅ 헤더 오른쪽 버튼 처리
     const handleRightButtonPress = () => {
         if (filterType === 'follower') {
-            // 팔로워 탭: 친구찾기 모달
             handleOpenFriendModal();
         } else {
-            // 내 일기 탭: 검색 모드 토글
             setIsSearchMode((prev) => !prev);
         }
     };
 
-    // 내 일기 검색 로직
     const searchedMyDiaries = myDiaryEntries.filter((entry) => {
         const titleHasKeyword = entry.title?.includes(searchKeyword) || false;
         const contentHasKeyword = entry.content?.includes(searchKeyword) || false;
@@ -246,12 +208,10 @@ const DiaryListScreen = ({ route }) => {
 
             <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 
-                {/* ✅ 내 일기 탭 */}
                 {filterType === 'my' && (
                     <>
                         {isSearchMode ? (
                             <>
-                                {/* 검색/필터링 영역 */}
                                 <DiarySearchArea
                                     searchKeyword={searchKeyword}
                                     setSearchKeyword={setSearchKeyword}
@@ -264,7 +224,6 @@ const DiaryListScreen = ({ route }) => {
                                     setPrivacyFilter={setPrivacyFilter}
                                 />
 
-                                {/* 검색 결과 */}
                                 <DiaryListSection
                                     title="📖 내 일기 검색 결과"
                                     entries={searchedMyDiaries}
@@ -290,7 +249,6 @@ const DiaryListScreen = ({ route }) => {
                             </>
                         ) : (
                             <>
-                                {/* 캘린더 */}
                                 <CalenderArea
                                     diaryList={myDiaryEntries}
                                     calendarEmotions={calendarEmotions}
@@ -304,7 +262,6 @@ const DiaryListScreen = ({ route }) => {
                                     }}
                                 />
                                 
-                                {/* 선택된 날짜의 일기 */}
                                 {selectedDate && (
                                     <DiaryListSection
                                         title={`📖 ${formattedSelectedDate} 일기`}
@@ -337,7 +294,6 @@ const DiaryListScreen = ({ route }) => {
                     </>
                 )}
 
-                {/* ✅ 팔로워 일기 탭 */}
                 {filterType === 'follower' && (
                     <View style={styles.followerContainer}>
                         <DiaryListSection
@@ -387,7 +343,6 @@ const DiaryListScreen = ({ route }) => {
             </SafeAreaView>
         </ImageBackground>
 
-        {/* ✅ 친구찾기 모달 */}
         <FriendSearchModal 
             visible={showFriendModal}
             onClose={() => setShowFriendModal(false)}

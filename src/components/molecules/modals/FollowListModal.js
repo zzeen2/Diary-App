@@ -22,7 +22,7 @@ const FollowListModal = ({
   onRemoveFollower,
   onRemoveFollowing
 }) => {
-  const [activeTab, setActiveTab] = useState('followers'); // 'followers' or 'followings'
+  const [activeTab, setActiveTab] = useState('followers');
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
@@ -33,10 +33,8 @@ const FollowListModal = ({
       const fetchList = async () => {
         try {
           let data = type === 'followers' ? await getFollowers(uid) : await getFollowings(uid);
-          console.log('[FollowListModal] API 응답:', data);
           if (data && !Array.isArray(data) && data.users) data = data.users;
           setList(Array.isArray(data) ? data : []);
-          console.log('[FollowListModal] setList:', Array.isArray(data) ? data : []);
         } catch (e) {
           setList([]);
           console.error('[FollowListModal] API 에러:', e);
@@ -66,7 +64,6 @@ const FollowListModal = ({
   };
 
   const renderItem = ({ item }) => {
-    console.log('item 전체:', item);
     const profileImg =
       item.profile_img ||
       item.profileImage ||
@@ -74,7 +71,6 @@ const FollowListModal = ({
       item.avatar ||
       item.img_url ||
       '';
-    console.log('프로필 이미지 값:', profileImg);
     return (
       <TouchableOpacity onPress={() => handleUserPress(item)} style={styles.userRow}>
         <Image
@@ -87,14 +83,10 @@ const FollowListModal = ({
         />
         <View style={styles.infoBox}>
           <Text style={styles.nickname}>{item.nickname || item.nick_name}</Text>
-          {/* 필요시 추가 정보(예: 자기소개) 표시 가능 */}
         </View>
-        {/* 팔로우/언팔로우 버튼 등 추가 가능 */}
       </TouchableOpacity>
     );
   };
-
-  console.log('[FollowListModal] 렌더링 list:', list);
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -243,7 +235,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#ff4757',
-    // marginLeft: 4,
   },
   separator: {
     height: 4,

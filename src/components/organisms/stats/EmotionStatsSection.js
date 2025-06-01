@@ -7,15 +7,9 @@ import { Dimensions } from 'react-native';
 const screenWidth = Dimensions.get('window').width;
 
 const EmotionStatsSection = ({ title = '감정 통계', emotionData = [] }) => {
-  console.log('=== EmotionStatsSection 렌더링 ===');
-  console.log('📊 받은 emotionData:', emotionData);
-  console.log('📊 emotionData 타입:', typeof emotionData);
-  console.log('📊 emotionData 배열 여부:', Array.isArray(emotionData));
-  
   const safeData = Array.isArray(emotionData) ? emotionData : [];
 
   if (!safeData || safeData.length === 0) {
-    console.log('⚠️ emotionData가 비어있음 - 기본 메시지 표시');
     return (
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
@@ -28,10 +22,6 @@ const EmotionStatsSection = ({ title = '감정 통계', emotionData = [] }) => {
     );
   }
 
-  console.log('✅ emotionData 유효 - 차트 렌더링');
-  console.log('📊 차트 데이터 생성 중...');
-
-  // 차트 데이터 생성
   const chartData = safeData.map((emotion, index) => {
     const dataPoint = {
       name: emotion.name || '알 수 없음',
@@ -40,15 +30,11 @@ const EmotionStatsSection = ({ title = '감정 통계', emotionData = [] }) => {
       legendFontColor: '#7F7F7F',
       legendFontSize: 12,
     };
-    console.log(`📊 차트 데이터 ${index}:`, dataPoint);
     return dataPoint;
   });
 
   const totalCount = safeData.reduce((sum, item) => sum + (item.count || 0), 0);
   
-  console.log('📊 최종 차트 데이터:', chartData);
-  console.log('📊 총 개수:', totalCount);
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -56,9 +42,7 @@ const EmotionStatsSection = ({ title = '감정 통계', emotionData = [] }) => {
         <Text style={styles.totalCount}>총 {totalCount}개</Text>
       </View>
       
-      {/* 파이차트 + 감정 리스트 가로 배치 */}
       <View style={styles.contentRow}>
-        {/* 왼쪽: 파이 차트 */}
         <View style={styles.chartContainer}>
           <PieChart
             data={chartData}
@@ -82,7 +66,6 @@ const EmotionStatsSection = ({ title = '감정 통계', emotionData = [] }) => {
           />
         </View>
 
-        {/* 오른쪽: 감정 리스트 */}
         <View style={styles.emotionListContainer}>
           <ScrollView style={styles.emotionList} showsVerticalScrollIndicator={false}>
             {safeData.map((emotion, index) => {
@@ -110,7 +93,6 @@ const EmotionStatsSection = ({ title = '감정 통계', emotionData = [] }) => {
         </View>
       </View>
 
-      {/* 요약 정보 */}
       {safeData.length > 0 && (
         <View style={styles.summaryContainer}>
           <Text style={styles.summaryTitle}>💡 분석 결과</Text>

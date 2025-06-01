@@ -25,7 +25,7 @@ const EmotionPieChart = ({ data = [] }) => {
         width={screenWidth - 32}
         height={200}
         chartConfig={{
-          color: () => `#000`, // legend text color
+          color: () => `#000`,
         }}
         accessor="population"
         backgroundColor="transparent"

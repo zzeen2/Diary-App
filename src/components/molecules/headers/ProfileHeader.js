@@ -21,7 +21,6 @@ const ProfileHeader = ({
 
   return (
     <View style={styles.container}>
-      {/* 왼쪽: 프로필 사진 */}
       <View style={styles.avatarContainer}>
         <Image 
           source={
@@ -36,11 +35,9 @@ const ProfileHeader = ({
         <View style={styles.avatarBorder} />
       </View>
 
-      {/* 오른쪽: 정보 */}
       <View style={styles.infoSection}>
         <View style={styles.nameRow}>
           <Text style={styles.nickname}>{nickname}</Text>
-          {/* ✅ isMine이 false일 때만 오른쪽에 버튼 표시 */}
           {!isMine && rightContent && <View style={styles.rightBox}>{rightContent}</View>}
         </View>
 

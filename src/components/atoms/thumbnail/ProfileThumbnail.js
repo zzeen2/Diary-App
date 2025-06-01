@@ -23,7 +23,7 @@ const ProfileThumbnail = ({ image, nickname, small = false }) => {
             <Image
                 source={getImageSource()}
                 style={[styles.avatar, small && styles.smallAvatar]}
-                onError={() => console.log('ProfileThumbnail 이미지 로드 실패:', image)}
+                onError={() => {}}
             />
             {nickname && (
                 <Text style={[styles.name, small && styles.smallName]} numberOfLines={1}>

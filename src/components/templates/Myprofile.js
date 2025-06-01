@@ -6,7 +6,7 @@ import { HeaderBar, ProfileHeader } from '../molecules/headers';
 import { DiaryListSection } from '../organisms/main';
 import { TabBar } from '../organisms/TabBar';
 import { useNavigation } from '@react-navigation/native';
-import profileImg from '../../assets/IMG_3349.jpg' // 테스트용
+import profileImg from '../../assets/IMG_3349.jpg';
 import { EditIntroModal, FollowListModal } from '../molecules/modals';
 import { PublicDiaryCard } from '../molecules/cards';
 import {PublicDiaryListSection} from '../atoms/thumbnail';
@@ -27,8 +27,6 @@ const tabs = [
     { id: 'stats', icon: '📊', label: '통계' },
     { id: 'profile', icon: '👤', label: '프로필' },
 ];
-
-
 
 const MyProfile = () => {
   const insets = useSafeAreaInsets();
@@ -69,40 +67,24 @@ const MyProfile = () => {
     try {
       const userUid = await AsyncStorage.getItem('userUid');
       if (!userUid) {
-        console.log("UID 없음, 프로필 로딩 중단");
-        // 필요시 로그아웃 또는 에러 처리
         setProfile(prev => ({ ...prev, nickname: '사용자 정보 없음', intro: '-'}));
         return;
       }
 
-      console.log(`[loadProfileData] UID (${userUid})로 프로필 정보 요청`);
       const userProfileData = await getUserProfileByUid(userUid);
 
       if (userProfileData) {
-        console.log("[loadProfileData] 받은 프로필 정보:", userProfileData);
         setProfile({
           uid: userProfileData.uid || userUid,
           nickname: userProfileData.nickname || userProfileData.nick_name || '사용자',
           profile_img: userProfileData.profile_image ? { uri: userProfileData.profile_image } : require('../../assets/IMG_3349.jpg'),
           intro: userProfileData.bio || '',
-          // API 응답에 통계 정보가 포함되어 있다고 가정 (없다면 아래 getUserStats 호출 유지)
           followerCount: userProfileData.followerCount !== undefined ? userProfileData.followerCount : profile.followerCount,
           followingCount: userProfileData.followingCount !== undefined ? userProfileData.followingCount : profile.followingCount,
           publicDiaryCount: userProfileData.publicDiaryCount !== undefined ? userProfileData.publicDiaryCount : profile.publicDiaryCount,
         });
 
-        // 만약 getUserProfileByUid 응답에 통계 정보(followerCount 등)가 없다면,
-        // 기존 getUserStats를 호출하여 통계 정보만 따로 업데이트할 수 있습니다.
-        // 예: if (userProfileData.followerCount === undefined) {
-        //   const statsRes = await getUserStats(userUid);
-        //   if (statsRes.success && statsRes.data) {
-        //     setProfile(prev => ({ ...prev, followerCount: statsRes.data.followerCount, ... }));
-        //   }
-        // }
-
       } else {
-        console.warn("[loadProfileData] 프로필 정보를 가져오지 못했습니다. AsyncStorage 값으로 대체 시도 또는 기본값 유지.");
-        // 필요시 AsyncStorage에서 fallback 로직 추가 (선택 사항)
         const storedNickname = await AsyncStorage.getItem('userNickname');
         const storedProfileImage = await AsyncStorage.getItem('userProfileImage');
         const storedBio = await AsyncStorage.getItem('userBio');
@@ -113,16 +95,13 @@ const MyProfile = () => {
             profile_img: storedProfileImage ? { uri: storedProfileImage } : require('../../assets/IMG_3349.jpg'),
             intro: storedBio || '자기소개 로드 실패',
         }));
-        // getUserStats는 uid가 있으므로 호출 가능
         const statsRes = await getUserStats(userUid);
         if (statsRes.success && statsRes.data) {
             setProfile(prev => ({ ...prev, followerCount: statsRes.data.followerCount, followingCount: statsRes.data.followingCount, publicDiaryCount: statsRes.data.diaryCount }));
         }
       }
     } catch (error) {
-      console.error('[loadProfileData] 프로필 데이터 로딩 실패:', error);
       setProfile(prev => ({ ...prev, nickname: '정보 로드 실패', intro: '오류 발생'}));
-      // 필요시 AsyncStorage fallback 로직 추가
     }
   };
 
@@ -155,7 +134,6 @@ const MyProfile = () => {
   ]);
 
   const handleRemoveFollowing = (id) => {
-
     setFollowings(prev => prev.filter(user => user.id !== id));
   };
 
@@ -177,28 +155,12 @@ const MyProfile = () => {
           text: "로그아웃",
           onPress: async () => {
             try {
-              // Redux 스토어 초기화
               dispatch(clearUser());
-
-              // AuthContext의 user 상태 null로 설정
               if (setAuthUser) {
                 setAuthUser(null);
-                console.log("AuthContext의 user 상태 null로 설정됨");
               }
-              
-              // AuthContext의 로그인 상태 변경 -> 이로 인해 App.tsx에서 화면 자동 전환
               setIsLoggedIn(false);
-              console.log("로그아웃 완료 - isLoggedIn: false, App.tsx에서 WelcomeScreen으로 자동 전환될 것입니다.");
-
-              // navigation.reset 제거 - AuthContext 상태 변경으로 자동 처리
-              // navigation.reset({
-              //   index: 0,
-              //   routes: [{ name: 'Welcome' }], 
-              // });
-              // console.log("WelcomeScreen으로 네비게이션 리셋 완료");
-
             } catch (error) {
-              console.error("로그아웃 처리 중 오류:", error);
               Alert.alert("오류", "로그아웃 중 문제가 발생했습니다.");
             }
           },
@@ -245,8 +207,6 @@ const MyProfile = () => {
       height: 1,
       backgroundColor: 'rgba(255,255,255,0.7)',
       marginVertical: 1,
-      // marginLeft : 16,
-      // width:'120%'
     },
     logoutButton: {
       padding: 5,
@@ -289,7 +249,7 @@ const MyProfile = () => {
                   entry={item}
                   userEmotion={item.userEmotion}
                   aiEmotion={item.aiEmotion}
-                  onPress={() => {/* 상세보기 등 */}}
+                  onPress={() => {}}
                 />
               )}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -307,8 +267,7 @@ const MyProfile = () => {
                     Alert.alert('오류', '사용자 ID를 찾을 수 없습니다.');
                     return;
                   }
-                  await updateUserBio(profile.uid, newIntro); // DB 업데이트
-                  // AsyncStorage의 userBio도 업데이트 (선택적이지만, 다른 곳에서 사용할 경우 대비)
+                  await updateUserBio(profile.uid, newIntro);
                   await AsyncStorage.setItem('userBio', newIntro); 
                   Alert.alert('성공', '자기소개가 저장되었습니다.');
                   loadProfileData(); // 수정 후 전체 프로필 정보 다시 로드하여 화면 갱신
@@ -333,7 +292,6 @@ const MyProfile = () => {
               if (tabId === 'home') navigation.navigate('Main');
               else if (tabId === 'diary') navigation.navigate('listDiary');
               else if (tabId === 'stats') navigation.navigate('stats');
-              // else if (tabId === 'profile') navigation.navigate('myProfile');
             }}
           />
         </SafeAreaView>
@@ -341,7 +299,6 @@ const MyProfile = () => {
     </View>
   );
 };
-
 
 export default MyProfile;
 

@@ -1,4 +1,3 @@
-// components/molecules/filters/RangeSelector.js
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
@@ -15,16 +14,10 @@ const RangeSelector = ({ selected = 'all', onSelect }) => {
       {options.map((opt) => (
         <TouchableOpacity
           key={opt.value}
-          style={[
-            styles.option,
-            selected === opt.value && styles.selectedOption,
-          ]}
+          style={[ styles.option, selected === opt.value && styles.selectedOption, ]}
           onPress={() => onSelect?.(opt.value)}
         >
-          <Text
-            style={[
-              styles.label,
-              selected === opt.value && styles.selectedLabel,
+          <Text style={[ styles.label, selected === opt.value && styles.selectedLabel,
             ]}
           >
             {opt.label}

@@ -1,4 +1,3 @@
-// components/molecules/stats/EmotionSummary.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import {StatsEmotionLabel} from '../../atoms/TextsAndLabel';

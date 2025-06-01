@@ -20,7 +20,6 @@ const HeaderBar = ({
 
     return (
         <View style={styles.container}>
-        {/* 왼쪽 영역 */}
         <View style={styles.side}>
             {showBackButton ? (
             <BackButton onPress={onBackPress} />
@@ -39,12 +38,10 @@ const HeaderBar = ({
             )}
         </View>
 
-        {/* 가운데 영역 */}
         <View style={styles.center}>
             {centerContent ? (centerContent) : (null)}
         </View>
 
-        {/* 오른쪽 영역 */}
             <View style={styles.side}>
             {showConfirmButton ? (
                 <ConfirmButton onPress={onConfirmPress} />

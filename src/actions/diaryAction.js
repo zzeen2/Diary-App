@@ -38,11 +38,11 @@ export const fetchMyDiaries = () => async (dispatch) => {
 };
 
 export const fetchTodayFollowingDiaries = () => async (dispatch) => {
-  dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_REQUEST });
-  try {
-    const data = await getTodayFollowingDiaries();
-    dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_SUCCESS, payload: data });
-  } catch (error) {
-    dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_FAILURE, payload: error.message });
-  }
+    dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_REQUEST });
+    try {
+        const data = await getTodayFollowingDiaries();
+        dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({ type: FETCH_TODAY_FOLLOWING_DIARIES_FAILURE, payload: error.message });
+    }
 };

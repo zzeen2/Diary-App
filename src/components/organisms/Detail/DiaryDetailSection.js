@@ -5,53 +5,39 @@ import {DiaryContentBox} from '../../molecules/boxes';
 import { DeleteModal } from '../../molecules/modals';
 
 const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImagePress, navigation }) => {
-  console.log("=== DiaryDetailSection 데이터 확인 ===");
-  console.log("diary:", diary);
-  console.log("emotions:", emotions);
 
   const {
     title,
     content,
-    createdAt, // ⭐ date 대신 createdAt 사용
+    createdAt,
     isPublic,
     images,
-    userEmotion, // ⭐ primaryEmotion 대신 userEmotion 사용
-    aiEmotion,   // ⭐ secondaryEmotion 대신 aiEmotion 사용
+    userEmotion,
+    aiEmotion,
     user,
   } = diary;
 
-  // ⭐ 감정 데이터 처리 로직 수정 ⭐
   let emotion1 = null;
   let emotion2 = null;
 
-  // userEmotion 처리
   if (userEmotion) {
     if (typeof userEmotion === 'object' && userEmotion.id) {
-      // 이미 완전한 객체인 경우
       emotion1 = userEmotion;
     } else if (typeof userEmotion === 'string') {
-      // ID만 있는 경우 emotions 배열에서 찾기
       emotion1 = emotions?.find(e => e.id === userEmotion);
     }
   }
 
-  // aiEmotion 처리
   if (aiEmotion) {
     if (typeof aiEmotion === 'object' && aiEmotion.id) {
-      // 이미 완전한 객체인 경우
       emotion2 = aiEmotion;
     } else if (typeof aiEmotion === 'string') {
-      // ID만 있는 경우 emotions 배열에서 찾기
       emotion2 = emotions?.find(e => e.id === aiEmotion);
     }
   }
 
-  console.log("처리된 emotion1 (userEmotion):", emotion1);
-  console.log("처리된 emotion2 (aiEmotion):", emotion2);
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
@@ -61,31 +47,25 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
         day: '2-digit'
       }).replace(/\. /g, '.').replace(/\.$/, '');
     } catch (error) {
-      console.error("날짜 포맷팅 오류:", error);
       return dateString;
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* 헤더 - 날짜 정보 제거 */}
       <DiaryHeader
         title={title}
-        emotion={[emotion1, emotion2]} // ⭐ 처리된 감정 데이터 전달
+        emotion={[emotion1, emotion2]}
         user={user}
         isMine={isMine}
         navigation={navigation}
       />
       
-      {/* 일기 본문 */}
       <DiaryContentBox content={content} images={images} onImagePress={onImagePress} />
 
-      {/* ⭐ 하단 영역: 날짜정보 + 수정/삭제 버튼 ⭐ */}
       <View style={styles.bottomSection}>
-        {/* 날짜와 공개범위 정보 */}
         <View style={styles.metaInfo}>
           {!isMine ? (
-            // 친구 일기인 경우
             <View style={styles.friendMetaContainer}>
               <Text style={styles.dateIcon}>📅</Text>
               <Text style={styles.dateText}>{formatDate(createdAt)}</Text>
@@ -94,7 +74,6 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
               <Text style={styles.publicText}>공개</Text>
             </View>
           ) : (
-            // 내 일기인 경우
             <View style={styles.myMetaContainer}>
               <Text style={styles.dateIcon}>📅</Text>
               <Text style={styles.dateText}>{formatDate(createdAt)}</Text>
@@ -109,7 +88,6 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
           )}
         </View>
 
-        {/* 본인 글인 경우 수정/삭제 버튼 */}
         {isMine && (
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
@@ -123,7 +101,6 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
         )}
       </View>
 
-      {/* 삭제 확인 모달 */}
       <DeleteModal
         visible={showDeleteModal}
         onConfirm={() => {

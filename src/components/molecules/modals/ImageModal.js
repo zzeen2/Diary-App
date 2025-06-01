@@ -28,12 +28,10 @@ const ImageModal = ({ visible, imageUrl, onClose }) => {
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.container}>
-              {/* 닫기 버튼 */}
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                 <Ionicons name="close" size={30} color="#fff" />
               </TouchableOpacity>
 
-              {/* 로딩 인디케이터 */}
               {loading && (
                 <ActivityIndicator
                   size="large"
@@ -42,7 +40,6 @@ const ImageModal = ({ visible, imageUrl, onClose }) => {
                 />
               )}
 
-              {/* 이미지 */}
               <Image
                 source={{ uri: imageUrl }}
                 style={styles.image}
@@ -51,7 +48,6 @@ const ImageModal = ({ visible, imageUrl, onClose }) => {
                 onLoadEnd={() => setLoading(false)}
                 onError={() => {
                   setLoading(false);
-                  console.error('이미지 로드 실패:', imageUrl);
                 }}
               />
             </View>

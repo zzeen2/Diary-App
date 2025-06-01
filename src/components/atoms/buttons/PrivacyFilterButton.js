@@ -10,9 +10,9 @@ const PrivacyFilterButton = ({ value = 'all', onChange }) => {
     };
 
     const getIcon = (current) => {
-        if (current === 'all') return 'refresh-ccw'; // 전체
-        if (current === 'public') return 'unlock';// 전체공개
-        return 'lock'; // 비공개
+        if (current === 'all') return 'refresh-ccw';
+        if (current === 'public') return 'unlock';
+        return 'lock';
     };
 
     return (

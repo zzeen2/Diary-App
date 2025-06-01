@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EXPO_PUBLIC_API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
-// 헬퍼 함수: 인증 헤더 생성
 const getAuthHeaders = async () => {
   const token = await AsyncStorage.getItem('jwtToken');
   return {
@@ -20,7 +19,6 @@ export const checkTodayWritten = async (excludeId = '') => {
     });
     return response.data;
   } catch (error) {
-    console.error('오늘 작성 여부 확인 실패:', error);
     throw error;
   }
 };
@@ -33,7 +31,7 @@ export const getTodayDiary = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error('오늘 일기 조회 실패:', error);
+    // console.error('오늘 일기 조회 실패:', error);
     throw error;
   }
 };
@@ -71,13 +69,12 @@ export const getTodayFollowingDiaries = async () => {
   return res.data;
 };
 
-// 일기 목록 조회
-export const fetchDiaries = async () => {
-  // TODO: 실제 API 연동
-  return [];
-};
+// // 일기 목록 조회
+// export const fetchDiaries = async () => {
+//   return [];
+// };
 
-// 수정 API (앱용)
+// 수정 API
 export const updateDiary = async (diaryId, data) => {
   try {
     const response = await axios.put(`${EXPO_PUBLIC_API_URL}/edit/app/${diaryId}`, data, {
@@ -106,10 +103,6 @@ export const deleteDiary = async (diaryId) => {
 // 댓글 작성 API (앱용)
 export const createComment = async (diaryId, content) => {
   try {
-    console.log('=== 댓글 작성 API 호출 ===');
-    console.log('일기 ID:', diaryId);
-    console.log('댓글 내용:', content);
-    
     const response = await axios.post(
       `${EXPO_PUBLIC_API_URL}/detail/app/createComment`,
       {
@@ -120,8 +113,6 @@ export const createComment = async (diaryId, content) => {
         headers: await getAuthHeaders()
       }
     );
-    
-    console.log('댓글 작성 성공:', response.data);
     return response.data;
   } catch (error) {
     console.error('댓글 작성 API 오류:', error.response?.data || error);
@@ -159,7 +150,7 @@ export const saveEmotionOnly = async (emotionId) => {
   }
 };
 
-// 앱용 스트릭 조회 (일기 + 감정 포함)
+// 스트릭 조회
 export const getStreakApp = async () => {
   try {
     const response = await axios.get(`${EXPO_PUBLIC_API_URL}/main/app/streak`, {

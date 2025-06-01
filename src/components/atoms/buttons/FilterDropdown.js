@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import React, { useState } from 'react';
-import { Feather } from '@expo/vector-icons'; // 아이콘
+import { Feather } from '@expo/vector-icons';
 
 const FilterDropdown = ({ selected, onSelect }) => {
   const [open, setOpen] = useState(false);

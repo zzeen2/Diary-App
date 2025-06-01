@@ -17,17 +17,14 @@ const DiaryImotionSection = ({
             <Text style={styles.notice}>오늘은 이미 감정을 등록하셨습니다.</Text>
         ) : (
             <>
-            {/* 제목 */}
             <Text style={styles.label}>오늘의 감정을 선택해주세요</Text>
 
-            {/* 감정 선택 영역 */}
             <EmotionSection
                 emotionIcons={emotionIcons}
                 selectedEmotion={selectedEmotion}
                 onSelectEmotion={onSelectEmotion}
             />
 
-            {/* 버튼들 */}
             <TouchableOpacity style={styles.saveBtn} onPress={onPressSaveEmotion}>
                 <Text style={styles.saveText}>감정만 저장하기</Text>
             </TouchableOpacity>

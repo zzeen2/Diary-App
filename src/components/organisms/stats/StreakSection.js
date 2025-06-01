@@ -3,16 +3,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 const StreakSection = ({ streakData }) => {
-  console.log('=== StreakSection 렌더링 ===');
-  console.log('🔥 받은 streakData:', streakData);
-  console.log('🔥 streakData 타입:', typeof streakData);
-  console.log('🔥 streakData 키들:', Object.keys(streakData || {}));
-  
   const safeData = streakData || {};
   const { totalDays = 0, bestStreak = 0, currentStreak = 0 } = safeData;
   
-  console.log('🔥 추출된 데이터:', { totalDays, bestStreak, currentStreak });
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>

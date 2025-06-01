@@ -9,13 +9,11 @@ const StatsAndRandom = ({ randomDiary, onRandomPress, onViewRandom, loading }) =
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.card}>
-        {/* 안내 문구 */}
         <View style={styles.noticeBox}>
           <Text style={styles.noticeText}>오늘은 이미 일기를 작성했어요!</Text>
           <Text style={styles.noticeSubText}>지난 추억을 돌아볼까요?</Text>
         </View>
 
-        {/* 랜덤 일기 */}
         <View style={styles.randomBox}>
           <View style={styles.randomHeader}>
             <Text style={styles.randomTitle}>🎲 추억의 일기</Text>

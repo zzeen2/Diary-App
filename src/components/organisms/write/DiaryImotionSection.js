@@ -15,7 +15,7 @@ const DiaryImotionSection = ({
   emotionList, 
   content, 
   onAnalyzeEmotion,
-  isEditMode = false // 수정 모드 플래그 추가
+  isEditMode = false
 }) => {
   const dispatch = useDispatch();
 
@@ -28,16 +28,11 @@ const DiaryImotionSection = ({
     loading: state.loading,   
   }));
 
-  console.log("=== DiaryImotionSection ===");
-  console.log("userEmotion:", userEmotion);
-  console.log("aiEmotion:", aiEmotion);
-  console.log("isEditMode:", isEditMode);
 
   return (
     <View style={styles.section}>
       <EmotionHeader isPublic={isPublic} onToggle={() => setIsPublic(prev => !prev)} />
 
-      {/* 사용자 감정 표시 */}
       <View style={styles.emotionContainer}>
         <EmotionRow 
           label={isEditMode ? "오늘의 감정" : "오늘의 감정"} 
@@ -45,7 +40,6 @@ const DiaryImotionSection = ({
         />
       </View>
 
-      {/* AI 감정 표시 */}
       <View style={styles.emotionContainer}>
         {aiEmotion ? (
           <EmotionRow 
@@ -62,7 +56,6 @@ const DiaryImotionSection = ({
         )}
       </View>
 
-      {/* 분석 버튼 */}
       <TouchableOpacity 
         style={[
           styles.analyzeButton,
@@ -102,7 +95,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reAnalyzeButton: {
-    backgroundColor: '#b881c2', // 재분석 버튼은 조금 다른 색상
+    backgroundColor: '#b881c2',
   },
   analyzeText: {
     color: '#fff',

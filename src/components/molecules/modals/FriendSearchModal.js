@@ -22,12 +22,11 @@ import { EXPO_PUBLIC_API_URL } from '@env';
 const FriendSearchModal = ({ visible, onClose }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [followingUsers, setFollowingUsers] = useState([]); // 현재 팔로우 중인 사용자들
+  const [followingUsers, setFollowingUsers] = useState([]);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const searchResults = useSelector(state => state.user.searchResults);
 
-  // 검색 결과 초기화
   useEffect(() => {
     if (visible) {
       setSearchKeyword('');
@@ -35,26 +34,17 @@ const FriendSearchModal = ({ visible, onClose }) => {
     }
   }, [visible]);
 
-  // 현재 팔로우 중인 사용자 목록 가져오기
   const loadFollowingList = async () => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) return;
 
-      // TODO: 실제 팔로우 목록 API 호출
-      // const response = await axios.get(`${EXPO_PUBLIC_API_URL}/follow/following`, {
-      //   headers: { 'Authorization': `Bearer ${token}` }
-      // });
-      // setFollowingUsers(response.data);
-
-      // 더미 데이터 제거
       setFollowingUsers([]);
     } catch (error) {
       console.error('팔로우 목록 로딩 실패:', error);
     }
   };
 
-  // 사용자 검색
   const searchUsers = async (keyword) => {
     if (!keyword.trim()) {
       setSearchResults([]);
@@ -68,18 +58,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
         Alert.alert('오류', '로그인이 필요합니다.');
         return;
       }
-
-      console.log('=== 사용자 검색 API 호출 ===');
-      console.log('검색어:', keyword);
-
-      // TODO: 실제 사용자 검색 API 호출
-      // const response = await axios.get(`${EXPO_PUBLIC_API_URL}/login/search/users`, {
-      //   params: { nickname: keyword },
-      //   headers: { 'Authorization': `Bearer ${token}` }
-      // });
-
-      // 더미 데이터 제거 - 빈 결과 반환
-      console.log('검색 결과: 더미데이터 제거로 빈 결과');
       setSearchResults([]);
 
     } catch (error) {
@@ -91,7 +69,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
     }
   };
 
-  // 팔로우/언팔로우 처리
   const handleFollowToggle = async (user) => {
     const isFollowing = followingUsers.includes(user.uid);
     
@@ -101,11 +78,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
         Alert.alert('오류', '로그인이 필요합니다.');
         return;
       }
-
-      console.log(`=== ${isFollowing ? '언팔로우' : '팔로우'} 요청 ===`);
-      console.log('대상 사용자:', user.nick_name, user.uid);
-
-      // TODO: 실제 팔로우/언팔로우 API 호출이 필요합니다
       Alert.alert('준비중', '팔로우 기능은 현재 준비중입니다.');
 
     } catch (error) {
@@ -114,7 +86,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
     }
   };
 
-  // 검색 입력 처리 (디바운싱)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchKeyword.trim()) {
@@ -124,12 +95,9 @@ const FriendSearchModal = ({ visible, onClose }) => {
     return () => clearTimeout(timeoutId);
   }, [searchKeyword]);
 
-  // 검색 결과 디버깅
   useEffect(() => {
-    console.log('[FriendSearchModal] searchResults:', searchResults);
   }, [searchResults]);
 
-  // 사용자 카드 렌더링
   const renderUserCard = ({ item }) => (
     <TouchableOpacity
       onPress={() => {
@@ -152,7 +120,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
   return (
     <View style={styles.modalOverlay}>
       <View style={styles.modalContainer}>
-        {/* 헤더 */}
         <View style={styles.modalHeader}>
           <Text style={styles.modalTitle}>친구 찾기</Text>
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
@@ -160,7 +127,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 검색 입력 */}
         <View style={styles.searchSection}>
           <View style={styles.searchInputWrapper}>
             <Feather name="search" size={16} color="#999" />
@@ -180,7 +146,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
           </View>
         </View>
 
-        {/* 검색 결과 */}
         <View style={styles.resultsList}>
           {loading ? (
             <View style={styles.loadingContainer}>
@@ -213,7 +178,7 @@ const FriendSearchModal = ({ visible, onClose }) => {
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    position: 'absolute', // 화면 전체를 덮도록 position: 'absolute' 사용
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -221,11 +186,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000, // 다른 요소들 위에 표시되도록 zIndex 설정
+    zIndex: 1000,
   },
   modalContainer: {
     width: '90%',
-    maxHeight: '80%', // 모달의 최대 높이 제한 (화면의 80%)
+    maxHeight: '80%',
     backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
@@ -258,7 +223,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8, // 플랫폼별 패딩 조절
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
   },
   searchInputField: {
     flex: 1,
@@ -270,10 +235,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   resultsList: {
-    // flex: 1, // 일단 주석 처리하고 height 또는 maxHeight로 제어
-    // minHeight: 100, 
-    height: 300, // 4-5개 항목이 보일 수 있는 대략적인 높이 (조정 필요)
-    // 또는 maxHeight: 300, 
+    height: 300,
   },
   loadingContainer: {
     alignItems: 'center',

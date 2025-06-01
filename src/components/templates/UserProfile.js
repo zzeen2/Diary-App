@@ -39,10 +39,8 @@ const UserProfile = ({ route }) => {
   useEffect(() => {
     dispatch(fetchEmotions());
     if (uid) {
-      console.log('[UserProfile] 진입 uid:', uid);
       getUserById(uid)
         .then((data) => {
-          console.log('[UserProfile] getUserById 응답:', data);
           setProfile((prev) => ({
             ...prev,
             nickname: data.nick_name,
@@ -51,23 +49,20 @@ const UserProfile = ({ route }) => {
             uid: data.uid,
           }));
         })
-        .catch((err) => { console.error('[UserProfile] getUserById 에러:', err); setProfile(null); });
+        .catch((err) => { setProfile(null); });
       getPublicDiaries(uid)
         .then((data) => {
-          console.log('[UserProfile] getPublicDiaries 응답:', data);
           setPublicDiaries(data);
         })
-        .catch((err) => { console.error('[UserProfile] getPublicDiaries 에러:', err); setPublicDiaries([]); });
+        .catch((err) => { setPublicDiaries([]); });
       AsyncStorage.getItem('userUid').then(myUid => {
         if (myUid) {
           checkFollowStatus(myUid, uid).then((res) => {
-            console.log('[UserProfile] checkFollowStatus 응답:', res);
             setIsFollowing(res);
-          }).catch((err) => { console.error('[UserProfile] checkFollowStatus 에러:', err); setIsFollowing(false); });
+          }).catch((err) => { setIsFollowing(false); });
         }
       });
       getUserStats(uid).then((res) => {
-        console.log('[UserProfile] getUserStats 응답:', res);
         if (res.success && res.data) {
           setProfile((prev) => ({
             ...prev,
@@ -76,7 +71,7 @@ const UserProfile = ({ route }) => {
             publicDiaryCount: res.data.diaryCount,
           }));
         }
-      }).catch((err) => { console.error('[UserProfile] getUserStats 에러:', err); });
+      }).catch((err) => { });
     }
   }, [dispatch, uid]);
 
@@ -85,21 +80,16 @@ const UserProfile = ({ route }) => {
   const handleFollowToggle = async () => {
     setLoading(true);
     const myUid = await AsyncStorage.getItem('userUid');
-    if (!myUid) { console.warn('[UserProfile] 내 uid 없음'); setLoading(false); return; }
+    if (!myUid) { setLoading(false); return; }
     try {
       if (isFollowing) {
-        console.log('[UserProfile] 언팔로우 요청:', myUid, uid);
         const res = await unfollowUser(myUid, uid);
-        console.log('[UserProfile] 언팔로우 응답:', res);
         setIsFollowing(false);
       } else {
-        console.log('[UserProfile] 팔로우 요청:', myUid, uid);
         const res = await followUser(myUid, uid);
-        console.log('[UserProfile] 팔로우 응답:', res);
         setIsFollowing(true);
       }
       const statsRes = await getUserStats(uid);
-      console.log('[UserProfile] getUserStats(팔로우 후) 응답:', statsRes);
       if (statsRes.success && statsRes.data) {
         setProfile((prev) => ({
           ...prev,
@@ -109,15 +99,10 @@ const UserProfile = ({ route }) => {
         }));
       }
     } catch (e) {
-      console.error('[UserProfile] 팔로우/언팔로우 에러:', e);
     } finally {
       setLoading(false);
     }
   };
-
-  console.log('[UserProfile] 렌더링 publicDiaries:', publicDiaries);
-  console.log('[UserProfile] 렌더링 isFollowing:', isFollowing);
-  console.log('[UserProfile] 렌더링 uid:', uid);
 
   return (
     <View style={styles.container}>
@@ -184,7 +169,7 @@ const UserProfile = ({ route }) => {
                       entry={item}
                       userEmotion={userEmotionData}
                       aiEmotion={aiEmotionData}
-                      onPress={() => {/* 상세보기 등 */}}
+                      onPress={() => {}}
                     />
                   );
                 }}

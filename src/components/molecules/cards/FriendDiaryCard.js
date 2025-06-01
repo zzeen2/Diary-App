@@ -6,13 +6,11 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
     const [lineCount, setLineCount] = useState(0);
     const [measuringText, setMeasuringText] = useState(true);
     
-    // 마크다운 이미지 태그 제거 함수
     const removeMarkdownImages = (text) => {
         if (!text) return '';
         return text.replace(/!\[.*?\]\((.*?)\)/g, '');
     };
 
-    // 본문에서 이미지 태그 제거
     const cleanContent = removeMarkdownImages(entry.content);
     
     useEffect(() => {
@@ -27,7 +25,6 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
     return (
         <TouchableOpacity onPress={onPress} style={styles.wrapper}>
             <View style={[ styles.card, lineCount === 1 && !measuringText && { height: 140 } ]}>
-                {/* 감정 색상 바 */}
                 <View style={styles.emotionBarContainer}>
                     {aiEmotion && userEmotion ? (
                         <>
@@ -41,16 +38,13 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
                     )}
                 </View>
 
-                {/* 카드 내용 */}
                 <View style={styles.content}>
-                    {/* 친구 정보 */}
                     <View style={styles.profileRow}>
                         <View style={styles.profileImageWrapper}>
                             <Image source={profileImageSource} style={styles.profileImage} />
                         </View>
                         <View style={styles.profileInfo}>
                             <Text style={styles.userName}>{writerName || '알 수 없음'}</Text>
-                            {/* ⭐ 날짜에 지구본 아이콘 추가 ⭐ */}
                             <View style={styles.dateContainer}>
                                 <Text style={styles.globeIcon}>🌍</Text>
                                 <Text style={styles.date}>
@@ -62,7 +56,6 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
 
                     <Text style={styles.title} numberOfLines={1}>{entry.title}</Text>
                     
-                    {/* 측정용 숨겨진 텍스트 */}
                     {measuringText && (
                         <Text 
                             style={[styles.preview, styles.hiddenText]} 
@@ -96,7 +89,6 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
                                 />
                             )}
                         </View>
-                        {/* 댓글 개수 표시 */}
                         {entry.commentCount > 0 && (
                             <Text style={styles.commentCount}>
                                 💬 {entry.commentCount}
@@ -172,7 +164,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#555',
     },
-    // ⭐ 날짜 컨테이너 스타일 추가 ⭐
     dateContainer: {
         flexDirection: 'row',
         alignItems: 'center',

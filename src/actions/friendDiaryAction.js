@@ -1,5 +1,3 @@
-// src/actions/friendDiaryAction.js
-
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,15 +12,7 @@ export const fetchFriendDiaries = () => async (dispatch) => {
   dispatch({ type: FETCH_FRIEND_DIARIES_REQUEST });
   
   try {
-    console.log('친구 일기 API 호출 시작...');
-    
     const token = await AsyncStorage.getItem('jwtToken');
-    
-    console.log('=== 토큰 디버깅 ===');
-    console.log('저장된 토큰 존재 여부:', !!token);
-    console.log('토큰 길이:', token?.length);
-    console.log('토큰 시작 부분:', token?.substring(0, 20) + '...');
-    
     if (!token) {
       throw new Error('저장된 JWT 토큰이 없습니다.');
     }
@@ -33,23 +23,12 @@ export const fetchFriendDiaries = () => async (dispatch) => {
         'Content-Type': 'application/json',
       },
     };
-    
-    console.log('API 요청 설정:', requestConfig);
-    console.log('요청 URL:', `${EXPO_PUBLIC_API_URL}/main/app/diary/followed`); // ⭐ 앱용 경로
-
-    const response = await axios.get(`${EXPO_PUBLIC_API_URL}/main/app/diary/followed`, requestConfig); // ⭐ 앱용 경로
-
-    console.log('친구 일기 API 응답 성공!');
-    console.log('응답 데이터:', response.data);
-
+    const response = await axios.get(`${EXPO_PUBLIC_API_URL}/main/app/diary/followed`, requestConfig); 
     dispatch({
       type: FETCH_FRIEND_DIARIES_SUCCESS,
       payload: response.data,
     });
   } catch (error) {
-    console.error('친구 일기 조회 실패:', error);
-    
-    // ⭐ 상세한 에러 정보 로깅 ⭐
     if (error.response) {
       console.error('에러 응답 상태:', error.response.status);
       console.error('에러 응답 데이터:', error.response.data);
