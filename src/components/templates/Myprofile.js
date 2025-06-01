@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../context/AuthContext';
 import { clearUser } from '../../reducers/userReducer';
 import { Feather } from '@expo/vector-icons';
-import { updateUserBio, getUserStats } from '../../api/user';
+import { updateUserBio, getUserStats, getUserProfileByUid } from '../../api/user';
 import { DiaryCard } from '../molecules/cards';
 import { fetchMyDiaries } from '../../actions/diaryAction';
 
@@ -40,7 +40,7 @@ const MyProfile = () => {
   const [modalType, setModalType] = useState('followers');
   const dispatch = useDispatch();
   const emotions = useSelector((state) => state.emotions.emotions);
-  const { setIsLoggedIn, setUser: setAuthUser, isLoggedIn } = useContext(AuthContext);
+  const { setIsLoggedIn, setAuthUser, isLoggedIn } = useContext(AuthContext);
   
   // Redux 스토어에서 로그인한 사용자 정보 가져오기 (이제 직접 사용하지 않음, 또는 보조적으로 사용)
   // const loggedInUser = useSelector((state) => state.user); 
@@ -55,50 +55,81 @@ const MyProfile = () => {
   
   // 프로필 정보 상태
   const [profile, setProfile] = useState({
-    profile_img: require('../../assets/IMG_3349.jpg'), // 기본 이미지
-    nickname: '사용자',
-    intro: '',
-    followerCount: 0, 
-    followingCount: 0, 
-    publicDiaryCount: 0, 
+    profile_img: require('../../assets/IMG_3349.jpg'),
+    nickname: '로딩 중...',
+    intro: '로딩 중...',
+    followerCount: 0,
+    followingCount: 0,
+    publicDiaryCount: 0,
+    uid: null,
   });
 
-  // AsyncStorage에서 사용자 정보를 불러와 profile 상태 업데이트
-  useEffect(() => {
-    const loadProfileData = async () => {
-      try {
+  // DB에서 사용자 프로필 정보를 불러와 profile 상태 업데이트
+  const loadProfileData = async () => {
+    try {
+      const userUid = await AsyncStorage.getItem('userUid');
+      if (!userUid) {
+        console.log("UID 없음, 프로필 로딩 중단");
+        // 필요시 로그아웃 또는 에러 처리
+        setProfile(prev => ({ ...prev, nickname: '사용자 정보 없음', intro: '-'}));
+        return;
+      }
+
+      console.log(`[loadProfileData] UID (${userUid})로 프로필 정보 요청`);
+      const userProfileData = await getUserProfileByUid(userUid);
+
+      if (userProfileData) {
+        console.log("[loadProfileData] 받은 프로필 정보:", userProfileData);
+        setProfile({
+          uid: userProfileData.uid || userUid,
+          nickname: userProfileData.nickname || userProfileData.nick_name || '사용자',
+          profile_img: userProfileData.profile_image ? { uri: userProfileData.profile_image } : require('../../assets/IMG_3349.jpg'),
+          intro: userProfileData.bio || '',
+          // API 응답에 통계 정보가 포함되어 있다고 가정 (없다면 아래 getUserStats 호출 유지)
+          followerCount: userProfileData.followerCount !== undefined ? userProfileData.followerCount : profile.followerCount,
+          followingCount: userProfileData.followingCount !== undefined ? userProfileData.followingCount : profile.followingCount,
+          publicDiaryCount: userProfileData.publicDiaryCount !== undefined ? userProfileData.publicDiaryCount : profile.publicDiaryCount,
+        });
+
+        // 만약 getUserProfileByUid 응답에 통계 정보(followerCount 등)가 없다면,
+        // 기존 getUserStats를 호출하여 통계 정보만 따로 업데이트할 수 있습니다.
+        // 예: if (userProfileData.followerCount === undefined) {
+        //   const statsRes = await getUserStats(userUid);
+        //   if (statsRes.success && statsRes.data) {
+        //     setProfile(prev => ({ ...prev, followerCount: statsRes.data.followerCount, ... }));
+        //   }
+        // }
+
+      } else {
+        console.warn("[loadProfileData] 프로필 정보를 가져오지 못했습니다. AsyncStorage 값으로 대체 시도 또는 기본값 유지.");
+        // 필요시 AsyncStorage에서 fallback 로직 추가 (선택 사항)
         const storedNickname = await AsyncStorage.getItem('userNickname');
         const storedProfileImage = await AsyncStorage.getItem('userProfileImage');
         const storedBio = await AsyncStorage.getItem('userBio');
-        const storedUserUid = await AsyncStorage.getItem('userUid');
-
-        setProfile(prevProfile => ({
-          ...prevProfile,
-          nickname: storedNickname || '사용자',
-          profile_img: storedProfileImage ? { uri: storedProfileImage } : require('../../assets/IMG_3349.jpg'),
-          intro: storedBio || '',
-          uid: storedUserUid || null,
+        setProfile(prev => ({
+            ...prev,
+            uid: userUid,
+            nickname: storedNickname || '사용자(오류)',
+            profile_img: storedProfileImage ? { uri: storedProfileImage } : require('../../assets/IMG_3349.jpg'),
+            intro: storedBio || '자기소개 로드 실패',
         }));
-
-        // 팔로워/팔로잉/공개일기 숫자 최신화
-        if (storedUserUid) {
-          const statsRes = await getUserStats(storedUserUid);
-          if (statsRes.success && statsRes.data) {
-            setProfile(prev => ({
-              ...prev,
-              followerCount: statsRes.data.followerCount,
-              followingCount: statsRes.data.followingCount,
-              publicDiaryCount: statsRes.data.diaryCount,
-            }));
-          }
+        // getUserStats는 uid가 있으므로 호출 가능
+        const statsRes = await getUserStats(userUid);
+        if (statsRes.success && statsRes.data) {
+            setProfile(prev => ({ ...prev, followerCount: statsRes.data.followerCount, followingCount: statsRes.data.followingCount, publicDiaryCount: statsRes.data.diaryCount }));
         }
-      } catch (error) {
-        console.error('프로필 데이터/통계 로딩 실패:', error);
       }
-    };
-    loadProfileData();
+    } catch (error) {
+      console.error('[loadProfileData] 프로필 데이터 로딩 실패:', error);
+      setProfile(prev => ({ ...prev, nickname: '정보 로드 실패', intro: '오류 발생'}));
+      // 필요시 AsyncStorage fallback 로직 추가
+    }
+  };
+
+  useEffect(() => {
+    loadProfileData(); // 마운트 시 프로필 정보 로드
   }, []);
-  
+
   const myDiaries = useSelector((state) => state.diary.myDiaries || []);
   const publicDiaries = myDiaries.filter((d) => d.isPublic);
   
@@ -146,20 +177,25 @@ const MyProfile = () => {
           text: "로그아웃",
           onPress: async () => {
             try {
-              await AsyncStorage.removeItem('jwtToken');
-              await AsyncStorage.removeItem('userUid');
-              await AsyncStorage.removeItem('userNickname');
-              await AsyncStorage.removeItem('userProfileImage');
-              await AsyncStorage.removeItem('userBio');
-
+              // Redux 스토어 초기화
               dispatch(clearUser());
 
-              if (setAuthUser) setAuthUser(null);
+              // AuthContext의 user 상태 null로 설정
+              if (setAuthUser) {
+                setAuthUser(null);
+                console.log("AuthContext의 user 상태 null로 설정됨");
+              }
               
-              console.log("로그아웃 완료");
-
-              // AuthContext의 상태 변경으로 자동으로 웰컴페이지로 이동
+              // AuthContext의 로그인 상태 변경 -> 이로 인해 App.tsx에서 화면 자동 전환
               setIsLoggedIn(false);
+              console.log("로그아웃 완료 - isLoggedIn: false, App.tsx에서 WelcomeScreen으로 자동 전환될 것입니다.");
+
+              // navigation.reset 제거 - AuthContext 상태 변경으로 자동 처리
+              // navigation.reset({
+              //   index: 0,
+              //   routes: [{ name: 'Welcome' }], 
+              // });
+              // console.log("WelcomeScreen으로 네비게이션 리셋 완료");
 
             } catch (error) {
               console.error("로그아웃 처리 중 오류:", error);
@@ -267,11 +303,15 @@ const MyProfile = () => {
               onClose={() => setShowEditModal(false)}
               onSave={async (newIntro) => {
                 try {
-                  const uid = await AsyncStorage.getItem('userUid');
-                  await updateUserBio(uid, newIntro);
-                  setProfile((prev) => ({ ...prev, intro: newIntro }));
-                  await AsyncStorage.setItem('userBio', newIntro);
+                  if (!profile.uid) {
+                    Alert.alert('오류', '사용자 ID를 찾을 수 없습니다.');
+                    return;
+                  }
+                  await updateUserBio(profile.uid, newIntro); // DB 업데이트
+                  // AsyncStorage의 userBio도 업데이트 (선택적이지만, 다른 곳에서 사용할 경우 대비)
+                  await AsyncStorage.setItem('userBio', newIntro); 
                   Alert.alert('성공', '자기소개가 저장되었습니다.');
+                  loadProfileData(); // 수정 후 전체 프로필 정보 다시 로드하여 화면 갱신
                 } catch (e) {
                   Alert.alert('오류', '자기소개 저장에 실패했습니다.');
                 }

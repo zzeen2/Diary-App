@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 3,
         elevation: 1,
-        maxHeight: 130,
+        maxHeight: 160,
     },
     emotionBarContainer: {
         width: 6,

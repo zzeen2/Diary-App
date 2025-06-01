@@ -1,9 +1,9 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Linking, SafeAreaView, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import WelcomeScreen from './src/screens/WelcomeScreens';
 import MainScreen from './src/components/templates/MainScreen';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import CreateDiary from './src/components/templates/CreateDiary'
 import { Provider } from 'react-redux';
@@ -17,53 +17,49 @@ import DiaryDetail from './src/components/templates/DiaryDetail';
 import DiaryEdit from './src/components/templates/DiaryEdit';
 import StatsTemplate from './src/components/templates/StatsTemplate';
 import LoginScreen from './src/components/templates/LoginScreen';
-import { useDispatch } from 'react-redux';
-import  fetchUser  from './src/reducers/userReducer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
-const AppContent = () => {
+// AppContent는 네비게이션 스크린 정의만 담당
+const AppScreens = () => {
   const { isLoggedIn } = useContext(AuthContext);
-  const dispatch = useDispatch(); 
-  const navigation = useNavigation(); // navigation 훅
 
-  useEffect(() => {
-    const initUser = async () => {
-      const token = await AsyncStorage.getItem('jwtToken');
-      if (token) {
-        dispatch(fetchUser(token));
-      }
-    };
-    initUser();
-  }, []);
-
-  if (isLoggedIn === null) return null;
-  
+  if (isLoggedIn === null) {
+    // 로딩 중에는 아무것도 표시하지 않거나 로딩 스피너 표시
+    return null; 
+  }
   
   return (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    {isLoggedIn ? (
-      <>
-        <Stack.Screen name="Main" component={MainScreen} />
-        <Stack.Screen name="createDiary" component={CreateDiary} />
-        <Stack.Screen name="listDiary" component={DiaryListScreen} />
-        <Stack.Screen name="myProfile" component={MyProfile} />
-        <Stack.Screen name="UserProfile" component={UserProfile} />
-        <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
-        <Stack.Screen name="DiaryEdit" component={DiaryEdit} />
-        <Stack.Screen name="stats" component={StatsTemplate} />
-      </>
-    ) : (
-      <>
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="OAuth" component={LoginScreen} />
-      <Stack.Screen name="Main" component={MainScreen} />
-      </>
-    )}
-  </Stack.Navigator>
-);
+    <Stack.Navigator screenOptions={{ headerShown: false }} id={undefined}>
+      {isLoggedIn ? (
+        <>
+          <Stack.Screen name="Main" component={MainScreen} />
+          <Stack.Screen name="createDiary" component={CreateDiary} />
+          <Stack.Screen name="listDiary" component={DiaryListScreen} />
+          <Stack.Screen name="myProfile" component={MyProfile} />
+          <Stack.Screen name="UserProfile" component={UserProfile} />
+          <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
+          <Stack.Screen name="DiaryEdit" component={DiaryEdit} />
+          <Stack.Screen name="stats" component={StatsTemplate} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="OAuth" component={LoginScreen} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
+};
 
+// RootNavigation은 NavigationContainer와 키 관리를 담당
+const RootNavigation = () => {
+  const { isLoggedIn } = useContext(AuthContext);
+  return (
+    <NavigationContainer key={String(isLoggedIn)}> 
+      <AppScreens />
+    </NavigationContainer>
+  );
 };
 
 export default function App() {
@@ -73,9 +69,7 @@ export default function App() {
     <Provider store={store}>
       <SafeAreaProvider>
         <AuthProvider>
-          <NavigationContainer>
-            <AppContent />
-          </NavigationContainer>
+          <RootNavigation />
         </AuthProvider>
       </SafeAreaProvider>
     </Provider>
