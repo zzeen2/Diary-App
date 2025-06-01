@@ -40,21 +40,16 @@ const DiaryImotionSection = ({
       {/* 사용자 감정 표시 */}
       <View style={styles.emotionContainer}>
         <EmotionRow 
-          label={isEditMode ? "사용자 감정 (수정 불가)" : "오늘의 감정"} 
+          label={isEditMode ? "오늘의 감정" : "오늘의 감정"} 
           emotion={userEmotion} 
         />
-        {isEditMode && (
-          <Text style={styles.readOnlyText}>
-            🔒 사용자가 선택한 감정은 수정할 수 없습니다
-          </Text>
-        )}
       </View>
 
       {/* AI 감정 표시 */}
       <View style={styles.emotionContainer}>
         {aiEmotion ? (
           <EmotionRow 
-            label={isEditMode ? "AI 분석 감정 (재분석 가능)" : "AI 분석 감정"} 
+            label={isEditMode ? "AI 분석 감정" : "AI 분석 감정"} 
             emotion={aiEmotion} 
           />
         ) : (
@@ -97,7 +92,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   emotionContainer: {
-    marginBottom: 16,
+    marginBottom: 4,
   },
   analyzeButton: {
     marginTop: 0,
@@ -107,7 +102,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reAnalyzeButton: {
-    backgroundColor: '#9966cc', // 재분석 버튼은 조금 다른 색상
+    backgroundColor: '#b881c2', // 재분석 버튼은 조금 다른 색상
   },
   analyzeText: {
     color: '#fff',

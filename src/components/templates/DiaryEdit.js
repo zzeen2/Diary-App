@@ -343,7 +343,7 @@ const DiaryEditScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <StatusBar style="dark" backgroundColor="transparent" translucent />
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
-        <SafeAreaView style={styles.safeContainer}>
+        <SafeAreaView style={[styles.safeContainer, { paddingTop: insets.top }]}>
           <HeaderBar
             showBackButton
             showConfirmButton
