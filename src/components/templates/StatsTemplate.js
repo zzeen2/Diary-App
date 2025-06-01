@@ -18,15 +18,18 @@ const tabs = [
 const StatsTemplate = ({ navigation, emotions, onTabChange }) => {
   console.log('=== StatsTemplate 렌더링 시작 ===');
   const insets = useSafeAreaInsets();
-  const [statsData, setStatsData] = useState([]);
+  const [userEmotionData, setUserEmotionData] = useState([]);
+  const [aiEmotionData, setAiEmotionData] = useState([]);
   const [streakData, setStreakData] = useState({});
   const [loading, setLoading] = useState(true);
 
   console.log('현재 상태:', {
-    statsData,
+    userEmotionData,
+    aiEmotionData,
     streakData,
     loading,
-    statsDataLength: Array.isArray(statsData) ? statsData.length : 'not array',
+    userEmotionLength: Array.isArray(userEmotionData) ? userEmotionData.length : 'not array',
+    aiEmotionLength: Array.isArray(aiEmotionData) ? aiEmotionData.length : 'not array',
     streakDataKeys: Object.keys(streakData),
   });
 
@@ -46,15 +49,23 @@ const StatsTemplate = ({ navigation, emotions, onTabChange }) => {
         console.log('📈 emotionStats:', JSON.stringify(emotionStats, null, 2));
         console.log('🔥 streakStats:', JSON.stringify(streakStats, null, 2));
         
-        setStatsData(emotionStats);
+        // 새로운 데이터 구조 처리 및 정렬
+        const sortedUserEmotions = (emotionStats?.userEmotions || []).sort((a, b) => (b.count || 0) - (a.count || 0));
+        const sortedAiEmotions = (emotionStats?.aiEmotions || []).sort((a, b) => (b.count || 0) - (a.count || 0));
+        
+        setUserEmotionData(sortedUserEmotions);
+        setAiEmotionData(sortedAiEmotions);
         setStreakData(streakStats);
         
         console.log('✅ 상태 업데이트 완료');
+        console.log('👤 정렬된 사용자 감정 데이터:', sortedUserEmotions);
+        console.log('🤖 정렬된 AI 감정 데이터:', sortedAiEmotions);
       } catch (error) {
         console.error('❌ 통계 API 에러:', error);
         console.error('❌ 에러 메시지:', error.message);
         console.error('❌ 에러 스택:', error.stack);
-        setStatsData([]);
+        setUserEmotionData([]);
+        setAiEmotionData([]);
         setStreakData({});
       } finally {
         setLoading(false);
@@ -66,8 +77,12 @@ const StatsTemplate = ({ navigation, emotions, onTabChange }) => {
 
   // 상태 변화 감지
   useEffect(() => {
-    console.log('📊 statsData 변화 감지:', statsData);
-  }, [statsData]);
+    console.log('👤 userEmotionData 변화 감지:', userEmotionData);
+  }, [userEmotionData]);
+
+  useEffect(() => {
+    console.log('🤖 aiEmotionData 변화 감지:', aiEmotionData);
+  }, [aiEmotionData]);
 
   useEffect(() => {
     console.log('🔥 streakData 변화 감지:', streakData);
@@ -87,8 +102,17 @@ const StatsTemplate = ({ navigation, emotions, onTabChange }) => {
           <HeaderBar title="통계" />
 
           <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-            {console.log('🎨 EmotionStatsSection 렌더링, 데이터:', statsData)}
-            <EmotionStatsSection emotionData={statsData} />
+            {console.log('🎨 사용자 감정 섹션 렌더링, 데이터:', userEmotionData)}
+            <EmotionStatsSection 
+              title="👤 내 감정 통계" 
+              emotionData={userEmotionData} 
+            />
+            
+            {console.log('🎨 AI 감정 섹션 렌더링, 데이터:', aiEmotionData)}
+            <EmotionStatsSection 
+              title="🤖 AI 감정 분석" 
+              emotionData={aiEmotionData} 
+            />
             
             {console.log('🎨 StreakSection 렌더링, 데이터:', streakData)}
             <StreakSection streakData={streakData} />
@@ -118,9 +142,10 @@ const styles = StyleSheet.create({
   safeContainer: { flex: 1 },
   scrollView: { flex: 1 },
   content: {
+    paddingTop: 20,
     paddingBottom: 80,
-    paddingHorizontal: 16,
-    gap: 20,
+    paddingHorizontal: 0,
+    gap: 16,
   },
 });
 

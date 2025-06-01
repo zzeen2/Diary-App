@@ -5,7 +5,7 @@ import WelcomeScreen from './src/screens/WelcomeScreens';
 import MainScreen from './src/components/templates/MainScreen';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import CreateDiary from './src/components/templates/createDiary'
+import CreateDiary from './src/components/templates/CreateDiary'
 import { Provider } from 'react-redux';
 import { store } from './src/store'
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
@@ -14,6 +14,7 @@ import DiaryListScreen from './src/components/templates/DiaryList';
 import MyProfile from './src/components/templates/Myprofile'
 import UserProfile from './src/components/templates/UserProfile';
 import DiaryDetail from './src/components/templates/DiaryDetail';
+import DiaryEdit from './src/components/templates/DiaryEdit';
 import StatsTemplate from './src/components/templates/StatsTemplate';
 import LoginScreen from './src/components/templates/LoginScreen';
 import { useDispatch } from 'react-redux';
@@ -50,6 +51,7 @@ const AppContent = () => {
         <Stack.Screen name="myProfile" component={MyProfile} />
         <Stack.Screen name="UserProfile" component={UserProfile} />
         <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
+        <Stack.Screen name="DiaryEdit" component={DiaryEdit} />
         <Stack.Screen name="stats" component={StatsTemplate} />
       </>
     ) : (

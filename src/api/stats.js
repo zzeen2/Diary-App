@@ -8,7 +8,7 @@ export const getEmotionStats = async () => {
     const token = await AsyncStorage.getItem('jwtToken');
     console.log('🔐 JWT 토큰:', token ? `${token.substring(0, 20)}...` : 'null');
     
-    const url = `${EXPO_PUBLIC_API_URL}/stats/app/stats/emotion`;
+    const url = `${EXPO_PUBLIC_API_URL}/stats/app/emotion`;
     console.log('🌐 요청 URL:', url);
     console.log('📡 API_URL 환경변수:', EXPO_PUBLIC_API_URL);
     
@@ -42,7 +42,7 @@ export const getStreakStats = async () => {
     const token = await AsyncStorage.getItem('jwtToken');
     console.log('🔐 JWT 토큰:', token ? `${token.substring(0, 20)}...` : 'null');
     
-    const url = `${EXPO_PUBLIC_API_URL}/stats/app/stats/streak`;
+    const url = `${EXPO_PUBLIC_API_URL}/stats/app/streak`;
     console.log('🌐 요청 URL:', url);
     console.log('📡 API_URL 환경변수:', EXPO_PUBLIC_API_URL);
     
