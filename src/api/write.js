@@ -127,11 +127,11 @@ export const saveDiary = async (diaryData) => {
     );
 
     Alert.alert('저장 완료', '일기가 성공적으로 저장되었습니다!');
-    return true;
+    return response.data; // 전체 응답 데이터 반환 (diary_id 포함)
 
   } catch (error) {
     console.error('❌ 일기 저장 실패:', error.response?.data || error.message || error);
     Alert.alert('저장 실패', error.response?.data?.message || '일기 저장에 실패했습니다.');
-    return false;
+    return null;
   }
 }; 

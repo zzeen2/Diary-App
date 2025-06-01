@@ -301,6 +301,7 @@ const DiaryDetail = ({ route, navigation }) => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onImagePress={handleImagePress}
+              navigation={navigation}
             />
 
             {/* 댓글 섹션 - 항상 표시 (공개/비공개 상태는 내부에서 처리) */}

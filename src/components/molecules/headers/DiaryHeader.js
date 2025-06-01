@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {EmotionTag, DiaryMeta} from '../../atoms/TextsAndLabel';
 import {ProfileThumbnail} from '../../atoms/thumbnail';
 
-const DiaryHeader = ({ title, emotion = [], date, isPublic, user, isMine }) => {
+const DiaryHeader = ({ title, emotion = [], date, isPublic, user, isMine, navigation }) => {
   const emotions = emotion.filter(Boolean);
   console.log("=== DiaryHeader 렌더링 ===");
   console.log("emotions:", emotions);
@@ -26,6 +26,17 @@ const DiaryHeader = ({ title, emotion = [], date, isPublic, user, isMine }) => {
     }
   };
 
+  // 프로필 클릭 핸들러
+  const handleProfilePress = () => {
+    if (user && navigation) {
+      console.log('프로필 이동:', user.nick_name || user.nickname, 'uid:', user.uid);
+      navigation.navigate('UserProfile', {
+        uid: user.uid,
+        nickname: user.nick_name || user.nickname
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* 첫 번째 행: 제목 + 프로필 (내 글이 아닌 경우만) */}
@@ -38,8 +49,9 @@ const DiaryHeader = ({ title, emotion = [], date, isPublic, user, isMine }) => {
         {/* 프로필 (본인 글이 아닐 때만 우측에) */}
         {!isMine && user && (
           <TouchableOpacity 
-            onPress={() => console.log('프로필 클릭:', user.nick_name || user.nickname)}
+            onPress={handleProfilePress}
             style={styles.profileContainer}
+            activeOpacity={0.7}
           >
             {/* ⭐ 임시로 직접 Image 컴포넌트 사용 ⭐ */}
             <View style={styles.profileWrapper}>

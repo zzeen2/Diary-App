@@ -47,8 +47,8 @@ const FriendSearchModal = ({ visible, onClose }) => {
       // });
       // setFollowingUsers(response.data);
 
-      // 임시 더미 데이터
-      setFollowingUsers([4284784202, 4282976753]); // 임희정, 친구A의 uid
+      // 더미 데이터 제거
+      setFollowingUsers([]);
     } catch (error) {
       console.error('팔로우 목록 로딩 실패:', error);
     }
@@ -78,37 +78,9 @@ const FriendSearchModal = ({ visible, onClose }) => {
       //   headers: { 'Authorization': `Bearer ${token}` }
       // });
 
-      // 임시 더미 검색 결과
-      const allUsers = [
-        {
-          uid: 4284784202,
-          nick_name: '임희정',
-          profile_image: 'http://k.kakaocdn.net/dn/badoZf/btsNMu0SZS4/rlYvUJUNaZGDnKxamo0hI1/img_640x640.jpg',
-        },
-        {
-          uid: 4282976753,
-          nick_name: '친구A',
-          profile_image: 'https://via.placeholder.com/40',
-        },
-        {
-          uid: 4282976754,
-          nick_name: '친구B',
-          profile_image: 'https://via.placeholder.com/40',
-        },
-        {
-          uid: 4282976755,
-          nick_name: '친구C',
-          profile_image: 'https://via.placeholder.com/40',
-        },
-      ];
-
-      // 검색어가 닉네임에 포함된 사용자 필터링
-      const filteredUsers = allUsers.filter(user => 
-        user.nick_name.toLowerCase().includes(keyword.toLowerCase())
-      );
-
-      console.log('검색 결과:', filteredUsers);
-      setSearchResults(filteredUsers);
+      // 더미 데이터 제거 - 빈 결과 반환
+      console.log('검색 결과: 더미데이터 제거로 빈 결과');
+      setSearchResults([]);
 
     } catch (error) {
       console.error('사용자 검색 실패:', error);
@@ -133,27 +105,8 @@ const FriendSearchModal = ({ visible, onClose }) => {
       console.log(`=== ${isFollowing ? '언팔로우' : '팔로우'} 요청 ===`);
       console.log('대상 사용자:', user.nick_name, user.uid);
 
-      if (isFollowing) {
-        // 언팔로우
-        // TODO: 실제 언팔로우 API 호출
-        // await axios.delete(`${EXPO_PUBLIC_API_URL}/follow/${user.uid}`, {
-        //   headers: { 'Authorization': `Bearer ${token}` }
-        // });
-        
-        setFollowingUsers(prev => prev.filter(uid => uid !== user.uid));
-        Alert.alert('완료', `${user.nick_name}님을 언팔로우했습니다.`);
-      } else {
-        // 팔로우
-        // TODO: 실제 팔로우 API 호출
-        // await axios.post(`${EXPO_PUBLIC_API_URL}/follow`, {
-        //   following_id: user.uid
-        // }, {
-        //   headers: { 'Authorization': `Bearer ${token}` }
-        // });
-        
-        setFollowingUsers(prev => [...prev, user.uid]);
-        Alert.alert('완료', `${user.nick_name}님을 팔로우했습니다!`);
-      }
+      // TODO: 실제 팔로우/언팔로우 API 호출이 필요합니다
+      Alert.alert('준비중', '팔로우 기능은 현재 준비중입니다.');
 
     } catch (error) {
       console.error('팔로우 처리 실패:', error);

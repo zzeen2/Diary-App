@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
     elevation: 4,
     marginHorizontal: 4,
     marginVertical: 4,
+    marginTop : 16,
   },
   avatarContainer: {
     position: 'relative',

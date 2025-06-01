@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TabBar } from '../organisms/TabBar';
-import {EmotionSelector} from '../organisms/main';
+import {EmotionSelector, StatsAndRandom} from '../organisms/main';
 import {DiaryListSection} from '../organisms/main';
 import  {HeaderBar}  from '../molecules/headers';
 import { AuthContext } from '../../context/AuthContext';
@@ -16,6 +16,8 @@ import { fetchStreak } from '../../reducers/streakReducer';
 import { fetchMyDiaries } from '../../actions/diaryAction';
 import { fetchFriendDiaries } from '../../actions/friendDiaryAction'; // ⭐ 친구 일기 액션 추가
 import { FriendSearchModal } from '../molecules/modals';
+import { checkTodayWritten, getTodayDiary, getRandomDiary, getMonthWrittenDates, saveEmotionOnly } from '../../api/diary';
+import { getCalendarEmotions } from '../../api/diary';
 
 const tabs = [
   { id: 'home', icon: '🏠', label: '홈' },
@@ -48,6 +50,18 @@ const MainScreen = () => {
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
   const [showFriendModal, setShowFriendModal] = useState(false); // 친구찾기 모달 상태
+
+  // 🆕 새로운 상태들 추가
+  const [hasWrittenToday, setHasWrittenToday] = useState(false);
+  const [todayDiary, setTodayDiary] = useState(null);
+  const [randomDiary, setRandomDiary] = useState(null);
+  const [monthlyRate, setMonthlyRate] = useState(0);
+  const [loadingRandom, setLoadingRandom] = useState(false);
+  const [calendarEmotions, setCalendarEmotions] = useState([]);
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
 
   const styles = StyleSheet.create({
     container: {
@@ -152,16 +166,60 @@ const MainScreen = () => {
       // 선택된 감정 초기화
       setSelectedEmotion(null);
 
-      // 오늘의 감정 저장 여부 확인
-      const checkSaved = async () => {
-        const saved = await AsyncStorage.getItem('emotionSavedDate');
-        const today = new Date().toISOString().slice(0, 10);
-        setIsEmotionSaved(saved === today);
-      };
-      checkSaved();
+      // 🆕 오늘 작성 여부 및 관련 데이터 로드
+      loadTodayStatus();
+      loadMonthlyRate();
+      loadRandomDiary();
 
     }, [dispatch])
   );
+
+  // 🆕 오늘 작성 상태 체크
+  const loadTodayStatus = async () => {
+    try {
+      const result = await checkTodayWritten();
+      setHasWrittenToday(result.hasWritten);
+      
+      if (result.hasWritten) {
+        const todayResult = await getTodayDiary();
+        if (todayResult.success) {
+          setTodayDiary(todayResult.diary);
+        }
+      }
+    } catch (error) {
+      console.error('오늘 작성 상태 확인 실패:', error);
+    }
+  };
+
+  // 🆕 이번 달 작성률 계산
+  const loadMonthlyRate = async () => {
+    try {
+      const now = new Date();
+      const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const writtenDates = await getMonthWrittenDates(yearMonth);
+      
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const rate = Math.round((writtenDates.length / daysInMonth) * 100);
+      setMonthlyRate(rate);
+    } catch (error) {
+      console.error('월간 작성률 계산 실패:', error);
+    }
+  };
+
+  // 🆕 랜덤 일기 불러오기
+  const loadRandomDiary = async () => {
+    try {
+      setLoadingRandom(true);
+      const result = await getRandomDiary();
+      if (result.success) {
+        setRandomDiary(result.diary);
+      }
+    } catch (error) {
+      console.error('랜덤 일기 불러오기 실패:', error);
+    } finally {
+      setLoadingRandom(false);
+    }
+  };
 
   // ⭐ 친구 일기 데이터 디버깅 useEffect ⭐
   useEffect(() => {
@@ -216,6 +274,24 @@ const MainScreen = () => {
     }
   };
 
+  // 🆕 오늘의 일기 보기
+  const viewTodayDiary = () => {
+    if (todayDiary) {
+      navigation.navigate('DiaryDetail', {
+        diary: {
+          id: todayDiary.id,
+          title: todayDiary.title,
+          user: {
+            id: currentUserId,
+            nickname: displayNickname,
+            profile_img: userProfileImage?.uri
+          }
+        },
+        isMine: true,
+      });
+    }
+  };
+
   // 날짜 포멧팅
   const today = new Date().toISOString();
   const displayDate = useFormmatedDate(today);
@@ -235,19 +311,32 @@ const MainScreen = () => {
     console.log(`${selectedEmotion.name} 감정만 저장`);
 
     try {
-      // 감정 저장 API 호출 (구현되어 있다고 가정)
-      // await saveEmotionToServer(selectedEmotion);
-
-      // 오늘 날짜 저장
-      const today = new Date().toISOString().slice(0, 10);
-      await AsyncStorage.setItem('emotionSavedDate', today);
+      // 실제 서버에 감정 저장 API 호출
+      await saveEmotionOnly(selectedEmotion.id);
 
       // 상태 반영 
       setIsEmotionSaved(true);
 
+      // 감정만 기록해도 추억의 일기 세션이 보이도록 상태 갱신
+      await loadTodayStatus();
+      
+      // 캘린더 데이터도 갱신
+      const fetchCalendarData = async () => {
+        try {
+          console.log('달력 감정 데이터 가져오기:', currentMonth);
+          const data = await getCalendarEmotions(currentMonth);
+          console.log('달력 감정 데이터:', data);
+          setCalendarEmotions(data);
+        } catch (error) {
+          console.error('달력 감정 데이터 가져오기 실패:', error);
+        }
+      };
+      await fetchCalendarData();
+
       Alert.alert('감정이 저장되었습니다.');
     } catch (err) {
-      Alert.alert('감정 저장 실패', err.message);
+      console.error('감정 저장 실패:', err);
+      Alert.alert('감정 저장 실패', err.message || '알 수 없는 오류가 발생했습니다.');
     }
   };
   
@@ -274,14 +363,27 @@ const MainScreen = () => {
               <Text style={styles.greetingText}>오늘의 감정은 어떤가요?</Text>
             </View>
 
-            {/* 감정 선택 영역 */}
-            <EmotionSelector 
-              emotionIcons={emotions}
-              selectedEmotion={selectedEmotion}
-              onSelectEmotion={setSelectedEmotion}
-              onWritePress={writeHandler}
-              onRecordPress={recordHandler}
-            />
+            {/* 감정 선택 영역 - 오늘 일기/감정 기록 전만 표시 */}
+            {!hasWrittenToday && (
+              <EmotionSelector 
+                emotionIcons={emotions}
+                selectedEmotion={selectedEmotion}
+                onSelectEmotion={setSelectedEmotion}
+                onWritePress={writeHandler}
+                onRecordPress={recordHandler}
+              />
+            )}
+
+            {/* 🆕 통계 및 랜덤 일기 - 일기/감정 기록 후에만 표시 */}
+            {hasWrittenToday && (
+              <StatsAndRandom 
+                monthlyRate={monthlyRate}
+                randomDiary={randomDiary}
+                onRandomPress={loadRandomDiary}
+                onViewRandom={(diary) => goToDetail(diary)}
+                loading={loadingRandom}
+              />
+            )}
             
             {/* 내 일기 */}
             <DiaryListSection
@@ -289,7 +391,10 @@ const MainScreen = () => {
               entries={myDiaries}
               findEmotion={findEmotion}
               maxCount={4}
-              onPressSeeMore={() => console.log('내 일기 더보기')}
+              onPressSeeMore={() => {
+                navigation.navigate('listDiary');
+                // 일기장 화면으로 이동 (기본이 내 일기 탭)
+              }}
               onPressCard={goToDetail}
             />
             
@@ -299,7 +404,10 @@ const MainScreen = () => {
               entries={friendDiaries || []} // null 방어
               findEmotion={findEmotion}
               isFriend
-              onPressSeeMore={() => console.log('친구 일기 더보기')}
+              onPressSeeMore={() => {
+                navigation.navigate('listDiary', { initialFilter: 'follower' });
+                // 일기장 화면의 팔로워 탭으로 이동
+              }}
               onPressCard={goToDetail}
               emptyMessage="😔 오늘 작성된 팔로잉 일기가 없어요"
               emptySubMessage="친구들을 찾아서 팔로우해보세요!"

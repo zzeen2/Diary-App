@@ -4,7 +4,7 @@ import {DiaryHeader} from '../../molecules/headers';
 import {DiaryContentBox} from '../../molecules/boxes';
 import { DeleteModal } from '../../molecules/modals';
 
-const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImagePress }) => {
+const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImagePress, navigation }) => {
   console.log("=== DiaryDetailSection 데이터 확인 ===");
   console.log("diary:", diary);
   console.log("emotions:", emotions);
@@ -61,6 +61,7 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
         emotion={[emotion1, emotion2]} // ⭐ 처리된 감정 데이터 전달
         user={user}
         isMine={isMine}
+        navigation={navigation}
       />
       
       {/* 일기 본문 */}

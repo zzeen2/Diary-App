@@ -158,6 +158,7 @@ const UserProfile = ({ route }) => {
             <View style={styles.divider2} />
             {isFollowing ? (
               <FlatList
+                style={{ marginTop: 16 }}
                 data={publicDiaries}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => {
@@ -229,6 +230,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingHorizontal: 10,
     paddingBottom: 80,
+    marginTop : 16
   },
   listTitle: {
     fontSize: 16,

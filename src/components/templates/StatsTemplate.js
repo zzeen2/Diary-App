@@ -99,7 +99,8 @@ const StatsTemplate = ({ navigation, emotions, onTabChange }) => {
       <StatusBar style="dark" backgroundColor="transparent" translucent />
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
         <SafeAreaView style={[styles.safeContainer, { paddingTop: insets.top }]}> 
-          <HeaderBar title="통계" />
+          <HeaderBar title="통계" onlyTitle={true} />
+          <View style={styles.divider} />
 
           <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
             {console.log('🎨 사용자 감정 섹션 렌더링, 데이터:', userEmotionData)}
@@ -146,6 +147,11 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
     paddingHorizontal: 0,
     gap: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    marginVertical: 1,
   },
 });
 

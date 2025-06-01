@@ -38,7 +38,7 @@ const useDiarySubmit = () => {
       
       if (!userUid) {
         Alert.alert('오류', '사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
-        return false;
+        return null;
       }
 
       // userEmotion이 객체라면 id 추출, 문자열이면 그대로 사용
@@ -59,13 +59,13 @@ const useDiarySubmit = () => {
 
       console.log('✅ 프론트엔드에서 백엔드로 보내는 diaryData:', diaryData);
 
-      const success = await saveDiary(diaryData);
-      return success;
+      const result = await saveDiary(diaryData);
+      return result; // { success: true, diary_id: ... } 또는 null
 
     } catch (error) {
       console.error('❌ 일기 저장 실패:', error);
       Alert.alert('저장 실패', '일기 저장에 실패했습니다.');
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }

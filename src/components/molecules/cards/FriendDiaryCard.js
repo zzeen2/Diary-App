@@ -6,6 +6,15 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
     const [lineCount, setLineCount] = useState(0);
     const [measuringText, setMeasuringText] = useState(true);
     
+    // 마크다운 이미지 태그 제거 함수
+    const removeMarkdownImages = (text) => {
+        if (!text) return '';
+        return text.replace(/!\[.*?\]\((.*?)\)/g, '');
+    };
+
+    // 본문에서 이미지 태그 제거
+    const cleanContent = removeMarkdownImages(entry.content);
+    
     useEffect(() => {
         setMeasuringText(true);
     }, [entry.content]);
@@ -62,28 +71,36 @@ const FriendDiaryCard = ({ entry, onPress, userEmotion, aiEmotion }) => {
                                 setMeasuringText(false);
                             }}
                         >
-                            {entry.content}
+                            {cleanContent}
                         </Text>
                     )}
                     
-                    {entry.content && (
-                        <Text style={styles.preview} numberOfLines={2}>{entry.content}</Text>
+                    {cleanContent && (
+                        <Text style={styles.preview} numberOfLines={2}>{cleanContent}</Text>
                     )}
 
-                    <View style={styles.tags}>
-                        {userEmotion && (
-                            <EmotionTag
-                                emoji={userEmotion.emoji}
-                                name={userEmotion.name}
-                                backgroundColor={userEmotion.color + '40'}
-                            />
-                        )}
-                        {aiEmotion && (
-                            <EmotionTag
-                                emoji={aiEmotion.emoji}
-                                name={aiEmotion.name}
-                                backgroundColor={aiEmotion.color + '40'}
-                            />
+                    <View style={styles.footer}>
+                        <View style={styles.tags}>
+                            {userEmotion && (
+                                <EmotionTag
+                                    emoji={userEmotion.emoji}
+                                    name={userEmotion.name}
+                                    backgroundColor={userEmotion.color + '40'}
+                                />
+                            )}
+                            {aiEmotion && (
+                                <EmotionTag
+                                    emoji={aiEmotion.emoji}
+                                    name={aiEmotion.name}
+                                    backgroundColor={aiEmotion.color + '40'}
+                                />
+                            )}
+                        </View>
+                        {/* 댓글 개수 표시 */}
+                        {entry.commentCount > 0 && (
+                            <Text style={styles.commentCount}>
+                                💬 {entry.commentCount}
+                            </Text>
                         )}
                     </View>
                 </View>
@@ -190,6 +207,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
+    },
+    commentCount: {
+        fontSize: 12,
+        color: '#888',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
 });
 

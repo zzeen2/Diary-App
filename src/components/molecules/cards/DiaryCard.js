@@ -11,6 +11,15 @@ const DiaryCard = ({ entry, onPress, userEmotion, aiEmotion  }) => {
     // 이미지 url 처리
     const imageUrl = entry.images && entry.images.length > 0 ? entry.images[0] : null;
 
+    // 마크다운 이미지 태그 제거 함수
+    const removeMarkdownImages = (text) => {
+        if (!text) return '';
+        return text.replace(/!\[.*?\]\((.*?)\)/g, '');
+    };
+
+    // 본문에서 이미지 태그 제거
+    const cleanContent = removeMarkdownImages(entry.content);
+
     useEffect(() => {
         // 컴포넌트가 마운트되거나 entry가 변경될 때마다 측정 상태 초기화
         setMeasuringText(true);
@@ -45,30 +54,38 @@ const DiaryCard = ({ entry, onPress, userEmotion, aiEmotion  }) => {
                     {/* 측정용 숨겨진 텍스트 */}
                     {measuringText && (
                         <Text  style={[styles.preview, styles.hiddenText]} onTextLayout={(e) => {setLineCount(e.nativeEvent.lines.length); setMeasuringText(false);}}>
-                            {entry.content}
+                            {cleanContent}
                         </Text>
                     )}
 
                     {/* 실제 보여지는 텍스트 */}
                     <Text style={styles.preview} numberOfLines={2}>
-                        {entry.content}
+                        {cleanContent}
                     </Text>
 
-                    <View style={styles.tags}>
-                        {userEmotion && (
-                            <EmotionTag
-                                emoji={userEmotion.emoji}
-                                name={userEmotion.name}
-                                backgroundColor={userEmotion.color + '40'}
-                            />
-                        )}
-                        {/* ⭐ AI 감정 태그 렌더링 ⭐ */}
-                        {aiEmotion && (
-                            <EmotionTag
-                                emoji={aiEmotion.emoji}
-                                name={aiEmotion.name}
-                                backgroundColor={aiEmotion.color + '40'}
-                            />
+                    <View style={styles.footer}>
+                        <View style={styles.tags}>
+                            {userEmotion && (
+                                <EmotionTag
+                                    emoji={userEmotion.emoji}
+                                    name={userEmotion.name}
+                                    backgroundColor={userEmotion.color + '40'}
+                                />
+                            )}
+                            {/* ⭐ AI 감정 태그 렌더링 ⭐ */}
+                            {aiEmotion && (
+                                <EmotionTag
+                                    emoji={aiEmotion.emoji}
+                                    name={aiEmotion.name}
+                                    backgroundColor={aiEmotion.color + '40'}
+                                />
+                            )}
+                        </View>
+                        {/* 공개 일기이고 댓글이 있을 때만 표시 */}
+                        {entry.isPublic && entry.commentCount > 0 && (
+                            <Text style={styles.commentCount}>
+                                💬 {entry.commentCount}
+                            </Text>
                         )}
                     </View>
                 </View>
@@ -143,6 +160,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    commentCount: {
+        fontSize: 12,
+        color: '#888',
     },
 });
 

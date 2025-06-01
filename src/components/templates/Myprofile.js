@@ -209,7 +209,10 @@ const MyProfile = () => {
       marginVertical: 1,
       // marginLeft : 16,
       // width:'120%'
-    }
+    },
+    logoutButton: {
+      padding: 5,
+    },
   });
   return (
     <View style={styles.container}>
@@ -217,10 +220,11 @@ const MyProfile = () => {
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
         <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
             <HeaderBar 
-              title={`${profile.nickname}님의 프로필`} 
-              rightContent={ 
-                <TouchableOpacity onPress={handleLogout} style={{ padding: 8 }}>
-                  <Feather name="log-out" size={24} color="#333" />
+              title="내 프로필"
+              onlyTitle={true}
+              rightContent={
+                <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+                  <Feather name="log-out" size={20} color="#b881c2" />
                 </TouchableOpacity>
               }
             />
@@ -239,6 +243,7 @@ const MyProfile = () => {
             <Text style={styles.listTitle}>📖 공개된 일기</Text>
             <View style={styles.divider2} />
             <FlatList
+              style={{ marginTop: 16 }}
               data={publicDiaries}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
@@ -276,13 +281,7 @@ const MyProfile = () => {
               uid={profile?.uid}
               type={modalType}
             />
-          <Button
-          title="친구 프로필 테스트"
-          onPress={() => navigation.navigate('UserProfile', {
-            isFollowing: true, // 또는 false로 바꿔 테스트
-            nickname: '민지',
-          })}
-        />
+
           </ScrollView>
           <TabBar
             tabs={tabs}

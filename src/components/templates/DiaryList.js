@@ -16,6 +16,7 @@ import useFormmatedDate from '../../hooks/useFormattedDate';
 import { TabBar } from '../organisms/TabBar';
 import { FriendSearchModal } from '../molecules/modals';
 import { getCalendarEmotions } from '../../api/diary';
+import { getFollowingsTodayDiaries } from '../../api/diary';
 
 const tabs = [
     { id: 'home', icon: '🏠', label: '홈' },
@@ -24,16 +25,15 @@ const tabs = [
     { id: 'profile', icon: '👤', label: '프로필' },
 ];
 
-// ✅ 친구찾기 버튼 컴포넌트
 const FriendSearchButton = ({ onPress }) => (
     <TouchableOpacity onPress={onPress} style={styles.friendSearchButton}>
         <Feather name="user-plus" size={20} color="#b881c2" />
     </TouchableOpacity>
 );
 
-const DiaryListScreen = () => {
+const DiaryListScreen = ({ route }) => {
     const insets = useSafeAreaInsets();
-    const [filterType, setFilterType] = useState('my');
+    const [filterType, setFilterType] = useState(route?.params?.initialFilter || 'my');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [selectedEmotion, setSelectedEmotion] = useState(null);
     const [showPrivateOnly, setShowPrivateOnly] = useState(false);
@@ -46,6 +46,7 @@ const DiaryListScreen = () => {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('diary');
     const [calendarEmotions, setCalendarEmotions] = useState([]); // 달력용 감정 데이터
+    const [followingTodayDiaries, setFollowingTodayDiaries] = useState([]); // 팔로잉 오늘 일기
     const [currentMonth, setCurrentMonth] = useState(() => {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -82,8 +83,20 @@ const DiaryListScreen = () => {
         dispatch(fetchEmotions());
         dispatch(fetchMyDiaries());
         dispatch(fetchTodayFollowingDiaries());
-        // TODO: 팔로워 일기 데이터도 가져오기
-        // dispatch(fetchFollowerDiaries());
+        
+        // 팔로잉 오늘 일기 데이터 가져오기
+        const fetchFollowingToday = async () => {
+            try {
+                const data = await getFollowingsTodayDiaries();
+                console.log('팔로잉 오늘 일기 데이터:', data);
+                setFollowingTodayDiaries(data);
+            } catch (error) {
+                console.error('팔로잉 오늘 일기 조회 실패:', error);
+                setFollowingTodayDiaries([]);
+            }
+        };
+        
+        fetchFollowingToday();
     }, [dispatch]);
 
     // 달력 감정 데이터 가져오기
@@ -127,48 +140,11 @@ const DiaryListScreen = () => {
     // 변환된 내 일기 데이터
     const myDiaryEntries = transformDiaryData(rawMyDiaries);
 
-    // ✅ 더미 팔로워 일기 데이터 (나중에 실제 API로 교체)
-    const allFollowerDiaries = [
-        {
-            id: 101,
-            title: '친구의 하루',
-            date: getTodayDotFormat(), // 오늘 날짜
-            content: '오늘 정말 좋은 하루였어요! 새로운 프로젝트를 시작했는데 너무 설레네요.',
-            primaryEmotion: 'excited',
-            isPublic: true,
-            writer: { uid: 4284784202, nick_name: '임희정', profile_image: 'http://k.kakaocdn.net/dn/badoZf/btsNMu0SZS4/rlYvUJUNaZGDnKxamo0hI1/img_640x640.jpg' },
-            createdAt: new Date().toISOString(),
-        },
-        {
-            id: 102,
-            title: '커피와 함께한 오후',
-            date: getTodayDotFormat(), // 오늘 날짜
-            content: '카페에서 친구들과 만나서 즐거운 시간을 보냈어요. 맛있는 커피와 달콤한 디저트까지!',
-            primaryEmotion: 'happy',
-            isPublic: true,
-            writer: { uid: 4282976753, nick_name: '친구A', profile_image: 'https://via.placeholder.com/40' },
-            createdAt: new Date().toISOString(),
-        },
-        {
-            id: 103,
-            title: '어제 일기',
-            date: '2025.05.30', // 어제 날짜
-            content: '어제는 좀 피곤했던 하루였어요.',
-            primaryEmotion: 'tired',
-            isPublic: true,
-            writer: { uid: 4282976754, nick_name: '친구B', profile_image: 'https://via.placeholder.com/40' },
-            createdAt: '2025-05-30T10:00:00.000Z',
-        }
-    ];
+    // ✅ 팔로잉 오늘 일기 데이터 변환
+    const transformedFollowingDiaries = transformDiaryData(followingTodayDiaries);
 
-    // ✅ 오늘 작성된 팔로워 일기만 필터링
-    const todayFollowerDiaries = allFollowerDiaries.filter(diary => 
-        diary.date === getTodayDotFormat()
-    );
-
-    console.log('=== 팔로워 일기 확인 ===');
-    console.log('전체 팔로워 일기:', allFollowerDiaries.length);
-    console.log('오늘 팔로워 일기:', todayFollowerDiaries.length);
+    console.log('=== 팔로잉 일기 확인 ===');
+    console.log('팔로잉 오늘 일기 개수:', transformedFollowingDiaries.length);
     console.log('오늘 날짜:', getTodayDotFormat());
 
     const findEmotion = (id) => {
@@ -219,7 +195,7 @@ const DiaryListScreen = () => {
     <View style={styles.container}>
         <StatusBar style="dark" backgroundColor="transparent" translucent />
         <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
-            <SafeAreaView style={styles.safeContainer}>
+            <SafeAreaView style={[styles.safeContainer, { paddingTop: insets.top }]}>
             <HeaderBar 
                 showBackButton={true} 
                 onBackPress={() => navigation.goBack()} 
@@ -313,7 +289,7 @@ const DiaryListScreen = () => {
                     <View style={styles.followerContainer}>
                         <DiaryListSection
                             title="👥 오늘의 팔로잉 일기"
-                            entries={todayFollowingDiaries}
+                            entries={transformedFollowingDiaries}
                             findEmotion={findEmotion}
                             isFriend={true}
                             onPressCard={(entry) =>
@@ -391,7 +367,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(184, 129, 194, 0.1)',
     },
     followerContainer: {
-        marginTop: 8,
+        marginTop: 16,
     },
 });
 
