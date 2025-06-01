@@ -17,6 +17,7 @@ import { TabBar } from '../organisms/TabBar';
 import { FriendSearchModal } from '../molecules/modals';
 import { getCalendarEmotions } from '../../api/diary';
 import { getFollowingsTodayDiaries } from '../../api/diary';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const tabs = [
     { id: 'home', icon: '🏠', label: '홈' },
@@ -58,6 +59,36 @@ const DiaryListScreen = ({ route }) => {
     const rawMyDiaries = diaryState?.myDiaries || [];
     const diaryLoading = diaryState?.loading || false;
     const todayFollowingDiaries = useSelector((state) => state.diary.todayFollowingDiaries) || [];
+    
+    // ⭐ 사용자 정보 상태 추가 ⭐
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [displayNickname, setDisplayNickname] = useState('');
+    const [userProfileImage, setUserProfileImage] = useState(null);
+
+    // ⭐ AsyncStorage에서 사용자 정보 로드 ⭐
+    useEffect(() => {
+        const loadUserInfo = async () => {
+            try {
+                const storedUid = await AsyncStorage.getItem('userUid');
+                const storedNickname = await AsyncStorage.getItem('userNickname');
+                const storedProfileImage = await AsyncStorage.getItem('userProfileImage');
+                
+                if (storedUid) setCurrentUserId(Number(storedUid));
+                if (storedNickname) setDisplayNickname(storedNickname);
+                if (storedProfileImage) setUserProfileImage({ uri: storedProfileImage });
+                
+                console.log('DiaryList 사용자 정보 로드:', {
+                    uid: storedUid,
+                    nickname: storedNickname,
+                    profileImage: storedProfileImage
+                });
+            } catch (error) {
+                console.error('사용자 정보 로드 실패:', error);
+            }
+        };
+        
+        loadUserInfo();
+    }, []);
 
     console.log('=== DiaryListScreen 상태 ===');
     console.log('현재 필터:', filterType);
@@ -238,12 +269,23 @@ const DiaryListScreen = ({ route }) => {
                                     title="📖 내 일기 검색 결과"
                                     entries={searchedMyDiaries}
                                     findEmotion={findEmotion}
-                                    onPressCard={(entry) => 
+                                    onPressCard={(entry) => {
+                                        const transformedEntry = {
+                                            ...entry,
+                                            user: {
+                                                uid: currentUserId,
+                                                id: currentUserId,
+                                                nickname: displayNickname,
+                                                nick_name: displayNickname,
+                                                profile_img: userProfileImage?.uri,
+                                                profile_image: userProfileImage?.uri,
+                                            }
+                                        };
                                         navigation.navigate('DiaryDetail', {
-                                            diary: entry,
+                                            diary: transformedEntry,
                                             isMine: true,
-                                        })
-                                    }
+                                        });
+                                    }}
                                 />
                             </>
                         ) : (
@@ -271,12 +313,23 @@ const DiaryListScreen = ({ route }) => {
                                             return convertedDate === selectedDate;
                                         })}
                                         findEmotion={findEmotion}
-                                        onPressCard={(entry) =>
-                                        navigation.navigate('DiaryDetail', {
-                                            diary: entry,
-                                            isMine: true,
-                                        })
-                                        }
+                                        onPressCard={(entry) => {
+                                            const transformedEntry = {
+                                                ...entry,
+                                                user: {
+                                                    uid: currentUserId,
+                                                    id: currentUserId,
+                                                    nickname: displayNickname,
+                                                    nick_name: displayNickname,
+                                                    profile_img: userProfileImage?.uri,
+                                                    profile_image: userProfileImage?.uri,
+                                                }
+                                            };
+                                            navigation.navigate('DiaryDetail', {
+                                                diary: transformedEntry,
+                                                isMine: true,
+                                            });
+                                        }}
                                     />
                                 )}
                             </>
@@ -292,12 +345,23 @@ const DiaryListScreen = ({ route }) => {
                             entries={transformedFollowingDiaries}
                             findEmotion={findEmotion}
                             isFriend={true}
-                            onPressCard={(entry) =>
+                            onPressCard={(entry) => {
+                                const transformedEntry = {
+                                    ...entry,
+                                    user: {
+                                        uid: entry.writer?.uid,
+                                        id: entry.writer?.uid,
+                                        nickname: entry.writer?.nick_name,
+                                        nick_name: entry.writer?.nick_name,
+                                        profile_img: entry.writer?.profile_image,
+                                        profile_image: entry.writer?.profile_image,
+                                    }
+                                };
                                 navigation.navigate('DiaryDetail', {
-                                    diary: entry,
+                                    diary: transformedEntry,
                                     isMine: false,
-                                })
-                            }
+                                });
+                            }}
                             emptyMessage="😔 오늘 작성된 팔로잉 일기가 없어요"
                             emptySubMessage="친구들을 찾아서 팔로우해보세요!"
                             onEmptyButtonPress={handleOpenFriendModal}

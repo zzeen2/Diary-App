@@ -12,7 +12,7 @@ import {
 import {CommentItemBox} from '../../molecules/boxes';
 import {CommentInput} from '../../atoms/inputs';
 
-const CommentListSection = ({ comments = [], onSubmitComment, onDeleteComment, currentUserId, isPublic = true }) => {
+const CommentListSection = ({ comments = [], onSubmitComment, onDeleteComment, currentUserId, isPublic = true, navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -43,6 +43,7 @@ const CommentListSection = ({ comments = [], onSubmitComment, onDeleteComment, c
                   comment={item}
                   isMyComment={isMine}
                   onDelete={() => onDeleteComment?.(item.id)}
+                  navigation={navigation}
                 />
               );
             })}

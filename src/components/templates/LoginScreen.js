@@ -108,7 +108,7 @@ export default function LoginScreen() {
           console.log('저장된 userBio:', await AsyncStorage.getItem('userBio'));
 
           setIsLoggedIn(true);
-          navigation.navigate('MainTab');
+          navigation.navigate('Main');
         } else {
           console.error("백엔드 응답에서 JWT 토큰 또는 유저 정보를 찾을 수 없습니다.");
           Alert.alert("로그인 실패", "서버 응답에 필수 정보가 부족합니다.");
@@ -216,7 +216,7 @@ export default function LoginScreen() {
           console.log('저장된 userBio:', await AsyncStorage.getItem('userBio'));
 
           setIsLoggedIn(true);
-          navigation.navigate('MainTab');
+          navigation.navigate('Main');
         } else {
           console.error("백엔드 응답에서 JWT 토큰 또는 유저 정보를 찾을 수 없습니다.");
           Alert.alert("로그인 실패", "서버 응답에 필수 정보가 부족합니다.");

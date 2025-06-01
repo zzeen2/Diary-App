@@ -68,7 +68,7 @@ const DiaryContentBox = ({ content, images = [], onImagePress }) => {
         </ScrollView>
       ) : (
         <Text style={styles.debugText}>
-          이미지 없음 (images: {JSON.stringify(images)})
+          
         </Text>
       )}
     </View>

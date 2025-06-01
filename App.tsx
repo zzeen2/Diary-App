@@ -25,8 +25,8 @@ const Stack = createNativeStackNavigator();
 
 const AppContent = () => {
   const { isLoggedIn } = useContext(AuthContext);
-  //const dispatch = useDispatch(); // 
-  //const navigation = useNavigation(); // navigation 훅
+  const dispatch = useDispatch(); 
+  const navigation = useNavigation(); // navigation 훅
 
   useEffect(() => {
     const initUser = async () => {

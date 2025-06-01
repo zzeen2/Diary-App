@@ -41,12 +41,25 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.log("자동 로그인 실패:", err.message);
             await AsyncStorage.removeItem('jwtToken');
+            await AsyncStorage.removeItem('userUid');
+            await AsyncStorage.removeItem('userNickname');
+            await AsyncStorage.removeItem('userProfileImage');
+            await AsyncStorage.removeItem('userBio');
+            dispatch(clearUser());
             setIsLoggedIn(false);
         }
         };
 
         checkToken();
     }, []);
+
+    // isLoggedIn이 false로 변경되면 추가 정리 작업
+    useEffect(() => {
+        if (isLoggedIn === false) {
+            console.log("로그아웃 상태로 변경됨 - 데이터 정리");
+            dispatch(clearUser());
+        }
+    }, [isLoggedIn]);
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn,}}>

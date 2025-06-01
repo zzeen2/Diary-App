@@ -40,7 +40,7 @@ const MyProfile = () => {
   const [modalType, setModalType] = useState('followers');
   const dispatch = useDispatch();
   const emotions = useSelector((state) => state.emotions.emotions);
-  const { setIsLoggedIn, setUser: setAuthUser } = useContext(AuthContext);
+  const { setIsLoggedIn, setUser: setAuthUser, isLoggedIn } = useContext(AuthContext);
   
   // Redux 스토어에서 로그인한 사용자 정보 가져오기 (이제 직접 사용하지 않음, 또는 보조적으로 사용)
   // const loggedInUser = useSelector((state) => state.user); 
@@ -155,9 +155,11 @@ const MyProfile = () => {
               dispatch(clearUser());
 
               if (setAuthUser) setAuthUser(null);
-              setIsLoggedIn(false);
               
               console.log("로그아웃 완료");
+
+              // AuthContext의 상태 변경으로 자동으로 웰컴페이지로 이동
+              setIsLoggedIn(false);
 
             } catch (error) {
               console.error("로그아웃 처리 중 오류:", error);

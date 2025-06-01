@@ -33,6 +33,7 @@ const MainScreen = () => {
   const emotions = useSelector((state) => state.emotions.emotions);
   const loading = useSelector((state) => state.loading);
   const streak = useSelector(state => state.streak.value);
+  const { isLoggedIn } = useContext(AuthContext); // AuthContext 추가
   
   // ⭐ Redux user 대신 AsyncStorage에서 직접 관리하는 상태들 ⭐
   const [displayNickname, setDisplayNickname] = useState('');
@@ -108,6 +109,13 @@ const MainScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       console.log("=== MainScreen useFocusEffect 시작 ===");
+      console.log("현재 로그인 상태:", isLoggedIn);
+      
+      // 로그인 상태가 아니면 아무것도 하지 않음
+      if (isLoggedIn !== true) {
+        console.log("로그인되지 않은 상태이므로 데이터 로드 건너뛰기");
+        return;
+      }
       
       const loadUserData = async () => {
         try {
@@ -171,11 +179,15 @@ const MainScreen = () => {
       loadMonthlyRate();
       loadRandomDiary();
 
-    }, [dispatch])
+    }, [dispatch, isLoggedIn]) // isLoggedIn을 의존성에 추가
   );
 
   // 🆕 오늘 작성 상태 체크
   const loadTodayStatus = async () => {
+    if (isLoggedIn !== true) {
+      console.log("로그인되지 않은 상태이므로 오늘 작성 상태 체크 건너뛰기");
+      return;
+    }
     try {
       const result = await checkTodayWritten();
       setHasWrittenToday(result.hasWritten);
@@ -193,6 +205,10 @@ const MainScreen = () => {
 
   // 🆕 이번 달 작성률 계산
   const loadMonthlyRate = async () => {
+    if (isLoggedIn !== true) {
+      console.log("로그인되지 않은 상태이므로 월간 작성률 계산 건너뛰기");
+      return;
+    }
     try {
       const now = new Date();
       const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -208,6 +224,10 @@ const MainScreen = () => {
 
   // 🆕 랜덤 일기 불러오기
   const loadRandomDiary = async () => {
+    if (isLoggedIn !== true) {
+      console.log("로그인되지 않은 상태이므로 랜덤 일기 불러오기 건너뛰기");
+      return;
+    }
     try {
       setLoadingRandom(true);
       const result = await getRandomDiary();

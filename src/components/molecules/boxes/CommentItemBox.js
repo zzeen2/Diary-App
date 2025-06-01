@@ -3,15 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import {ProfileThumbnail} from '../../atoms/thumbnail';
 import { Feather } from '@expo/vector-icons';
 
-const CommentItemBox = ({ comment, isMyComment = false, onDelete }) => {
+const CommentItemBox = ({ comment, isMyComment = false, onDelete, navigation }) => {
     // 백엔드 데이터 구조에 맞게 수정
     const writer = comment.writer || comment.user; // 하위 호환성을 위해 둘 다 체크
     const content = comment.content;
     const createdAt = comment.createdAt || comment.created_at;
     
     // 프로필 이미지와 닉네임 처리
-    const profileImage = writer?.profile_image || writer?.profile_img;
-    const nickname = writer?.nick_name || writer?.nickname;
+    const profileImage = writer?.profile_image || writer?.profile_img || writer?.profileImage || writer?.img_url;
+    const nickname = writer?.nick_name || writer?.nickname || writer?.name;
     
     // 날짜 포맷팅
     const formatDate = (dateString) => {
@@ -28,15 +28,32 @@ const CommentItemBox = ({ comment, isMyComment = false, onDelete }) => {
         }
     };
 
+    // 프로필 클릭 핸들러
+    const handleProfilePress = () => {
+        if (writer && navigation) {
+            const writerUid = writer.uid || writer.id;
+            const writerNickname = writer.nick_name || writer.nickname || writer.name;
+            console.log('댓글 프로필 클릭:', writerNickname, 'uid:', writerUid);
+            navigation.navigate('UserProfile', {
+                uid: writerUid,
+                nickname: writerNickname
+            });
+        }
+    };
+
     return (
         <View style={styles.container}>
-            {/* 프로필 썸네일 */}
-            <ProfileThumbnail image={profileImage} small />
+            {/* 프로필 썸네일 - 클릭 가능하게 수정 */}
+            <TouchableOpacity onPress={handleProfilePress} activeOpacity={0.7}>
+                <ProfileThumbnail image={profileImage} small />
+            </TouchableOpacity>
 
             {/* 내용 + 날짜 */}
             <View style={styles.contentBox}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.nickname}>{nickname || '익명'}</Text>
+                    <TouchableOpacity onPress={handleProfilePress} activeOpacity={0.7}>
+                        <Text style={styles.nickname}>{nickname || '익명'}</Text>
+                    </TouchableOpacity>
                     <Text style={styles.date}>{formatDate(createdAt)}</Text>
                 </View>
                 <Text style={styles.content}>{content}</Text>

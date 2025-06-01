@@ -131,12 +131,33 @@ const DiaryDetail = ({ route, navigation }) => {
       if (response.data.success && response.data.diary) {
         const diaryData = response.data.diary;
         
+        // ⭐ user 정보 처리: 기존 user 정보가 있으면 유지하고, 없으면 writer에서 변환 ⭐
+        let userInfo = diary?.user; // 기존 user 정보 유지
+        
+        // 만약 기존 user 정보가 없고 diaryData에 writer가 있다면 변환
+        if (!userInfo && diaryData.writer) {
+          userInfo = {
+            uid: diaryData.writer.uid,
+            id: diaryData.writer.uid,
+            nickname: diaryData.writer.nick_name,
+            nick_name: diaryData.writer.nick_name,
+            profile_img: diaryData.writer.profile_image,
+            profile_image: diaryData.writer.profile_image,
+          };
+        }
+        
+        console.log("=== user 정보 확인 ===");
+        console.log("기존 diary.user:", diary?.user);
+        console.log("diaryData.writer:", diaryData.writer);
+        console.log("최종 userInfo:", userInfo);
+        
         // diary 데이터 업데이트
         setDiary({
           ...diaryData,
           isPublic: diaryData.is_public,
           userEmotion: diaryData.emotionLog?.userEmotionData,
           aiEmotion: diaryData.emotionLog?.aiEmotionData,
+          user: userInfo, // ⭐ user 정보 명시적으로 설정 ⭐
         });
         
         // 댓글 데이터 설정
@@ -311,6 +332,7 @@ const DiaryDetail = ({ route, navigation }) => {
               onSubmitComment={handleSubmitComment}
               onDeleteComment={handleDeleteComment}
               isPublic={diary.isPublic}
+              navigation={navigation}
             />
           </ScrollView>
 

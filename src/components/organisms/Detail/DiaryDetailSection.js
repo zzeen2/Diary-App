@@ -51,13 +51,26 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit', 
+        day: '2-digit'
+      }).replace(/\. /g, '.').replace(/\.$/, '');
+    } catch (error) {
+      console.error("날짜 포맷팅 오류:", error);
+      return dateString;
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* 헤더 */}
+      {/* 헤더 - 날짜 정보 제거 */}
       <DiaryHeader
         title={title}
-        date={createdAt} // ⭐ createdAt 전달
-        isPublic={isPublic}
         emotion={[emotion1, emotion2]} // ⭐ 처리된 감정 데이터 전달
         user={user}
         isMine={isMine}
@@ -67,18 +80,48 @@ const DiaryDetailSection = ({ diary, isMine, emotions, onEdit, onDelete, onImage
       {/* 일기 본문 */}
       <DiaryContentBox content={content} images={images} onImagePress={onImagePress} />
 
-      {/* 본인 글인 경우 수정/삭제 버튼 */}
-      {isMine && (
-        <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
-            <Text style={styles.editText}>수정</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
-            <Text style={styles.deleteText}>삭제</Text>
-          </TouchableOpacity>
+      {/* ⭐ 하단 영역: 날짜정보 + 수정/삭제 버튼 ⭐ */}
+      <View style={styles.bottomSection}>
+        {/* 날짜와 공개범위 정보 */}
+        <View style={styles.metaInfo}>
+          {!isMine ? (
+            // 친구 일기인 경우
+            <View style={styles.friendMetaContainer}>
+              <Text style={styles.dateIcon}>📅</Text>
+              <Text style={styles.dateText}>{formatDate(createdAt)}</Text>
+              <Text style={styles.separator}>•</Text>
+              <Text style={styles.publicIcon}>🌍</Text>
+              <Text style={styles.publicText}>공개</Text>
+            </View>
+          ) : (
+            // 내 일기인 경우
+            <View style={styles.myMetaContainer}>
+              <Text style={styles.dateIcon}>📅</Text>
+              <Text style={styles.dateText}>{formatDate(createdAt)}</Text>
+              <Text style={styles.separator}>•</Text>
+              <Text style={isPublic ? styles.publicIcon : styles.privateIcon}>
+                {isPublic ? '🌍' : '🔒'}
+              </Text>
+              <Text style={styles.privacyText}>
+                {isPublic ? '공개' : '비공개'}
+              </Text>
+            </View>
+          )}
         </View>
-      )}
+
+        {/* 본인 글인 경우 수정/삭제 버튼 */}
+        {isMine && (
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
+              <Text style={styles.editText}>수정</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
+              <Text style={styles.deleteText}>삭제</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
 
       {/* 삭제 확인 모달 */}
       <DeleteModal
@@ -103,8 +146,6 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 16,
     gap: 10,
   },
   editBtn: {
@@ -128,6 +169,57 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#fff',
+  },
+  bottomSection: {
+    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  metaInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  friendMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  myMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  dateText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#444',
+  },
+  separator: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#444',
+    marginHorizontal: 4,
+  },
+  publicIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  publicText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#444',
+  },
+  privateIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  privacyText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#444',
   },
 });
 
