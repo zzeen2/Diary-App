@@ -2,7 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Alert, Platform } from 'react-native';
 
-// 기본 이미지 조작 옵션
+// 기본 이미지 조작
 const DEFAULT_MANIPULATION_OPTIONS = {
   resizeWidth: 1400,
   compressQuality: 0.7,
