@@ -66,29 +66,29 @@ const FriendSearchModal = ({ visible, onClose }) => {
 
   // 검색어가 변경될 때마다 Redux 액션을 dispatch합니다
   useEffect(() => {
+    // searchKeyword가 비어있으면 API 호출을 하지 않고, 이전 검색 결과를 초기화할 수 있습니다.
+    if (!searchKeyword.trim()) {
+      // 필요하다면 여기서 dispatch({ type: 'CLEAR_SEARCH_RESULTS' }); 와 같이 검색 결과를 비우는 액션을 호출합니다.
+      // 현재는 searchResults를 Redux에서 가져오므로, Redux에서 검색 결과 초기화 로직이 필요할 수 있습니다.
+      // 혹은, searchUsersByNickname 액션 내부에서 빈 쿼리일 때 결과를 비우도록 처리할 수도 있습니다.
+      return; // 빈 문자열이면 더 이상 진행하지 않음
+    }
+
     const timeoutId = setTimeout(() => {
-      if (searchKeyword.trim()) {
-        dispatch(searchUsersByNickname(searchKeyword));
-        
-        // 백엔드가 작동하지 않을 경우를 대비한 임시 더미 데이터
-        // 실제 검색 결과가 없고 백엔드 문제일 경우에만 사용
-        setTimeout(() => {
-          // 검색 후 2초 뒤에도 결과가 없다면 더미 데이터 표시 (개발/테스트용)
-          if (searchResults.length === 0 && !loading) {
-            console.log('백엔드 API 문제로 더미 데이터 표시');
-            // dispatch({ 
-            //   type: 'SEARCH_USERS_SUCCESS', 
-            //   payload: [
-            //     { uid: 1, nick_name: '테스트유저1', profile_image: null },
-            //     { uid: 2, nick_name: '테스트유저2', profile_image: null }
-            //   ] 
-            // });
-          }
-        }, 2000);
-      }
-    }, 500);
+      dispatch(searchUsersByNickname(searchKeyword));
+      
+      // 백엔드가 작동하지 않을 경우를 대비한 임시 더미 데이터 로직은
+      // 현재 문제의 원인이 될 수 있으므로 일단 주석 처리하거나 제거하는 것을 권장합니다.
+      // setTimeout(() => {
+      //   if (searchResults.length === 0 && !loading) { // 이 조건들이 useEffect 재실행을 유발할 수 있음
+      //     console.log('백엔드 API 문제로 더미 데이터 표시');
+      //   }
+      // }, 2000);
+
+    }, 500); // 500ms 디바운스
+
     return () => clearTimeout(timeoutId);
-  }, [searchKeyword, dispatch, searchResults.length, loading]);
+  }, [searchKeyword, dispatch]); // 의존성 배열에서 searchResults.length와 loading 제거
 
   // 디버깅을 위한 로그
   useEffect(() => {
