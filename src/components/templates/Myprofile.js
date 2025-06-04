@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../context/AuthContext';
 import { clearUser } from '../../reducers/userReducer';
 import { Feather } from '@expo/vector-icons';
-import { updateUserBio, getUserStats, getUserProfileByUid } from '../../api/user';
+import { updateUserBio, getUserStats, getUserById } from '../../api/user';
 import { DiaryCard } from '../molecules/cards';
 import { fetchMyDiaries } from '../../actions/diaryAction';
 
@@ -67,41 +67,67 @@ const MyProfile = () => {
     try {
       const userUid = await AsyncStorage.getItem('userUid');
       if (!userUid) {
-        setProfile(prev => ({ ...prev, nickname: '사용자 정보 없음', intro: '-'}));
+        setProfile(prev => ({ ...prev, nickname: '사용자 정보 없음', intro: '-', followerCount: 0, followingCount: 0, publicDiaryCount: 0 }));
         return;
       }
 
-      const userProfileData = await getUserProfileByUid(userUid);
+      // 1. 기본 프로필 정보 준비 (초기값 또는 AsyncStorage 값으로)
+      let nickname = await AsyncStorage.getItem('userNickname') || '사용자';
+      let profile_img_uri = await AsyncStorage.getItem('userProfileImage');
+      let profile_img = profile_img_uri ? { uri: profile_img_uri } : require('../../assets/IMG_3349.jpg');
+      let intro = await AsyncStorage.getItem('userBio') || '';
+      let currentUid = userUid;
 
-      if (userProfileData) {
-        setProfile({
-          uid: userProfileData.uid || userUid,
-          nickname: userProfileData.nickname || userProfileData.nick_name || '사용자',
-          profile_img: userProfileData.profile_image ? { uri: userProfileData.profile_image } : require('../../assets/IMG_3349.jpg'),
-          intro: userProfileData.bio || '',
-          followerCount: userProfileData.followerCount !== undefined ? userProfileData.followerCount : profile.followerCount,
-          followingCount: userProfileData.followingCount !== undefined ? userProfileData.followingCount : profile.followingCount,
-          publicDiaryCount: userProfileData.publicDiaryCount !== undefined ? userProfileData.publicDiaryCount : profile.publicDiaryCount,
-        });
+      // 2. getUserById API 호출하여 기본 정보 업데이트 시도
+      const userProfileApiResponse = await getUserById(userUid);
+      console.log('MyProfile - userProfileData (from getUserById):', userProfileApiResponse);
 
-      } else {
-        const storedNickname = await AsyncStorage.getItem('userNickname');
-        const storedProfileImage = await AsyncStorage.getItem('userProfileImage');
-        const storedBio = await AsyncStorage.getItem('userBio');
+      if (userProfileApiResponse) {
+        nickname = userProfileApiResponse.nickname || userProfileApiResponse.nick_name || nickname;
+        profile_img = userProfileApiResponse.profile_image ? { uri: userProfileApiResponse.profile_image } : profile_img;
+        intro = userProfileApiResponse.bio || intro;
+        currentUid = userProfileApiResponse.uid || userUid;
+      }
+      
+      // 3. 기본 정보로 프로필 상태 우선 업데이트 (카운트는 아직 이전 상태 또는 0)
+      setProfile(prev => ({
+        ...prev, // 이전 카운트 유지 또는 초기 0
+        uid: currentUid,
+        nickname: nickname,
+        profile_img: profile_img,
+        intro: intro,
+      }));
+
+      // 4. getUserStats API 호출하여 통계(카운트) 정보 가져오기
+      const statsRes = await getUserStats(userUid);
+      console.log('MyProfile - statsRes (from getUserStats):', statsRes);
+
+      if (statsRes && statsRes.success && statsRes.data) {
         setProfile(prev => ({
-            ...prev,
-            uid: userUid,
-            nickname: storedNickname || '사용자(오류)',
-            profile_img: storedProfileImage ? { uri: storedProfileImage } : require('../../assets/IMG_3349.jpg'),
-            intro: storedBio || '자기소개 로드 실패',
+          ...prev, // 위에서 설정된 기본 정보 유지
+          followerCount: statsRes.data.followerCount !== undefined ? statsRes.data.followerCount : 0,
+          followingCount: statsRes.data.followingCount !== undefined ? statsRes.data.followingCount : 0,
+          publicDiaryCount: statsRes.data.diaryCount !== undefined ? statsRes.data.diaryCount : 0, // API 응답 필드명이 diaryCount일 수 있음
         }));
-        const statsRes = await getUserStats(userUid);
-        if (statsRes.success && statsRes.data) {
-            setProfile(prev => ({ ...prev, followerCount: statsRes.data.followerCount, followingCount: statsRes.data.followingCount, publicDiaryCount: statsRes.data.diaryCount }));
-        }
+      } else {
+        console.log('MyProfile - Failed to get stats or statsRes.data is missing. Counts will be set to 0.');
+        setProfile(prev => ({
+          ...prev,
+          followerCount: 0,
+          followingCount: 0,
+          publicDiaryCount: 0,
+        }));
       }
     } catch (error) {
-      setProfile(prev => ({ ...prev, nickname: '정보 로드 실패', intro: '오류 발생'}));
+      console.error('Error in loadProfileData:', error);
+      setProfile(prev => ({
+        ...prev,
+        nickname: '정보 로드 실패',
+        intro: '오류 발생',
+        followerCount: 0,
+        followingCount: 0,
+        publicDiaryCount: 0,
+      }));
     }
   };
 

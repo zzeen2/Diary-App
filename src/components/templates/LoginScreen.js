@@ -67,7 +67,25 @@ export default function LoginScreen() {
 
       } catch (error) {
         setIsLoading(false);
-        Alert.alert("로그인 실패", `로그인 중 오류가 발생했습니다: ${error.response?.data?.message || error.message}`);
+        console.error('로그인 처리 중 상세 오류:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          url: url
+        });
+        
+        // 기능적으로는 성공했지만 에러가 표시되는 경우 처리
+        if (error.response?.status === 500 && error.response?.data?.message?.includes('authorization code not found')) {
+          // 이미 로그인이 성공했을 가능성이 높으므로 토큰 확인
+          const existingToken = await AsyncStorage.getItem('jwtToken');
+          if (existingToken) {
+            console.log('로그인은 성공했지만 에러 메시지가 표시됨, 기존 토큰 사용');
+            setIsLoggedIn(true);
+            return;
+          }
+        }
+        
+        Alert.alert("로그인 실패", `로그인 중 오류가 발생했습니다: ${error.response?.data?.error_description || error.response?.data?.message || error.message}`);
       }
     }
     else if (url.includes('devops1.store') && url.includes('code=')) {
@@ -133,7 +151,25 @@ export default function LoginScreen() {
 
       } catch (error) {
         setIsLoading(false);
-        Alert.alert("로그인 실패", `로그인 중 오류가 발생했습니다: ${error.response?.data?.error_description || error.message}`);
+        console.error('로그인 처리 중 상세 오류:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          url: url
+        });
+        
+        // 기능적으로는 성공했지만 에러가 표시되는 경우 처리
+        if (error.response?.status === 500 && error.response?.data?.message?.includes('authorization code not found')) {
+          // 이미 로그인이 성공했을 가능성이 높으므로 토큰 확인
+          const existingToken = await AsyncStorage.getItem('jwtToken');
+          if (existingToken) {
+            console.log('로그인은 성공했지만 에러 메시지가 표시됨, 기존 토큰 사용');
+            setIsLoggedIn(true);
+            return;
+          }
+        }
+        
+        Alert.alert("로그인 실패", `로그인 중 오류가 발생했습니다: ${error.response?.data?.error_description || error.response?.data?.message || error.message}`);
       }
     } else {
     }

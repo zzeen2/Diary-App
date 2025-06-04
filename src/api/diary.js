@@ -14,11 +14,14 @@ const getAuthHeaders = async () => {
 // 오늘 작성 여부 확인
 export const checkTodayWritten = async (excludeId = '') => {
   try {
+    console.log('checkTodayWritten API 호출 시작, excludeId:', excludeId);
     const response = await axios.get(`${EXPO_PUBLIC_API_URL}/main/app/checkTodayWritten?excludeId=${excludeId}`, {
       headers: await getAuthHeaders()
     });
+    console.log('checkTodayWritten API 응답:', response.data);
     return response.data;
   } catch (error) {
+    console.error('checkTodayWritten API 오류:', error);
     throw error;
   }
 };

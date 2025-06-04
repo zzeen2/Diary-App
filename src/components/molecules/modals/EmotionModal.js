@@ -9,8 +9,10 @@ const itemWidth = (width - 100) / 4;
 const EmotionModal = ({ visible, onClose, onConfirm, tempEmotion, setTempEmotion, emotions }) => {
     return (
         <Modal visible={visible} transparent animationType="fade">
+            {/* 모달 밖 클릭하면 닫힘 */}
         <TouchableWithoutFeedback onPress={onClose}>
             <View style={styles.overlay}>
+                {/* 모달 안에는 닫힘버튼 아니면 안닫힘 */}
             <TouchableWithoutFeedback>
                 <View style={styles.modal}>
                 <ModalCloseButton onPress={onClose} />
@@ -18,7 +20,7 @@ const EmotionModal = ({ visible, onClose, onConfirm, tempEmotion, setTempEmotion
 
                 <View style={styles.grid}>
                     {emotions.map((emotion, idx) => {
-                    const selected = tempEmotion?.type === emotion.type;
+                    const selected = tempEmotion?.type === emotion.type; // 초기값이 null일경우 오류 방지
                     return (
                         <View key={idx} style={[styles.item, selected && styles.selectedItem]} >
                         <EmojiIcon emoji={emotion.emoji} color={emotion.color} onPress={() => setTempEmotion(emotion)} />

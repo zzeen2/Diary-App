@@ -130,10 +130,9 @@ const DiaryWriteScreen = ({ route, navigation }) => {
             
             const result = await submit(submitData);
             if (result && result.diary_id) {
-                navigation.replace('DiaryDetail', { 
-                  diaryId: result.diary_id,
-                  isMine: true,
-                  shouldRefresh: true
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Main', params: { refresh: true, timestamp: Date.now() } }],
                 });
             }
           }

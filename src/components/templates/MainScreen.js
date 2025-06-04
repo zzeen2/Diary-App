@@ -26,7 +26,7 @@ const tabs = [
   { id: 'profile', icon: '👤', label: '프로필' },
 ];
 
-const MainScreen = () => {
+const MainScreen = ({ route }) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -139,15 +139,19 @@ const MainScreen = () => {
         }
       };
 
-      loadUserData();
-      
-      dispatch(fetchEmotions());
-      dispatch(fetchFriendDiaries());
-      setSelectedEmotion(null);
-      loadTodayStatus();
-      loadMonthlyRate();
-      loadRandomDiary();
+      const refreshData = async () => {
+        console.log('=== MainScreen useFocusEffect 실행 ===');
+        await loadUserData();
+        dispatch(fetchEmotions());
+        dispatch(fetchFriendDiaries());
+        setSelectedEmotion(null);
+        
+        // 오늘 일기 작성 상태를 확인
+        await loadTodayStatus();
+        await loadMonthlyRate();
+      };
 
+      refreshData();
     }, [dispatch, isLoggedIn])
   );
 
@@ -156,16 +160,41 @@ const MainScreen = () => {
       return;
     }
     try {
+      console.log('=== loadTodayStatus 시작 ===');
       const result = await checkTodayWritten();
-      setHasWrittenToday(result.hasWritten);
+      console.log('checkTodayWritten 결과:', result);
       
-      if (result.hasWritten) {
+      const hasWritten = result.hasWritten;
+      console.log('hasWritten 상태 변경:', hasWrittenToday, '->', hasWritten);
+      setHasWrittenToday(hasWritten);
+      
+      if (hasWritten) {
+        console.log('일기 작성됨 - 오늘 일기 조회 시작');
         const todayResult = await getTodayDiary();
-        if (todayResult.success) {
+        console.log('getTodayDiary 결과:', todayResult);
+        
+        if (todayResult.success && todayResult.diary) {
           setTodayDiary(todayResult.diary);
+          console.log('오늘 일기 설정 완료');
+        } else {
+          // 일기는 없지만 감정만 저장된 경우
+          setTodayDiary(null);
+          console.log('감정만 저장된 상태');
         }
+        
+        // 랜덤 일기도 로드
+        console.log('랜덤 일기 로드 시작');
+        await loadRandomDiary();
+      } else {
+        console.log('일기 미작성 상태');
+        setTodayDiary(null);
       }
+      
+      console.log('=== loadTodayStatus 완료 ===');
     } catch (error) {
+      console.error('loadTodayStatus 오류:', error);
+      setHasWrittenToday(false);
+      setTodayDiary(null);
     }
   };
 
@@ -200,6 +229,14 @@ const MainScreen = () => {
       setLoadingRandom(false);
     }
   };
+
+  // hasWrittenToday 상태 변경 감지
+  useEffect(() => {
+    console.log('=== hasWrittenToday 상태 변경 ===');
+    console.log('hasWrittenToday:', hasWrittenToday);
+    console.log('todayDiary:', todayDiary);
+    console.log('UI 렌더링 결정:', hasWrittenToday ? 'StatsAndRandom 표시' : 'EmotionSelector 표시');
+  }, [hasWrittenToday, todayDiary]);
 
   useEffect(() => {
   }, [friendDiaries, friendDiariesLoading, friendDiariesError]);
@@ -277,6 +314,39 @@ const MainScreen = () => {
     }
   };
   
+  // route 파라미터로 받은 refresh가 true일 때 데이터 새로고침
+  useEffect(() => {
+    console.log('=== route refresh useEffect ===');
+    console.log('route?.params:', route?.params);
+    
+    if (route?.params?.refresh || route?.params?.timestamp) {
+      console.log('일기 작성 후 새로고침 시작');
+      const refreshAfterWrite = async () => {
+        // 강제로 상태 초기화
+        setHasWrittenToday(false);
+        setTodayDiary(null);
+        setRandomDiary(null);
+        
+        // 잠시 대기 후 새로운 상태 로드
+        setTimeout(async () => {
+          await loadTodayStatus();
+          await loadMonthlyRate();
+          console.log('일기 작성 후 새로고침 완료');
+          // 파라미터 초기화는 여기서!
+          if (route?.params?.refresh) {
+            navigation.setParams({ refresh: false });
+          }
+        }, 100);
+      };
+      refreshAfterWrite();
+      
+      // 파라미터 초기화 <-- 이 부분을 setTimeout 안으로 옮겼습니다.
+      // if (route?.params?.refresh) {
+      //   navigation.setParams({ refresh: false });
+      // }
+    }
+  }, [route?.params?.refresh, route?.params?.timestamp]);
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" backgroundColor="transparent" translucent />

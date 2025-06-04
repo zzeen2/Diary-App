@@ -29,6 +29,7 @@ const EditIntroModal = ({ visible, onClose, currentIntro, onSave }) => {
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modal}>
+          {/* 헤더 */}
           <View style={styles.header}>
             <Text style={styles.title}>자기소개 수정</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeIcon}>
@@ -36,6 +37,7 @@ const EditIntroModal = ({ visible, onClose, currentIntro, onSave }) => {
             </TouchableOpacity>
           </View>
 
+          {/* 입력 영역 */}
           <View style={styles.inputContainer}>
             <TextInput
               style={[styles.input, isTooLong && styles.inputError]}
@@ -59,6 +61,7 @@ const EditIntroModal = ({ visible, onClose, currentIntro, onSave }) => {
             </View>
           )}
 
+          {/* 버튼 영역 */}
           <View style={styles.buttons}>
             <TouchableOpacity 
               style={styles.cancelButton} 

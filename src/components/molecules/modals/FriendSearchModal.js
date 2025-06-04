@@ -92,8 +92,6 @@ const FriendSearchModal = ({ visible, onClose }) => {
 
   // 디버깅을 위한 로그
   useEffect(() => {
-    console.log('FriendSearchModal - searchResults:', searchResults);
-    console.log('FriendSearchModal - loading:', loading);
   }, [searchResults, loading]);
 
   const renderUserCard = ({ item }) => (
