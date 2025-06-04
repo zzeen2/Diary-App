@@ -20,7 +20,7 @@ import { DiaryInputBox, ImagePickerBox } from '../molecules/boxes';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchEmotions } from '../../actions/emotionAction';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
+import { pickAndManipulateImageAsync } from '../../utils/imageUtils';
 import { analyzeEmotion, uploadImageToServer } from '../../api/write';
 import { updateDiary } from '../../api/diary';
 
@@ -127,26 +127,34 @@ const DiaryEditScreen = ({ route, navigation }) => {
   };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
+    if (selectedImageUris.length >= 5) {
+      Alert.alert('사진 첨부 제한', '최대 5장까지 사진을 첨부할 수 있습니다.');
+      return;
+    }
+
+    const manipulatedImage = await pickAndManipulateImageAsync({
+      // 필요하다면 여기에 조작 옵션을 전달합니다.
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setSelectedImageUris(prev => [...prev, uri]);
-      
+    if (manipulatedImage && manipulatedImage.uri) {
+      const newManipulatedUri = manipulatedImage.uri;
+      setSelectedImageUris(prev => [...prev, newManipulatedUri]);
+
       try {
-        const imageUrl = await uploadImageToServer(uri);
-        if (imageUrl) {
-          setUploadedImageUrls(prev => [...prev, imageUrl]);
+        const uploadedUrl = await uploadImageToServer(newManipulatedUri);
+        if (uploadedUrl) {
+          setUploadedImageUrls(prev => [...prev, uploadedUrl]);
+        } else {
+          Alert.alert('업로드 실패', '이미지 업로드에 실패했습니다. (서버 응답 없음)');
+          setSelectedImageUris(prev => prev.filter(uri => uri !== newManipulatedUri));
         }
       } catch (error) {
-        Alert.alert('업로드 실패', '이미지 업로드에 실패했습니다.');
-        setSelectedImageUris(prev => prev.filter(img => img !== uri));
+        console.error('Image upload failed after manipulation:', error);
+        Alert.alert('업로드 실패', '이미지 업로드 중 오류가 발생했습니다.');
+        setSelectedImageUris(prev => prev.filter(uri => uri !== newManipulatedUri));
       }
+    } else {
+      console.log('Image picking or manipulation was cancelled or failed.');
     }
   };
 

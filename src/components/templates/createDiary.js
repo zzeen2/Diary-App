@@ -8,7 +8,7 @@ import {DiaryImotionSection} from '../organisms/write';
 import {DiaryInputBox, ImagePickerBox} from '../molecules/boxes';
 import useDiarySubmit from '../../hooks/useDiarySubmit';
 import { useSelector } from 'react-redux';
-import * as ImagePicker from 'expo-image-picker'; 
+import { pickAndManipulateImageAsync } from '../../utils/imageUtils';
 
 const DiaryWriteScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -54,33 +54,37 @@ const DiaryWriteScreen = ({ route, navigation }) => {
       Alert.alert('사진 첨부 제한', '최대 5장까지 사진을 첨부할 수 있습니다.');
       return;
     }
-    
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
+
+    const manipulatedImage = await pickAndManipulateImageAsync({
     });
 
-    if (!result.canceled) {
-      const newUri = result.assets[0].uri;
-      const updatedSelectedUris = [...selectedImageUris, newUri];
+    if (manipulatedImage && manipulatedImage.uri) {
+      const newManipulatedUri = manipulatedImage.uri;
+      const updatedSelectedUris = [...selectedImageUris, newManipulatedUri];
       setSelectedImageUris(updatedSelectedUris);
-      
+
       if (uploadImage) {
         try {
-          const uploadedUrl = await uploadImage(newUri);
-          const updatedUploadedUrls = [...uploadedImageUrls, uploadedUrl];
-          setUploadedImageUrls(updatedUploadedUrls);
+          const uploadedUrl = await uploadImage(newManipulatedUri); 
+          if (uploadedUrl) {
+            const updatedUploadedUrls = [...uploadedImageUrls, uploadedUrl];
+            setUploadedImageUrls(updatedUploadedUrls);
+          } else {
+            Alert.alert('업로드 실패', '이미지 업로드에 실패했습니다. (서버 응답 없음)');
+            setSelectedImageUris(prevUris => prevUris.filter(uri => uri !== newManipulatedUri));
+          }
         } catch (error) {
-          Alert.alert('업로드 실패', '이미지 업로드에 실패했습니다.');
-          setSelectedImageUris(selectedImageUris.filter(uri => uri !== newUri));
+          console.error('Image upload failed after manipulation:', error);
+          Alert.alert('업로드 실패', '이미지 업로드 중 오류가 발생했습니다.');
+          setSelectedImageUris(prevUris => prevUris.filter(uri => uri !== newManipulatedUri));
         }
       } else {
-        const updatedUploadedUrls = [...uploadedImageUrls, newUri];
+        console.warn('uploadImage function is not available. Using manipulated URI as placeholder.');
+        const updatedUploadedUrls = [...uploadedImageUrls, newManipulatedUri];
         setUploadedImageUrls(updatedUploadedUrls);
       }
-      
-      setTimeout(() => {
-      }, 100);
+    } else {
+      console.log('Image picking or manipulation was cancelled or failed.');
     }
   };
 

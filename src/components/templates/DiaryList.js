@@ -301,6 +301,7 @@ const DiaryListScreen = ({ route }) => {
                             entries={transformedFollowingDiaries}
                             findEmotion={findEmotion}
                             isFriend={true}
+                            maxCount={transformedFollowingDiaries.length}
                             onPressCard={(entry) => {
                                 const transformedEntry = {
                                     ...entry,

@@ -404,6 +404,7 @@ const MainScreen = ({ route }) => {
               entries={friendDiaries || []}
               findEmotion={findEmotion}
               isFriend
+              maxCount={4}
               onPressSeeMore={() => {
                 navigation.navigate('listDiary', { initialFilter: 'follower' });
               }}
