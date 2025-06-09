@@ -22,7 +22,7 @@ const friendDiaryReducer = (state = initialState, action) => {
         error: null,
       };
     case FETCH_FRIEND_DIARIES_SUCCESS:
-      console.log('친구 일기 요청 성공:', action.payload);
+      //console.log('친구 일기 요청 성공:', action.payload);
       return {
         ...state,
         loading: false,

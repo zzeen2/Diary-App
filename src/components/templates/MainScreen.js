@@ -32,7 +32,7 @@ const MainScreen = ({ route }) => {
   const navigation = useNavigation();
   const emotions = useSelector((state) => state.emotions.emotions);
   const loading = useSelector((state) => state.loading);
-  const streak = useSelector(state => state.streak.value);
+  const streakRedux = useSelector(state => state.streak.value);
   const { isLoggedIn } = useContext(AuthContext);
   
   const [displayNickname, setDisplayNickname] = useState('');
@@ -206,10 +206,14 @@ const MainScreen = ({ route }) => {
       const now = new Date();
       const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const writtenDates = await getMonthWrittenDates(yearMonth);
-      
       const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
       const rate = Math.round((writtenDates.length / daysInMonth) * 100);
       setMonthlyRate(rate);
+
+      // 달력 감정 데이터 API 호출 및 콘솔 출력
+      const calendarData = await getCalendarEmotions(yearMonth);
+      console.log('getCalendarEmotions 응답:', calendarData);
+      setCalendarEmotions(calendarData);
     } catch (error) {
     }
   };
@@ -346,6 +350,40 @@ const MainScreen = ({ route }) => {
       // }
     }
   }, [route?.params?.refresh, route?.params?.timestamp]);
+
+  // streak 계산 함수 교체 (중복 제거, KST 기준)
+  function calculateStreak(calendarEmotions) {
+    if (!Array.isArray(calendarEmotions) || calendarEmotions.length === 0) return 0;
+    const dateSet = new Set(calendarEmotions.map(e => e.date));
+    const now = new Date();
+    const KST_OFFSET = 9 * 60 * 60 * 1000;
+    const koreaNow = new Date(now.getTime() + KST_OFFSET);
+    let streak = 0;
+    let day = new Date(koreaNow);
+    while (true) {
+      const dateStr = day.toISOString().split('T')[0];
+      if (dateSet.has(dateStr)) {
+        streak += 1;
+        day.setDate(day.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  // streak 계산을 기존 useSelector가 아니라 감정 기록 기준으로 변경
+  const streak = calculateStreak(calendarEmotions);
+
+  useEffect(() => {
+    console.log('calendarEmotions:', calendarEmotions);
+    if (calendarEmotions && calendarEmotions.length > 0) {
+      console.log('calendarEmotions 샘플:', calendarEmotions.slice(0, 3));
+      calendarEmotions.slice(0, 3).forEach((e, idx) => {
+        console.log(`calendarEmotions[${idx}]`, e);
+      });
+    }
+  }, [calendarEmotions]);
 
   return (
     <View style={styles.container}>

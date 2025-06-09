@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import {ProfileThumbnail} from '../../atoms/thumbnail';
 import { Feather } from '@expo/vector-icons';
+import axios from 'axios';
+import { EXPO_PUBLIC_API_URL } from '@env';
 
 const CommentItemBox = ({ comment, isMyComment = false, onDelete, navigation }) => {
     const writer = comment.writer || comment.user;
@@ -25,10 +27,29 @@ const CommentItemBox = ({ comment, isMyComment = false, onDelete, navigation }) 
         }
     };
 
-    const handleProfilePress = () => {
+    const handleProfilePress = async () => {
         if (writer && navigation) {
-            const writerUid = writer.uid || writer.id;
+            let writerUid = writer.uid || writer.id;
             const writerNickname = writer.nick_name || writer.nickname || writer.name;
+            console.log('프로필 클릭: writerUid:', writerUid, 'writer:', writer);
+            if (!writerUid && writerNickname) {
+                // 닉네임으로 uid 조회
+                try {
+                    const res = await axios.get(`${EXPO_PUBLIC_API_URL}/login/search/users`, {
+                        params: { q: writerNickname }
+                    });
+                    const users = res.data.users || [];
+                    // 완전 일치하는 닉네임 찾기
+                    const user = users.find(u => u.nick_name === writerNickname);
+                    writerUid = user?.uid;
+                } catch (e) {
+                    writerUid = undefined;
+                }
+            }
+            if (!writerUid) {
+                alert('프로필 정보를 불러올 수 없습니다. (작성자 ID 없음)');
+                return;
+            }
             navigation.navigate('UserProfile', {
                 uid: writerUid,
                 nickname: writerNickname

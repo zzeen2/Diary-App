@@ -158,7 +158,7 @@ const DiaryDetail = ({ route, navigation }) => {
         <StatusBar style="dark" backgroundColor="transparent" translucent />
         <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
           <SafeAreaView style={[styles.safeContainer, { paddingTop: insets.top }]}>
-            <HeaderBar showBackButton onBackPress={() => navigation.goBack()} />
+            <HeaderBar showBackButton onBackPress={() => navigation.navigate('Main')} />
             <View style={styles.divider} />
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>일기를 불러오는 중...</Text>
@@ -247,7 +247,7 @@ const DiaryDetail = ({ route, navigation }) => {
       <StatusBar style="dark" backgroundColor="transparent" translucent />
       <ImageBackground source={require('../../assets/background.png')} style={styles.backgroundImage}>
         <SafeAreaView style={[styles.safeContainer, { paddingTop: insets.top }]}>
-          <HeaderBar showBackButton onBackPress={() => navigation.goBack()} />
+          <HeaderBar showBackButton onBackPress={() => navigation.navigate('Main')} />
           <View style={styles.divider} />
 
           <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer}>

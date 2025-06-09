@@ -136,7 +136,9 @@ const DiaryWriteScreen = ({ route, navigation }) => {
             if (result && result.diary_id) {
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'Main', params: { refresh: true, timestamp: Date.now() } }],
+                  routes: [
+                    { name: 'DiaryDetail', params: { diaryId: result.diary_id } }
+                  ],
                 });
             }
           }

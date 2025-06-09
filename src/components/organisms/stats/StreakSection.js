@@ -9,8 +9,8 @@ const StreakSection = ({ streakData }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>✍️ 작성 연속 기록</Text>
-        <Text style={styles.subtitle}>꾸준히 쓰고 있는 일기 습관을 확인해보세요</Text>
+        <Text style={styles.title}>✍️ 감정 연속 기록</Text>
+        <Text style={styles.subtitle}>꾸준히 기록하고 있는 감정 습관을 확인해보세요</Text>
       </View>
       
       <View style={styles.statsGrid}>
@@ -18,7 +18,7 @@ const StreakSection = ({ streakData }) => {
         <View style={[styles.statCard, styles.totalCard]}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardIcon}>📝</Text>
-            <Text style={styles.cardTitle}>총 작성일</Text>
+            <Text style={styles.cardTitle}>총 기록일</Text>
           </View>
           <Text style={[styles.statNumber, styles.totalNumber]}>{totalDays}</Text>
           <Text style={styles.cardSubtitle}>일</Text>
