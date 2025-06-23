@@ -153,7 +153,7 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 #### ✍️ 일기 작성
 <div align="center">
   <img src="./src/assets/readme_imgs/diary/create_diary.gif" width="250" alt="Welcome Flow">
-  <br><b>웰컴 페이지 플로우</b>
+  <br><b>감정 일기 작성 플로우</b>
 </div>
 
 <!-- <p align="center">
@@ -169,13 +169,27 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 - **AI 감정 분석**: 작성 완료 시 OpenAI API를 통한 감정 분석
 
 #### 📅 일기 목록 (일기 검색)
-<div align="center">
+<!-- <div align="center">
   <img src="./src/assets/readme_imgs/diary/mylist_after.jpeg" width="300"/>
   <br/><b>일기 저장 후 내 일기 달력</b>
 </div>
 <div align="center">
-  <img src="./src/assets/readme_imgs/diary/mylist.gif" width="250" alt="Welcome Flow">
-  <br><b>웰컴 페이지 플로우</b>
+  <img src="./src/assets/readme_imgs/diary/mylist.gif" width="300" alt="Welcome Flow">
+  <br><b>내 일기 검색 플로우</b>
+</div> -->
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="./src/assets/readme_imgs/diary/mylist_after.jpeg" width="300"/>
+        <br/><b>일기 저장 후 내 일기 달력</b>
+      </td>
+      <td align="center">
+        <img src="./src/assets/readme_imgs/diary/mylist.gif" width="300" alt="Welcome Flow">
+        <br><b>내 일기 검색 플로우</b>
+      </td>
+    </tr>
+  </table>
 </div>
 
 **주요 기능**:
