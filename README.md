@@ -102,7 +102,7 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 
 ### 🎬 Welcome Page
 <div align="center">
-  <img src="./src/assets/readme_imgs/welcome/welcome_flow.gif" width="" alt="Welcome Flow">
+  <img src="./src/assets/readme_imgs/welcome/welcome_flow.gif" width="250" alt="Welcome Flow">
   <br><b>웰컴 페이지 플로우</b>
 </div>
 
