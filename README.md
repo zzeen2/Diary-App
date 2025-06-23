@@ -200,85 +200,79 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 - **일기 요약**: 카드 형태로 일기 제목, 감정, 작성 시간 표시
 
 #### 📝 일기 상세 및 댓글
-<p align="center">
+<div align="center">
+  <img src="./src/assets/readme_imgs/diary/edit_comment.gif" width="250" alt="Welcome Flow">
+  <br><b>일기 수정 및 댓글 기능</b>
+</div>
+<!-- <p align="center">
   <video width="300" controls>
     <source src="./src/assets/readme_imgs/diary/edit_comment.gif" type="video/mp4">
   </video>
   <br/><b>일기 수정 및 댓글 기능</b>
-</p>
+</p> -->
 
 **주요 기능**:
 - **일기 상세 보기**: 전체 일기 내용, 작성자, 날짜, 감정 표시
 - **수정/삭제**: 본인 일기일 경우 수정 및 삭제 기능
-- **댓글 시스템**: 친구들과 일기에 대한 댓글 작성
-- **공개 설정 변경**: 비공개 → 공개 전환 가능
+- **댓글 시스템**: 팔로워와 일기에 대한 댓글 작성
+- **공개 설정 변경**: 비공개/공개 전환 가능
 
 ### 👥 소셜 기능
 
 #### 📖 친구 일기 목록
 <div align="center">
-  <img src="./src/assets/readme_imgs/friendlist.PNG" width="300"/>
-  <br/><b>친구 일기 목록</b>
+  <img src="./src/assets/readme_imgs/diary/friendlist.PNG" width="300"/>
+  <br/><b>친구 일기 목록탭</b>
 </div>
 
 **주요 기능**:
-- **친구 일기 피드**: 팔로우한 친구들의 오늘 작성된 공개 일기 목록
-- **실시간 업데이트**: 새로운 일기 작성 시 실시간 반영
-- **일기 미리보기**: 일기 제목, 감정, 작성 시간 표시
+- **팔로잉 일기 피드**: 팔로우한 친구들의 오늘 작성된 공개 일기 목록
+- **팔로잉 추가**: 헤더 오른쪽의 팔로잉 버튼을 눌러 팔로잉 검색 및 추가 가능
+
 
 #### 👤 친구 추가/팔로우
-<p align="center">
-  <video width="300" controls>
-    <source src="./src/assets/readme_imgs/add_friend.MP4" type="video/mp4">
-  </video>
+<div align="center">
+  <img src="./src/assets/readme_imgs/social/add_friend.gif" width="300"/>
   <br/><b>친구 프로필 및 팔로우 기능</b>
-</p>
+</div>
 
 **주요 기능**:
-- **친구 검색**: 닉네임으로 친구 검색
+- **친구 검색**: 닉네임으로 친구 검색(카카오 닉네임)
 - **프로필 조회**: 친구의 프로필 정보 및 공개 일기 목록
-- **팔로우/언팔로우**: 원클릭 팔로우 기능
-- **상호 팔로우**: 서로 팔로우 시 친구 관계 형성
-- **친구 추천**: 공통 관심사 기반 친구 추천
+- **팔로우/언팔로우**: 팔로우/팔로잉 버튼으로 상호작용
 
 #### 👥 팔로워/팔로잉 관리
-<p align="center">
-  <video width="300" controls>
-    <source src="./src/assets/readme_imgs/follow_list.mov" type="video/mp4">
-  </video>
+<div align="center">
+  <img src="./src/assets/readme_imgs/profile/follow_list.gif" width="300"/>
   <br/><b>팔로워/팔로잉 목록 모달</b>
-</p>
+</div>
 
 **주요 기능**:
 - **팔로워 목록**: 나를 팔로우하는 사용자 목록
 - **팔로잉 목록**: 내가 팔로우하는 사용자 목록
-- **상호작용**: 목록에서 직접 팔로우/언팔로우
 - **프로필 이동**: 목록에서 친구 프로필로 바로 이동
-- **친구 관리**: 친구 관계 관리 및 정리
 
-### 👤 프로필 화면
+### 👤 사용자 프로필 화면
 <div align="center">
-  <img src="./src/assets/readme_imgs/my_profile.jpeg" width="300"/>
+  <img src="./src/assets/readme_imgs/profile/my_profile.jpeg" width="300"/>
   <br/><b>내 프로필 화면</b>
 </div>
 
 **주요 기능**:
 - **프로필 정보**: 프로필 이미지, 닉네임, 자기소개 표시 및 수정
-- **통계 정보**: 팔로워/팔로잉 수, 공개 일기 수, 연속 기록 일수
+- **통계 정보**: 팔로워/팔로잉 수, 공개 일기 수 등
 - **내 일기 목록**: 작성한 공개 일기들의 목록
-- **설정 메뉴**: 로그아웃, 계정 삭제, 알림 설정 등
-- **프로필 공유**: 내 프로필 링크 공유 기능
 
 ### 📊 통계 화면
 <div align="center">
   <table>
     <tr>
       <td align="center">
-        <img src="./src/assets/readme_imgs/stats1.png" width="250"/><br/>
+        <img src="./src/assets/readme_imgs/stats/stat1.PNG" width="250"/><br/>
         <b>감정 통계 (원그래프)</b>
       </td>
       <td align="center">
-        <img src="./src/assets/readme_imgs/stats2.png" width="250"/><br/>
+        <img src="./src/assets/readme_imgs/stats/stat1.PNG" width="250"/><br/>
         <b>연속 기록 스트릭</b>
       </td>
     </tr>
@@ -286,16 +280,13 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 </div>
 
 **주요 기능**:
-- **감정 분포 차트**: 월별/기간별 감정 통계 원그래프
-- **연속 기록 스트릭**: Duolingo 스타일의 연속 기록 시스템
-- **감정 달력**: 날짜별 기록된 감정을 달력에 시각화
-- **감정 트렌드**: 시간에 따른 감정 변화 추이 분석
-- **통계 내보내기**: 감정 통계 데이터 CSV 다운로드
+- **감정 분포 차트**: 누적 감정 통계 원그래프
+- **연속 기록 스트릭**: 누적 기록을 확인 가능한 연속 기록 통계 시스템
 - **목표 설정**: 월별 기록 목표 설정 및 달성률 표시
 
 ---
 
-## 🔧 API 주요 명세 (기여 부분 중심)
+## 🔧 API 주요 명세 
 
 *(이 부분은 프론트엔드에서 주로 어떤 API와 상호작용했는지, 혹은 백엔드 개발에 참여하신 API 위주로 작성합니다.)*
 
