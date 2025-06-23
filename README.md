@@ -149,7 +149,123 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 - **연속 스트릭**: 상단 헤더에 연속 기록 일수 표시로 동기부여
 - **일기 요약 섹션**: 본문 스크롤 영역에 내 일기/팔로워 일기 요약 표시
 
-### 🔧 API 주요 명세
+### 📔 일기 관련 화면
+
+#### ✍️ 일기 작성
+<div align="center">
+  <img src="./src/assets/readme_imgs/diary/create_diary.gif" width="250" alt="Welcome Flow">
+  <br><b>감정 일기 작성 플로우</b>
+</div>
+
+**주요 기능**:
+- **감정 아이콘 표시**: 선택한 감정이 상단 감정 섹션에 표시
+- **공개/비공개 설정**: 일기 공개 범위 선택
+- **AI 감정 분석**: 작성 완료 시 OpenAI API를 통한 감정 분석
+
+#### 📅 일기 목록 (일기 검색)
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="./src/assets/readme_imgs/diary/mylist_after.jpeg" width="300"/>
+        <br/><b>일기 저장 후 내 일기 달력</b>
+      </td>
+      <td align="center">
+        <img src="./src/assets/readme_imgs/diary/mylist.gif" width="300" alt="Welcome Flow">
+        <br><b>내 일기 검색 플로우</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
+**주요 기능**:
+- **달력 뷰**: 월별 달력에서 일기 및 감정 작성 여부 시각적 표시
+- **감정 아이콘 표시** : 감정만 등록 혹은 기존 일기 삭제 시 아이콘 백그라운드 반투명 및 테두리 점선 처리
+- **일기 검색**: 특정 날짜 클릭 시 해당 날짜 일기 조회
+- **감정별 필터링**: 감정 아이콘으로 일기 분류
+- **일기 요약**: 카드 형태로 일기 제목, 감정, 작성 시간 표시
+
+#### 📝 일기 상세 및 댓글
+<div align="center">
+  <img src="./src/assets/readme_imgs/diary/edit_comment.gif" width="250" alt="Welcome Flow">
+  <br><b>일기 수정 및 댓글 기능</b>
+</div>
+
+**주요 기능**:
+- **일기 상세 보기**: 전체 일기 내용, 작성자, 날짜, 감정 표시
+- **수정/삭제**: 본인 일기일 경우 수정 및 삭제 기능
+- **댓글 시스템**: 팔로워와 일기에 대한 댓글 작성
+- **공개 설정 변경**: 비공개/공개 전환 가능
+
+### 👥 소셜 기능
+
+#### 📖 친구 일기 목록
+<div align="center">
+  <img src="./src/assets/readme_imgs/diary/friendlist.PNG" width="300"/>
+  <br/><b>친구 일기 목록탭</b>
+</div>
+
+**주요 기능**:
+- **팔로잉 일기 피드**: 팔로우한 친구들의 오늘 작성된 공개 일기 목록
+- **팔로잉 추가**: 헤더 오른쪽의 팔로잉 버튼을 눌러 팔로잉 검색 및 추가 가능
+
+#### 👤 친구 추가/팔로우
+<div align="center">
+  <img src="./src/assets/readme_imgs/social/add_friend.gif" width="300"/>
+  <br/><b>친구 프로필 및 팔로우 기능</b>
+</div>
+
+**주요 기능**:
+- **친구 검색**: 닉네임으로 친구 검색(카카오 닉네임)
+- **프로필 조회**: 친구의 프로필 정보 및 공개 일기 목록
+- **팔로우/언팔로우**: 팔로우/팔로잉 버튼으로 상호작용
+
+#### 👥 팔로워/팔로잉 관리
+<div align="center">
+  <img src="./src/assets/readme_imgs/profile/follow_list.gif" width="300"/>
+  <br/><b>팔로워/팔로잉 목록 모달</b>
+</div>
+
+**주요 기능**:
+- **팔로워 목록**: 나를 팔로우하는 사용자 목록
+- **팔로잉 목록**: 내가 팔로우하는 사용자 목록
+- **프로필 이동**: 목록에서 친구 프로필로 바로 이동
+
+### 👤 사용자 프로필 화면
+<div align="center">
+  <img src="./src/assets/readme_imgs/profile/my_profile.jpeg" width="300"/>
+  <br/><b>내 프로필 화면</b>
+</div>
+
+**주요 기능**:
+- **프로필 정보**: 프로필 이미지, 닉네임, 자기소개 표시 및 수정
+- **통계 정보**: 팔로워/팔로잉 수, 공개 일기 수 등
+- **내 일기 목록**: 작성한 공개 일기들의 목록
+
+### 📊 통계 화면
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="./src/assets/readme_imgs/stats/stat1.PNG" width="250"/><br/>
+        <b>감정 통계 (원그래프)</b>
+      </td>
+      <td align="center">
+        <img src="./src/assets/readme_imgs/stats/stat2.PNG" width="250"/><br/>
+        <b>연속 기록 스트릭</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
+**주요 기능**:
+- **감정 분포 차트**: 누적 감정 통계 원그래프
+- **연속 기록 스트릭**: 누적 기록을 확인 가능한 연속 기록 통계 시스템
+- **목표 설정**: 월별 기록 목표 설정 및 달성률 표시
+
+---
+
+## 🔧 API 주요 명세
 
 ### 사용자 인증 API
 | Method | Path | Description | 앱에서의 활용 |
