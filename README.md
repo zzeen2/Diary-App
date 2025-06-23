@@ -115,11 +115,11 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
   <table>
     <tr>
       <td align="center">
-        <img src="./src/assets/readme_imgs/main_cap2.PNG" width="250"/><br/>
+        <img src="./src/assets/readme_imgs/main//main_cap2.PNG" width="250"/><br/>
         <b>메인 화면 - 구성 1</b>
       </td>
       <td align="center">
-        <img src="./src/assets/readme_imgs/main_cap1.PNG" width="250"/><br/>
+        <img src="./src/assets/readme_imgs/main/main_cap1.PNG" width="250"/><br/>
         <b>메인 화면 - 구성 2</b>
       </td>
     </tr>
