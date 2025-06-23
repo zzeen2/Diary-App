@@ -151,12 +151,17 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 ### 📔 일기 관련 화면
 
 #### ✍️ 일기 작성
-<p align="center">
+<div align="center">
+  <img src="./src/assets/readme_imgs/diary/create_diary.gif" width="250" alt="Welcome Flow">
+  <br><b>웰컴 페이지 플로우</b>
+</div>
+
+<!-- <p align="center">
   <video width="300" controls>
     <source src="./src/assets/readme_imgs/diary/create_diary.gif" type="video/mp4">
   </video>
   <br/><b>일기 작성 플로우</b>
-</p>
+</p> -->
 
 **주요 기능**:
 - **감정 아이콘 표시**: 선택한 감정이 상단 감정 섹션에 표시
@@ -168,13 +173,10 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
   <img src="./src/assets/readme_imgs/diary/mylist_after.jpeg" width="300"/>
   <br/><b>일기 저장 후 내 일기 달력</b>
 </div>
-<p align="center">
-  <video width="300" controls>
-    <source src="./src/assets/readme_imgs/diary/mylist.gif" type="video/mp4">
-  </video>
-  <br/><b>달력 기반 내일기 검색</b>
-</p>
-
+<div align="center">
+  <img src="./src/assets/readme_imgs/diary/mylist.gif" width="250" alt="Welcome Flow">
+  <br><b>웰컴 페이지 플로우</b>
+</div>
 
 **주요 기능**:
 - **달력 뷰**: 월별 달력에서 일기 및 감정 작성 여부 시각적 표시
