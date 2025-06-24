@@ -68,7 +68,7 @@ MoodCloud는 바쁜 일상 속에서 자신의 감정을 돌아보고 기록할 
 
 
 #### 🌐 웹 버전
-- **배포된 웹사이트**: [https://cuekim.shop/](https://cuekim.shop/))
+- **배포된 웹사이트**: [https://cuekim.shop/](https://cuekim.shop/)
 
 ### 스토어 배포
 - **App Store**: 예정
